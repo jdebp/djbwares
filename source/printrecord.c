@@ -3,6 +3,8 @@
 #include "error.h"
 #include "byte.h"
 #include "dns.h"
+#include "ip4.h"
+#include "ip6.h"
 #include "printrecord.h"
 
 static char *d;
@@ -58,6 +60,21 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     if (!stralloc_cats(out," ")) return 0;
     if (!dns_domain_todot_cat(out,d)) return 0;
   }
+  else if (byte_equal(misc,2,DNS_T_SRV)) {
+    if (!stralloc_cats(out," SRV ")) return 0;
+    pos = dns_packet_copy(buf,len,pos,misc,6); if (!pos) return 0;
+    pos = dns_packet_getname(buf,len,pos,&d); if (!pos) return 0;
+    uint16_unpack_big(misc,&u16);
+    if (!stralloc_catulong0(out,u16,0)) return 0;
+    if (!stralloc_cats(out," ")) return 0;
+    uint16_unpack_big(misc + 2,&u16);
+    if (!stralloc_catulong0(out,u16,0)) return 0;
+    if (!stralloc_cats(out," ")) return 0;
+    uint16_unpack_big(misc + 4,&u16);
+    if (!stralloc_catulong0(out,u16,0)) return 0;
+    if (!stralloc_cats(out," ")) return 0;
+    if (!dns_domain_todot_cat(out,d)) return 0;
+  }
   else if (byte_equal(misc,2,DNS_T_SOA)) {
     if (!stralloc_cats(out," SOA ")) return 0;
     pos = dns_packet_getname(buf,len,pos,&d); if (!pos) return 0;
@@ -73,6 +90,8 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     }
   }
   else if (byte_equal(misc,2,DNS_T_A)) {
+    char ipstr[IP4_FMT];
+
     if (datalen != 4) { errno = error_proto; return 0; }
     if (!stralloc_cats(out," A ")) return 0;
     pos = dns_packet_copy(buf,len,pos,misc,4); if (!pos) return 0;
@@ -81,6 +100,14 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
       if (i) if (!stralloc_cats(out,".")) return 0;
       if (!stralloc_catulong0(out,ch,0)) return 0;
     }
+  }
+  else if (byte_equal(misc,2,DNS_T_AAAA)) {
+    char ipstr[IP6_FMT];
+
+    if (datalen != 16) { errno = error_proto; return 0; }
+    if (!stralloc_cats(out," AAAA ")) return 0;
+    pos = dns_packet_copy(buf,len,pos,misc,16); if (!pos) return 0;
+    if (!stralloc_catb(out,ipstr,ip6_fmt(ipstr,misc,':'))) return 0;
   }
   else {
     if (!stralloc_cats(out," ")) return 0;

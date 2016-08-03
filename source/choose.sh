@@ -5,7 +5,7 @@ redo-ifchange "$3" "$4"
 case "$1" in
   *c*) 
 	redo-ifchange compile "$2.c"
-	./compile "$2.c" >/dev/null 2>&1 || result="$3" 
+	./compile "$2.o" "$2.c" "$2.d" >/dev/null 2>&1 || result="$3" 
 	;;
 esac
 

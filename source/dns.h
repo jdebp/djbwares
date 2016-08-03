@@ -20,6 +20,7 @@
 #define DNS_T_SIG "\0\30"
 #define DNS_T_KEY "\0\31"
 #define DNS_T_AAAA "\0\34"
+#define DNS_T_SRV "\0\41"
 #define DNS_T_AXFR "\0\374"
 #define DNS_T_ANY "\0\377"
 
@@ -72,6 +73,8 @@ extern int dns_name_packet(stralloc *,const char *,unsigned int);
 extern int dns_name_packet_multi(stralloc *,const char *,unsigned int);
 extern void dns_name4_domain(char *,const char *);
 #define DNS_NAME4_DOMAIN 31
+extern void dns_name6_domain(char *,const char *);
+#define DNS_NAME6_DOMAIN 73
 extern int dns_name4(stralloc *,const char *);
 extern int dns_name4_multi(stralloc *,const char *);
 extern int dns_txt_packet(stralloc *,const char *,unsigned int);

@@ -8,6 +8,7 @@
 #include "byte.h"
 #include "fmt.h"
 #include "ip4.h"
+#include "ip6.h"
 #include "exit.h"
 #include "case.h"
 #include "scan.h"
@@ -202,7 +203,8 @@ static stralloc f[NUMFIELDS];
 
 static char *d1;
 static char *d2;
-char dptr[DNS_NAME4_DOMAIN];
+char dptr4[DNS_NAME4_DOMAIN];
+char dptr6[DNS_NAME6_DOMAIN];
 
 char strnum[FMT_ULONG];
 
@@ -225,10 +227,12 @@ int main()
   char loc[2];
   unsigned long u;
   uint32 u32;
-  char ip[4];
+  char ip4[4];
+  char ip6[16];
   char type[2];
   char soa[20];
   char buf[4];
+  char srv[6];
 
   umask(022);
 
@@ -339,13 +343,20 @@ int main()
 	rr_addname(d2);
 	rr_finish(d1);
 
-	iplen = ip4_scan(f[1].s,ip) ;
+	iplen = ip4_scan(f[1].s,ip4) ;
 	if (iplen != 0 && iplen + 1 == f[1].len) {
 	  rr_start(DNS_T_A,ttl,ttd,loc);
-	  rr_add(ip,4);
+	  rr_add(ip4,sizeof ip4);
 	  rr_finish(d2);
-	} else if (f[1].len > 1)
-	  die_semantic4("unparseable IP address in ","& or ."," line: ", f[1].s) ;
+	} else {
+	  iplen = ip6_scan(f[1].s,ip6) ;
+	  if (iplen != 0 && iplen + 1 == f[1].len) {
+	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
+	    rr_add(ip6,sizeof ip6);
+	    rr_finish(d2);
+	  } else if (f[1].len > 1)
+	    die_semantic4("unparseable IP address in ","& or ."," line: ", f[1].s) ;
+	}
 
 	break;
 
@@ -357,22 +368,36 @@ int main()
 
 	if (!stralloc_0(&f[1])) nomem();
 
-	iplen = ip4_scan(f[1].s,ip) ;
+	iplen = ip4_scan(f[1].s,ip4) ;
 	if (iplen != 0 && iplen + 1 == f[1].len) {
 	  rr_start(DNS_T_A,ttl,ttd,loc);
-	  rr_add(ip,4);
+	  rr_add(ip4,sizeof ip4);
 	  rr_finish(d1);
 
 	  if (line.s[0] == '=') {
-	    dns_name4_domain(dptr,ip);
+	    dns_name4_domain(dptr4,ip4);
 	    rr_start(DNS_T_PTR,ttl,ttd,loc);
 	    rr_addname(d1);
-	    rr_finish(dptr);
+	    rr_finish(dptr4);
 	  }
-	} else if (f[1].len > 1)
-	  die_semantic4("unparseable IP address in ","+ or ="," line: ", f[1].s) ;
-	else
-	  die_semantic4("missing IP address in ","+ or ="," line: ", f[1].s) ;
+	} else {
+	  iplen = ip6_scan(f[1].s,ip6) ;
+	  if (iplen != 0 && iplen + 1 == f[1].len) {
+	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
+	    rr_add(ip6,sizeof ip6);
+	    rr_finish(d1);
+
+	    if (line.s[0] == '=') {
+	      dns_name6_domain(dptr6,ip6);
+	      rr_start(DNS_T_PTR,ttl,ttd,loc);
+	      rr_addname(d1);
+	      rr_finish(dptr6);
+	    }
+	  } else if (f[1].len > 1)
+	    die_semantic4("unparseable IP address in ","+ or ="," line: ", f[1].s) ;
+	  else
+	    die_semantic4("missing IP address in ","+ or ="," line: ", f[1].s) ;
+	}
 	break;
 
       case '@':
@@ -398,14 +423,59 @@ int main()
 	rr_addname(d2);
 	rr_finish(d1);
 
-	iplen = ip4_scan(f[1].s,ip) ;
+	iplen = ip4_scan(f[1].s,ip4) ;
 	if (iplen != 0 && iplen + 1 == f[1].len) {
 	  rr_start(DNS_T_A,ttl,ttd,loc);
-	  rr_add(ip,4);
+	  rr_add(ip4,sizeof ip4);
 	  rr_finish(d2);
-	} else if (f[1].len > 1)
-	  die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
+	} else {
+	  iplen = ip6_scan(f[1].s,ip6) ;
+	  if (iplen != 0 && iplen + 1 == f[1].len) {
+	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
+	    rr_add(ip6,sizeof ip6);
+	    rr_finish(d2);
+	  } else if (f[1].len > 1)
+	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
+	}
 	break;
+
+      case 'S': 
+        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem(); 
+	ttlparse(&f[6],&ttl,TTL_POSITIVE,"S");
+        ttdparse(&f[7],ttd); 
+        locparse(&f[8],loc); 
+  
+        if (!stralloc_0(&f[1])) nomem(); 
+  
+        if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) { 
+          if (!stralloc_cats(&f[2],".srv.")) nomem(); 
+          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem(); 
+        } 
+        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem(); 
+  
+        if (!stralloc_0(&f[4])) nomem(); 
+        if (!scan_ulong(f[4].s,&u)) u = 0; 
+        uint16_pack_big(srv,u); 
+        if (!stralloc_0(&f[5])) nomem(); 
+        if (!scan_ulong(f[5].s,&u)) u = 0; 
+        uint16_pack_big(srv + 2,u); 
+        if (!stralloc_0(&f[3])) nomem(); 
+        if (!scan_ulong(f[3].s,&u)) nomem(); 
+        uint16_pack_big(srv + 4,u); 
+  
+        rr_start(DNS_T_SRV,ttl,ttd,loc); 
+        rr_add(srv,sizeof srv); 
+        rr_addname(d2); 
+        rr_finish(d1); 
+  
+	iplen = ip4_scan(f[1].s,ip4) ;
+	if (iplen != 0 && iplen + 1 == f[1].len) {
+          rr_start(DNS_T_A,ttl,ttd,loc); 
+          rr_add(ip4,sizeof ip4); 
+          rr_finish(d2); 
+	} else if (f[1].len > 1)
+	  die_semantic4("unparseable IP address in ","S"," line: ", f[1].s) ;
+        break; 
 
       case '^': case 'C':
 	if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem();

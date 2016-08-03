@@ -70,6 +70,7 @@ static void logtype(const char type[2])
   else if (byte_equal(type,2,DNS_T_CNAME)) string("cname");
   else if (byte_equal(type,2,DNS_T_PTR)) string("ptr");
   else if (byte_equal(type,2,DNS_T_SIG)) string("sig");
+  else if (byte_equal(type,2,DNS_T_SRV)) string("srv");
   else {
     uint16 u;
 

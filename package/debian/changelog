@@ -1,3 +1,11 @@
+djbwares (3) unstable; urgency=medium
+
+  * Added Michael Handler's SRV patch.
+  * Extended SRV support to tinydns-get and dnsq.
+  * Added the tinydns mmap() leak prevention patch.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Wed, 03 Aug 2016 14:57:58 +0100
+
 djbwares (2) unstable; urgency=medium
 
   * First published version.

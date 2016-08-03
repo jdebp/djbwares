@@ -252,6 +252,18 @@ static int doit(struct query *z,int state)
     log_stats();
     return 1;
   }
+  if (dns_domain_equal(d,"\0011\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\3ip6\3int\0")) {
+    if (z->level) goto LOWERLEVEL;
+    if (!rqa(z)) goto DIE;
+    if (typematch(DNS_T_PTR,dtype)) {
+      if (!response_rstart(d,DNS_T_PTR,655360)) goto DIE;
+      if (!response_addname("\011localhost\0")) goto DIE;
+      response_rfinish(RESPONSE_ANSWER);
+    }
+    cleanup(z);
+    log_stats();
+    return 1;
+  }
 
   if (dlen <= 255) {
     byte_copy(key,2,DNS_T_ANY);

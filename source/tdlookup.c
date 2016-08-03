@@ -332,12 +332,13 @@ int respond(char *q,char qtype[2],char ip[4])
   if (!r) r = cdb_find(&c,key,4);
   if (!r) r = cdb_find(&c,key,3);
   if (!r) r = cdb_find(&c,key,2);
-  if (r == -1) return 0;
+  if (r == -1) { r = 0; goto done; }
   if (r && (cdb_datalen(&c) == 2))
-    if (cdb_read(&c,clientloc,2,cdb_datapos(&c)) == -1) return 0;
+    if (cdb_read(&c,clientloc,2,cdb_datapos(&c)) == -1) { r = 0; goto done; }
 
   r = doit(q,qtype);
 
+done:
   cdb_free(&c);
   close(fd);
   return r;

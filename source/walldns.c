@@ -14,11 +14,13 @@ void initialize(void)
 int respond(char *q,char qtype[2])
 {
   int flaga;
+  int flagaaaa;	// FIXME: Use this!
   int flagptr;
   char ip[4];
   int j;
 
   flaga = byte_equal(qtype,2,DNS_T_A);
+  flagaaaa = byte_equal(qtype,2,DNS_T_AAAA);
   flagptr = byte_equal(qtype,2,DNS_T_PTR);
   if (byte_equal(qtype,2,DNS_T_ANY)) flaga = flagptr = 1;
 

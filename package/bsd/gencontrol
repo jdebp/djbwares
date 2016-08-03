@@ -19,7 +19,13 @@ new_pkg() {
 		echo "comment: ."
 		echo "maintainer: J.deBoynePollard"
 		echo "www: http:/jdebp.info./Softwares/djbwares/"
-		basename `/bin/pwd` | sed -e 's/^.*-\([[:digit:]][[:alnum:].]*\)$/version: "\1"/'
+		version="`basename \`/bin/pwd\` | sed -e 's/^.*-\([[:digit:]][[:alnum:].]*\)$/\1/'`"
+		if test -r bsd/"${name}".epoch
+		then
+			echo "version: \"${version},`cat \"bsd/${name}.epoch\"`\""
+		else
+			echo "version: \"${version}\""
+		fi
 		if test -r bsd/"${name}".deps
 		then
 			echo "deps: {"

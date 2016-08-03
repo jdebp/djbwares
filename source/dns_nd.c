@@ -22,3 +22,16 @@ void dns_name4_domain(char name[DNS_NAME4_DOMAIN],const char ip[4])
   namelen += i;
   byte_copy(name + namelen,14,"\7in-addr\4arpa\0");
 }
+
+void dns_name6_domain(char name[DNS_NAME6_DOMAIN],const char ip[16])
+{
+  unsigned int namelen;
+  int j;
+
+  namelen = 0;
+  for (j = 16; j-- > 0; ) {
+    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j]); 
+    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j] / 16); 
+  }
+  byte_copy(name + namelen,9,"\3ip6\3int\0");
+}

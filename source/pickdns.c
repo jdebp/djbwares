@@ -26,15 +26,17 @@ static int doit(char *q,char qtype[2],char ip[4])
   uint32 dlen;
   unsigned int qlen;
   int flaga;
+  int flagaaaa;
   int flagmx;
 
   qlen = dns_domain_length(q);
   if (qlen > 255) return 0; /* impossible */
 
   flaga = byte_equal(qtype,2,DNS_T_A);
+  flagaaaa = byte_equal(qtype,2,DNS_T_AAAA);
   flagmx = byte_equal(qtype,2,DNS_T_MX);
-  if (byte_equal(qtype,2,DNS_T_ANY)) flaga = flagmx = 1;
-  if (!flaga && !flagmx) goto REFUSE;
+  if (byte_equal(qtype,2,DNS_T_ANY)) flaga = flagaaaa = flagmx = 1;
+  if (!flaga && !flagaaaa && !flagmx) goto REFUSE;
 
   key[0] = '%';
   byte_copy(key + 1,4,ip);
@@ -72,6 +74,16 @@ static int doit(char *q,char qtype[2],char ip[4])
       dlen -= 4;
       if (!response_rstart(q,DNS_T_A,5)) return 0;
       if (!response_addbytes(data + dlen,4)) return 0;
+      response_rfinish(RESPONSE_ANSWER);
+    }
+  }
+  if (flagaaaa) {
+//    dns_sortip6(data,dlen);
+    if (dlen > 48) dlen = 48;
+    while (dlen >= 16) {
+      dlen -= 16;
+      if (!response_rstart(q,DNS_T_AAAA,5)) return 0;
+      if (!response_addbytes(data + dlen,16)) return 0;
       response_rfinish(RESPONSE_ANSWER);
     }
   }

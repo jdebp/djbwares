@@ -9,13 +9,21 @@
 extern unsigned int fmt_uint(char *,unsigned int);
 extern unsigned int fmt_uint0(char *,unsigned int,unsigned int);
 extern unsigned int fmt_xint(char *,unsigned int);
+#if 0 // No known implementation or doco.
 extern unsigned int fmt_nbbint(char *,unsigned int,unsigned int,unsigned int,unsigned int);
+#endif
 extern unsigned int fmt_ushort(char *,unsigned short);
 extern unsigned int fmt_xshort(char *,unsigned short);
+#if 0 // No known implementation or doco.
 extern unsigned int fmt_nbbshort(char *,unsigned int,unsigned int,unsigned int,unsigned short);
+#endif
 extern unsigned int fmt_ulong(char *,unsigned long);
 extern unsigned int fmt_xlong(char *,unsigned long);
+#if 0 // No known implementation or doco.
 extern unsigned int fmt_nbblong(char *,unsigned int,unsigned int,unsigned int,unsigned long);
+#endif
+
+extern char fmt_xdigit(unsigned char);
 
 extern unsigned int fmt_plusminus(char *,int);
 extern unsigned int fmt_minus(char *,int);

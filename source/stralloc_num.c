@@ -1,4 +1,24 @@
 #include "stralloc.h"
+#include "fmt.h"
+
+int stralloc_catxlong0(stralloc *sa,unsigned long u,unsigned int n)
+{
+  unsigned int len;
+  unsigned long q;
+  char *s;
+
+  len = 1;
+  q = u;
+  while (q > 15) { ++len; q /= 16; }
+  if (len < n) len = n;
+
+  if (!stralloc_readyplus(sa,len)) return 0;
+  s = sa->s + sa->len;
+  sa->len += len;
+  while (len) { s[--len] = fmt_xdigit(u); u /= 16; }
+
+  return 1;
+}
 
 int stralloc_catulong0(stralloc *sa,unsigned long u,unsigned int n)
 {
