@@ -1,0 +1,7 @@
+ttydetach
+ptyrun
+ptybandage
+nobuf
+exclon
+excloff
+background

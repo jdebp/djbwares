@@ -1,0 +1,69 @@
+<refentry id="taiclock">
+
+<refmeta>
+<refentrytitle>taiclock</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<refmiscinfo class="version">2</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>taiclock</refname>
+<refpurpose>check a system's clock through TAICLOCK</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>taiclock</command>
+<arg choice='req'><replaceable>host</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>taiclock</command> connects to a TAICLOCK server on <replaceable>host</replaceable>.
+It communicates using <ulink url="http://cr.yp.to/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
+<replaceable>host</replaceable> must be a dotted-decimal IP address.
+</para>
+
+<para>
+<command>taiclock</command> prints to its standard output a 16-byte TAI64NA adjustment that, when added to the local UNIX clock, will produce the TAI clock on <replaceable>host</replaceable>.
+This is suitable for input to programs such as <citerefentry><refentrytitle>clockadd</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>clockview</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>taiclock</command> limits the adjustment to 2 days.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>sntpclock</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar program that uses the SNTP protocol</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>taiclockd</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a server program that speaks the TAICLOCK protocol</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>clockspeed</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by Daniel J. Bernstein.
+Documentation modernizations by Jonathan de Boyne Pollard.
+</para>
+</refsection>
+
+</refentry>

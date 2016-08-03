@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+test "$1" = 'remove' || exit 0
+
+if grep -q "#-- daemontools-run begin" /etc/inittab; then
+  echo 'Removing SV inittab entry...'
+  rm -f /etc/inittab'{new}'
+  sed -e '/#-- daemontools-run begin/,/#-- daemontools-run end/d' \
+    /etc/inittab > /etc/inittab'{new}'
+  mv -f /etc/inittab'{new}' /etc/inittab
+  kill -s HUP 1 || :
+  echo 'Sending services the TERM and CONT signals...'
+  svc -dx /etc/service/* || :
+  sleep 5
+  echo 'Sending log services the TERM and CONT signals...'
+  svc -dx /etc/service/*/log || :
+fi

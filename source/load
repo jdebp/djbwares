@@ -1,0 +1,7 @@
+#!/bin/sh -e
+target="$1"
+objects="$1.o"
+shift
+libraries="$@"
+redo-ifchange -- link ${objects} ${libraries}
+exec ./link "${target}" ${objects} ${libraries}

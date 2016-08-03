@@ -1,0 +1,10 @@
+#!/bin/sh -e
+if [ \! -d package ] || [ \! -d package/debian ] 
+then
+	echo "You are not in the right directory." 1>&2 
+	exit 100
+fi
+
+# Create and populate the debian directory.
+install -d -m 0755 debian
+( cd package/debian && ( 2>/dev/null pax -w -r -l -u -- * ../../debian/ || true ) )

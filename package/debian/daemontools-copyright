@@ -1,0 +1,21 @@
+This package was debianized by Gerrit Pape <pape@smarden.org> on
+Wed, 18 Jul 2001 12:02:57 +0200.
+
+It was downloaded from
+ http://cr.yp.to/daemontools/daemontools-0.76.tar.gz
+
+Upstream Author: D. J. Bernstein <djb@cr.yp.to>
+
+The man-pages in debian/daemontools-man/ were downloaded from
+ http://smarden.org/pape/djb/manpages/daemontools-0.76-man-20020131.tar.gz
+
+Copyright:
+
+D. J. Bernstein placed the daemontools package into the public domain.
+From http://cr.yp.to/distributors.html
+ What are the distribution terms for daemontools?
+ 2007.12.28: I hereby place the daemontools package (in particular,
+ daemontools-0.76.tar.gz, with MD5 checksum 1871af2453d6e464034968a0fbcb2bfc)
+ into the public domain. The package is no longer copyrighted.
+
+The Debian diff is in the public domain.

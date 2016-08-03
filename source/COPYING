@@ -1,0 +1,107 @@
+Daniel J. Bernstein's original softwares
+========================================
+
+Bernstein's softwares collected here are in the public domain.
+
+"I have decided to put all of my future and (going through the things that I have done in the past) past software into the public domain."
+— Daniel J. Bernstein, The Future of Open Source Mathematical Software, Sage Days 6, 2007-11-11
+
+There are additional individual notices, reiterating this specifically for clockspeed, daemontools, djbdns, and ucspi-tcp, at http://cr.yp.to/distributors.html .
+
+ptyget and publicfile rely upon the same Bernstein libraries that were made public domain in the later packages; and removing that duplication is part of the very raison d'être here.
+
+Eliminating the libraries duplicated (and improved!) in the other packages leaves just these files, which M. Bernstein's 2007 announcement is presumed to cover:
+
+  From ptyget-0.50:
+    background.1
+    background.c
+    excloff.1
+    excloff.c
+    exclon.1
+    exclon.c
+    getopt.3
+    getopt.c
+    getopt.h
+    nobuf.1
+    nobuf.sh
+    ptybandage.1
+    ptybandage.sh
+    ptyget.8
+    ptyget.c
+    ptyio.8
+    ptyio.c
+    ptyrun.1
+    ptyrun.sh
+    ptyspawn.8
+    ptyspawn.c
+    subfdin.c
+    subfdout.c
+    tryptc.c
+    tryptmx.c
+    ttyctrl.c
+    ttyctrl.h
+    ttydetach.1
+    ttydetach.c
+    ttymodes.c
+    ttymodes.h
+
+  From publicfile-0.52:
+    caldate_fmjd.c
+    caldate.h
+    caltime.h
+    caltime_utc.c
+    case_startb.c
+    fetch.c
+    fetch.h
+    file.c
+    file.h
+    filetype.c
+    filetype.h
+    ftpd.c
+    httpdate.c
+    httpdate.h
+    httpd.c
+    leapsecs_sub.c
+    main.c
+    pathdecode.c
+    pathdecode.h
+    percent.c
+    percent.h
+    timeoutaccept.c
+    timeoutaccept.h
+
+Jonathan de Boyne Pollard's modifications and additions
+=======================================================
+
+Some modifications may look like mine, but aren't.
+For example: timeoutread.c from publicfile-0.52 differs from the timeoutread.c here.
+That's a Daniel J. Bernstein modification to his own code, though, where he updated one library to use a newly invented other library (iopause in this particular case — an improvement that was on publicfile-0.52's own TODO list).
+
+I've done some fairly minor modifications here and there to Daniel J. Bernstein's code.
+These modifications I waive my copyright rights on, in order to not complicate the copyright status of the existing code.
+
+The same goes for my conversions of and updates to the Bernstein manual pages.
+
+I've also added a build and packaging system.
+All of the *.do files are mine, for instance, as is everything in package/ .
+Although daemontools-0.76 had things like package/compile and ptyget-0.50 had *.do files, all of mine are ground-up reimplementations (with reference to an old WWW page by Laurent Bercot in the case of package/compile et al.).
+
+I'm not convinced that the law of my country permits donation to the public domain.
+(This is a complex subject that is too long to address here; so I'll say no more than that.)
+So consider my build and packaging additions to be copyright licenced under the terms of any of:
+* The ISC licence.
+* The Simplified (2 clause) BSD licence.
+* The FreeBSD licence.
+* The MIT "Expat" licence.
+
+It is my understanding that these are functionally identical, and this helps to avoid BSD Licence Hell.
+
+Copyright (c) 2016 Jonathan de Boyne Pollard.  
+Moral rights of the author asserted.
+
+Hereinafter follows the ISC licence.
+----
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. 
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.

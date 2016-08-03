@@ -1,0 +1,192 @@
+Source: djbwares
+Priority: optional
+Maintainer: Jonathan de Boyne Pollard <jonathan.de.boyne.pollard@gmail.com>, Gerrit Pape <pape@smarden.org>
+Build-Depends: redo, xmlto, pax
+
+Package: publicfile
+Architecture: amd64
+Section: web
+Depends: ${shlibs:Depends}
+Suggests: 
+Recommends: 
+Description: Static content UCSPI HTTP and FTP servers
+
+Package: clockspeed
+Architecture: amd64
+Section: admin
+Depends: ${shlibs:Depends}
+Suggests: 
+Recommends: 
+Description: Maintain system clock from RTDSC and SNTP
+ clockspeed uses a hardware tick counter to compensate for a persistently
+ fast or slow system clock. Given a few time measurements from a reliable
+ source, it computes and then eliminates the clock skew.
+ .
+ sntpclock checks another system's NTP clock, and prints the results in a
+ format suitable for input to clockspeed. sntpclock is the simplest
+ available NTP/SNTP client.
+ .
+ taiclock and taiclockd form an even simpler alternative to SNTP. They
+ are suitable for precise time synchronization over a local area network,
+ without the hassles and potential security problems of an NTP server.
+ .
+ This version of clockspeed can use the Pentium RDTSC tick counter or the
+ Solaris gethrtime() nanosecond counter.
+
+Package: daemontools
+Section: admin
+Architecture: any
+Suggests: daemontools-run | runit
+Depends: ${shlibs:Depends}
+Replaces: daemontools-doc
+Description: a collection of tools for managing UNIX services
+ supervise monitors a service. It starts the service and restarts the
+ service if it dies. Setting up a new service is easy: all supervise
+ needs is a directory with a run script that runs the service. 
+ .
+ multilog saves error messages to one or more logs. It optionally timestamps
+ each line and, for each log, includes or excludes lines matching specified
+ patterns. It automatically rotates logs to limit the amount of disk space
+ used. If the disk fills up, it pauses and tries again, without losing any
+ data.
+
+Package: multilog
+Section: admin
+Architecture: any
+Conflicts: daemontools
+Depends: ${shlibs:Depends}
+Description: just Bernstein multilog on its own
+ multilog saves error messages to one or more logs. It optionally timestamps
+ each line and, for each log, includes or excludes lines matching specified
+ patterns. It automatically rotates logs to limit the amount of disk space
+ used. If the disk fills up, it pauses and tries again, without losing any
+ data.
+
+Package: taiclockd
+Section: admin
+Architecture: any
+Conflicts: clockspeed
+Depends: ${shlibs:Depends}
+Description: just Bernstein taiclockd on its own
+ taiclock and taiclockd form an even simpler alternative to SNTP. They
+ are suitable for precise time synchronization over a local area network,
+ without the hassles and potential security problems of an NTP server.
+
+Package: daemontools-run
+Section: admin
+Architecture: all
+Depends: daemontools (>> 1:0.76)
+Conflicts: runit
+Description: daemontools service supervision
+ Starts svscanboot from inittab, and provides the directory /etc/service/
+ for services to be supervised by daemontools.
+
+Package: djbdns
+Section: web
+Architecture: amd64
+Depends: ${shlibs:Depends}
+Suggests: 
+Recommends: 
+Description: djbdns built by Synety
+
+Package: ptyget
+Architecture: amd64
+Section: admin
+Depends: ${shlibs:Depends}
+Suggests: 
+Recommends: 
+Description: ptyget built by JdeBP 
+ ptyget is a universal pseudo-terminal interface. It is designed to be
+ used by any program that needs a pty. It can also serve as a wrapper to
+ improve the behavior of existing programs. 
+ .
+ ptyget can also serve as a wrapper to improve the behavior of existing
+ programs. For example, ``ptybandage telnet'' is like ``telnet'' but can
+ be put into a pipeline. ``nobuf grep'' is like ``grep'' but won't
+ block-buffer if it's redirected.
+ .
+ Previous pty-allocating programs---rlogind, telnetd, sshd, xterm,
+ screen, emacs, expect, etc.---have caused dozens of security problems.
+ There are two fundamental reasons for this. First, these programs are
+ installed setuid root so that they can allocate ptys; this turns every
+ little bug in hundreds of thousands of lines of code into a potential
+ security hole. Second, these programs are not careful enough to protect
+ the pty from access by other users.
+ .
+ ptyget solves both of these problems. All the privileged code is in one
+ tiny program. This program guarantees that one user can't touch another
+ user's pty.
+ .
+ ptyget is a complete rewrite of pty 4.0, Bernstein's previous pty-allocating
+ package. pty 4.0's session management features have been split off into
+ a separate package, sess.
+ .
+ This version has been patched to be buildable by redo(1) and to recognize and use the new POSIX 2001 (Unix98) ptmx library functions instead of System V Streams ioctl()s.
+
+Package: ucspi-tcp
+Architecture: any
+Depends: ${shlibs:Depends}
+Section: net
+Replaces: ucspi-tcp-doc
+Description: command-line tools for building TCP client-server applications
+ tcpserver waits for incoming connections and, for each connection, runs a
+ program of your choice. Your program receives environment variables showing
+ the local and remote host names, IP addresses, and port numbers.
+ .
+ tcpserver offers a concurrency limit to protect you from running out of
+ processes and memory. When you are handling 40 (by default) simultaneous
+ connections, tcpserver smoothly defers acceptance of new connections.
+ .
+ tcpserver also provides TCP access control features, similar to
+ tcp-wrappers/tcpd's hosts.allow but much faster. Its access control rules
+ are compiled into a hashed format with cdb, so it can easily deal with
+ thousands of different hosts. 
+ .
+ This package includes a recordio tool that monitors all the input and output
+ of a server. 
+ .
+ tcpclient makes a TCP connection and runs a program of your choice. It sets
+ up the same environment variables as tcpserver. 
+ .
+ This package includes several sample clients built on top of tcpclient:
+ who@, date@, finger@, http@, tcpcat, and mconnect. 
+ .
+ tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
+ Interface, using the TCP protocol. UCSPI tools are
+ available for several different networks.
+
+Package: ucspi-tcp-ipv6
+Architecture: any
+Depends: ${shlibs:Depends}
+Replaces: ucspi-tcp-doc
+Conflicts: ucspi-tcp
+Provides: ucspi-tcp
+Section: net
+Description: command-line tools for building TCP client-server applications (IPv6)
+ ucspi-tcp-ipv6 is the ucspi-tcp package with IPv6 support added.
+ .
+ tcpserver waits for incoming connections and, for each connection, runs a
+ program of your choice. Your program receives environment variables showing
+ the local and remote host names, IP addresses, and port numbers.
+ .
+ tcpserver offers a concurrency limit to protect you from running out of
+ processes and memory. When you are handling 40 (by default) simultaneous
+ connections, tcpserver smoothly defers acceptance of new connections.
+ .
+ tcpserver also provides TCP access control features, similar to
+ tcp-wrappers/tcpd's hosts.allow but much faster. Its access control rules
+ are compiled into a hashed format with cdb, so it can easily deal with
+ thousands of different hosts.
+ .
+ This package includes a recordio tool that monitors all the input and output
+ of a server.
+ .
+ tcpclient makes a TCP connection and runs a program of your choice. It sets
+ up the same environment variables as tcpserver.
+ .
+ This package includes several sample clients built on top of tcpclient:
+ who@, date@, finger@, http@, tcpcat, and mconnect.
+ .
+ tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
+ Interface, using the TCP protocol. UCSPI tools are
+ available for several different networks.

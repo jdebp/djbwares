@@ -1,0 +1,52 @@
+<refentry id="taiclockd">
+
+<refmeta>
+<refentrytitle>taiclockd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<refmiscinfo class="version">2</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>taiclockd</refname>
+<refpurpose>announce the system's clock through TAICLOCK</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>taiclockd</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>taiclockd</command> announces the local UNIX clock through <ulink url="http://pobox.com/~djb/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
+It listens for TAICLOCK requests through UDP and responds with the system's current time.
+</para>
+
+<para>
+<emphasis>Do not run <code>taiclockd</code> if your system is tuned by <code>xntpd</code>.</emphasis>
+See Daniel J. Bernstein's <ulink url="http://cr.yp.to/proto/utctai.html">UTC, TAI, and UNIX time</ulink> paper for further discussion.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Security</title>
+<para>
+<command>taiclockd</command> does not need to run as root.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by Daniel J. Bernstein.
+Documentation modernizations by Jonathan de Boyne Pollard.
+</para>
+</refsection>
+
+</refentry>

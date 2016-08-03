@@ -1,0 +1,213 @@
+daemontools (2) unstable; urgency=low
+
+  * 
+
+ -- Gerrit Pape <pape@smarden.org>  Wed, 16 Apr 2008 21:20:38 +0000
+
+daemontools (1:0.76-3) unstable; urgency=low
+
+  * debian/daemontools-run.postinst: don't exec into the kill program, so
+    that the shell builtin is used (closes: #475619).
+  * debian/daemontools-run.postrm: ignore error if 'kill -s HUP 1' fails
+    for some reason on package removal (#474141).
+  * debian/control: Standards-Version: 3.7.3.0.
+
+ -- Gerrit Pape <pape@smarden.org>  Wed, 16 Apr 2008 21:20:38 +0000
+
+daemontools (1:0.76-2) unstable; urgency=low
+
+  * debian/daemontools-run.postinst: also remove inittab entry on upgrade
+    from daemontools-installer FHS version, to have new entry added
+    afterwards; look also for /var/lib/svscan, to possibly copy content to
+    /etc/service/ on upgrade (closes: #468853).
+  * debian/daemontools.NEWS.Debian: mention /etc/service/ as default
+    directory for services; recommend compatibility symlink.
+
+ -- Gerrit Pape <pape@smarden.org>  Sun, 02 Mar 2008 15:28:46 +0000
+
+daemontools (1:0.76-1) unstable; urgency=low
+
+  * debian/changelog: add epoch 1 to supersede unofficial package.
+  * switch from tarball in tarball .orig.tar.gz to original upstream
+    tarball.
+  * debian/rules: remove target configure:; use glibc by default instead
+    of dietlibc.
+  * debian/control: no longer Build-Depends: dietlibc.
+  * debian/gcc/: remove; obsolete.
+  * debian/rules: build programs in target build:; install programs into
+    /usr/bin/.
+  * debian/rules: new target patch: apply diffs from debian/diff/, reverse
+    apply in target clean:.
+  * debian/diff/0001-error.h-include-errno.h-instead-of-extern-int.patch:
+    new; error.h: '#include <errno.h>' instead of 'extern int errno;'.
+  * debian/daemontools-man/: new; add manpages downloaded from
+    http://smarden.org/pape/djb/manpages/daemontools-0.76-man-20020131.tar.gz.
+  * debian/rules: install manpages from debian/daemontools-man/ into
+    /usr/share/man/man8/.
+  * debian/daemontools.postinst, debian/daemontools.postrm: remove;
+    obsolete.
+  * debian/implicit: add proper dependencies to support 'parallel build'
+    through make -j (thx Daniel Schepler for the patch).
+  * debian/daemontools-run.README.Debian, debian/daemontools-run.postinst,
+    debian/daemontools-run.postrm: new; from the (unofficial) daemontools-run
+    package, slightly modified.
+  * debian/control, debian/rules: new package daemontools-run.
+  * debian/control: daemontools: no longer Depends: daemontools-run
+    (>= 0.76.1); no longer Recommends: daemontools-doc (>= 0.76-1);
+    Suggests: daemontools-run (>> 1:0.76); Replaces: daemontools-doc.
+  * debian/control: dameontools-run: Conflicts: runit.
+  * debian/rules: run dpkg-shlibdeps; remove debian/substvars in target
+    clean:.
+  * debian/control: Depends: ${shlibs:Depends}.
+  * debian/control: Standards-Version: 3.7.2.2.
+  * debian/copyright: rewrite copyright.
+  * debian/daemontools.README.Debian, debian/daemontools-run.README.Debian:
+    redo.
+  * debian/control: minor updates to short and long descriptions; Suggests:
+    daemontools-run | runit.
+  * debian/daemontools-run.postrm: use svc -dx to signal services and log
+    services to stop on package removal.
+  * debian/rules: adapt svscanboot: default directory for services is
+    /var/service/; find svc through PATH.
+  * upload to Debian/main (closes: #453684).
+  * debian/control, debian/daemontools-run.README.Debian,
+    debian/daemontools-run.postrm, debian/daemontools.README.Debian,
+    debian/rules: change default directory for services from /var/service/
+    to /etc/service/ (see also #461478).
+  * debian/diff/0002-supervise.c-.-supervise-may-be-a-symlink-if-it-s-da.diff:
+    new; supervise.c: ./supervise may be a symlink, if it's dangling, create
+    link target.
+  * debian/update-service, debian/update-service.8: new; a variant of
+    runit's update-service(8) program.
+  * debian/rules: packages daemontools-run: install update-service program
+    plus manpage, provide /var/lib/supervise/.
+  * debian/daemontools-run.README.Debian: talk about the update-service(8)
+    program.
+  * debian/daemontools-run.postinst: on fresh install, or update from
+    unofficial package, look for /var/service, then /service, and copy
+    content to /etc/service/ if its a non-emtpy directory, and provide
+    compatibility symlink.
+  * debian/daemontools-run.postinst: on fresh install, or update from
+    unofficial package, remove inittab entry if present, to have new entry
+    added afterwards.
+  * debian/daemontools.NEWS.Debian: new; package introduced to Debian/main,
+    mention how to put on hold if upgrade from non-free is not desired.
+  * debian/daemontools-run.postinst: really remove inittab entry on upgrade
+    from daemontools-installer.
+
+ -- Gerrit Pape <pape@smarden.org>  Tue, 26 Feb 2008 20:01:21 +0000
+
+daemontools (0.76-zarge2) sarge; urgency=low
+
+  * build against sarge's dietlibc-dev (0.28-3).
+
+ -- Gerrit Pape <pape@smarden.org>  Thu, 26 May 2005 18:59:14 +0000
+
+daemontools (0.76-zarge1) sarge; urgency=low
+
+  * debian/copyright: typo.
+  * debian/daemontools.postinst, debian/daemontools.postrm: minor cleanup.
+  * debian/implicit: update to revision 1.10.
+  * debian/rules: minor cleanup.
+
+ -- Gerrit Pape <pape@smarden.org>  Sun, 15 Aug 2004 16:13:06 +0000
+
+daemontools (0.76-zarge0.3) sarge; urgency=low
+
+  * debian/rules: stop using debhelper, use implicit rules.
+  * debian/implicit: new; implicit Makefile rules.
+  * debian/postinst, debian/postrm: simplify; rename to debian/daemontools.*.
+  * debian/docs, debian/dirs: remove; obsolete.
+  * debian/README.Debian: rename to debian/daemontools.README.Debian.
+  * debian/control: no longer Build-Depends: dephelper; remove
+    Standards-Version.
+
+ -- Gerrit Pape <pape@smarden.org>  Mon, 22 Mar 2004 14:29:10 +0000
+
+daemontools (0.76-zarge0.2) sarge; urgency=low
+
+  * use diet libc.
+  * debian/rules: set up diet program as c compiler wrapper; conditionally
+    overwrite PATH to have diet program used as c compiler wrapper; minor
+    cleanup.
+  * debian/gcc/gcc*: new; diet program as c compiler wrapper.
+  * debian/control: Build-Depends: dietlibc-dev; no longer Depends:
+    ${shlibs:Depends}.
+
+ -- Gerrit Pape <pape@smarden.org>  Wed, 12 Nov 2003 14:39:11 +0000
+
+daemontools (0.76-woody1) woody; urgency=low
+
+  * bump version for release.
+
+ -- Gerrit Pape <pape@smarden.org>  Tue,  9 Jul 2002 11:05:14 +0200
+
+daemontools (0.76-woody0.1) woody; urgency=low
+
+  * send init a HUP signal in postinst if /command/svscanboot did not
+    exist before; daemontools-run no more does this in that case.
+    This fixes a rarely seen problem when installing a bunch of packages
+    at once and daemontools-run is configured before daemontools is fully
+    installed: init reports SV respawning to fast and disables it for five
+    minutes.
+
+ -- Gerrit Pape <pape@smarden.org>  Sat, 16 Feb 2002 13:58:57 +0100
+
+daemontools (0.76-1) woody; urgency=low
+
+  * new upstream version 0.76.
+  * depends on daemontools-run, just recommends daemontools-doc.
+
+ -- Gerrit Pape <pape@innominate.com>  Wed, 18 Jul 2001 12:02:57 +0200
+
+daemontools (0.70-1) stable; urgency=low
+
+  * 1st debian version, no other changes.
+
+ -- Gerrit Pape <pape@innominate.com>  Thu,  1 Feb 2001 09:46:39 +0100
+
+daemontools (0.70-0.8) unstable; urgency=low
+
+  * binaries are now installed in /usr/local/bin .
+
+ -- Gerrit Pape <pape@innominate.com>  Mon, 18 Dec 2000 10:42:31 +0100
+
+daemontools (0.70-0.7) unstable; urgency=low
+
+  * removed all documentation -> will be in daemontools-doc.
+  * removed init-script, /var/service and /var/log/service -> will be
+    in daemontools-run.
+
+ -- Gerrit Pape <pape@innominate.de>  Mon, 14 Aug 2000 12:05:44 +0200
+
+daemontools (0.70-0.6) unstable; urgency=low
+
+  * lintian fixes.
+
+ -- Gerrit Pape <pape@innominate.de>  Mon, 19 Jun 2000 12:30:19 +0200
+
+daemontools (0.70-0.5) unstable; urgency=low
+
+  * providing /var/log/service/ for multilog directories.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue, 13 Jun 2000 17:14:59 +0200
+
+daemontools (0.70-0.4) unstable; urgency=low
+
+  * init-script added, svscan will be started at boottime, monitoring
+    /var/service.
+
+ -- Gerrit Pape <pape@innominate.de>  Mon, 15 May 2000 11:05:58 +0200
+
+daemontools (0.70-0.3) unstable; urgency=low
+
+  * man-pages added.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue, 25 Apr 2000 09:21:24 +0200
+
+daemontools (0.70-0.1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue, 18 Apr 2000 11:38:23 +0200
+

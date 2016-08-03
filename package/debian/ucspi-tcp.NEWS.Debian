@@ -1,0 +1,17 @@
+ucspi-tcp (1:0.88-1) unstable; urgency=low
+
+  With the ucspi-tcp package being put into the public domain by the
+  upstream author, ucspi-tcp is now available as binary package in
+  Debian/main.
+
+  Please note that this new binary package does not include as many
+  patches as the package created through the ucspi-tcp-src package
+  available in Debian/non-free.  ucspi-tcp-src is still available, if
+  you don't want to upgrade to this new binary package, you should stop
+  the installation, make sure the ucspi-tcp-src package is installed,
+  and put ucspi-tcp on hold, as described in
+
+   http://www.debian.org/doc/FAQ/ch-pkg_basics.en.html#s-puttingonhold
+  
+ -- Gerrit Pape <pape@smarden.org>  Wed, 09 Jan 2008 07:16:22 +0000
+

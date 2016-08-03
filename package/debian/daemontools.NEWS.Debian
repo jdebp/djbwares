@@ -1,0 +1,30 @@
+daemontools (1:0.76-1) unstable; urgency=low
+
+  With the daemontools package being put into the public domain by the
+  upstream author, daemontools is now available as binary package in
+  Debian/main.
+
+  Please note that this new binary package differs from the package created
+  through the daemontools-installer package available in Debian/non-free;
+  most notably this package doesn't set up svscanboot to run and provide
+  system-wide service supervision.  To do so, additionally install the
+  daemontools-run package.
+
+  daemontools' default directory for services on Debian is /etc/service/,
+  not the top-level directory /service/ as provided by the upstream package;
+  to be consistent with existing documentation, it is recommended to create
+  a compatibility symlink through
+
+    ln -s /etc/service /service
+
+  after installing the daemontools-run package.
+  
+  daemontools-installer is still available, if you don't want to upgrade to
+  these new binary packages, you should stop the installation, make sure the
+  daemontools-installer package is installed, and put daemontools on hold,
+  as described in
+
+   http://www.debian.org/doc/FAQ/ch-pkg_basics.en.html#s-puttingonhold
+  
+ -- Gerrit Pape <pape@smarden.org>  Mon, 25 Feb 2008 20:24:49 +0000
+

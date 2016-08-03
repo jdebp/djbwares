@@ -1,0 +1,14 @@
+#!/bin/sh -e
+redo-ifchange find-systype.sh 
+rm -f "$1"
+ar cr "$@"
+case "`./find-systype.sh`" in
+	sunos-5.*) ;;
+	unix_sv*) ;;
+	irix64-*) ;;
+	irix-*) ;;
+	dgux-*) ;;
+	hp-ux-*) ;;
+	sco*) ;;
+	*) ranlib "$1" ;;
+esac

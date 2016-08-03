@@ -1,0 +1,151 @@
+ucspi-tcp (2) unstable; urgency=low
+
+  * 
+
+ -- Gerrit Pape <pape@smarden.org>  Tue, 13 Oct 2009 22:57:51 +0000
+
+ucspi-tcp (1:0.88-3) unstable; urgency=low
+
+  * ucspi-tcp-ipv6/diff/0001-rblsmtpd.c...diff, 0002-Makefile...diff,
+    0003-Apply-fefe-s-ucspi-tcp-0.88-ipv6.diff19-ipv6-patch.diff: new:
+    ucspi-tcp with IPv6 support added.
+  * debian/control: new package ucspi-tcp-ipv6: ucspi-tcp with IPv6
+    support added (thx fefe; closes: #534925).
+  * debian/rules: build and install new package ucspi-tcp-ipv6.
+
+ -- Gerrit Pape <pape@smarden.org>  Tue, 13 Oct 2009 22:57:51 +0000
+
+ucspi-tcp (1:0.88-2) unstable; urgency=low
+
+  * debian/rules: install: force remove also auto_home.c before re-doing
+    upstream targets install, instcheck (closes: #476070).
+  * debian/diff/0003-Makefile-target-choose-do-not-depend-on-conf-home.diff:
+    new: Makefile: target choose: do not depend on conf-home.
+  * debian/control: Vcs-Git: http://smarden.org/git/ucspi-tcp.git/;
+    Standards-Version: 3.8.0.1.
+  * debian/rules: minor.
+
+ -- Gerrit Pape <pape@smarden.org>  Tue, 17 Jun 2008 21:31:34 +0000
+
+ucspi-tcp (1:0.88-1) unstable; urgency=low
+
+  * debian/changelog: add epoch 1 to supersede unofficial package.
+  * debian/rules: remove target configure:; use glibc by default instead
+    of dietlibc.
+  * debian/control: no longer Build-Depends: dietlibc.
+  * debian/gcc/: remove; obsolete.
+  * debian/rules: install programs into /usr/bin/.
+  * debian/rules: new target patch: apply diffs from debian/diff/, reverse
+    apply in target clean:.
+  * debian/diff/0001-error.h-include-errno.h-instead-of-extern-int.diff:
+    new; error.h: '#include <errno.h>' instead of 'extern int errno;'.
+  * debian/ucspi-tcp-man/: new; add manpages downloaded from
+    http://smarden.org/pape/djb/manpages/ucspi-tcp-0.88-man-20020317.tar.gz.
+  * debian/rules: install manpages from debian/ucspi-tcp-man/ into
+    /usr/share/man/man1/.
+  * debian/control: no longer Recommends: ucspi-tcp-doc; Replaces:
+    ucspi-tcp-doc.
+  * debian/implicit: add proper dependencies to support 'parallel build'
+    through make -j (thx Daniel Schepler for the patch).
+  * debian/rules: run dpkg-shlibdeps; remove debian/substvars in target
+    clean:.
+  * debian/control: Depends: ${shlibs:Depends}.
+  * debian/control: Standards-Version: 3.7.2.2.
+  * debian/copyright: rewrite copyright.
+  * debian/ucspi-tcp.README.Debian: remove reference to unofficial packages.
+  * debian/control: minor updates to descriptions.
+  * debian/diff/0002-rblsmtpd.c-don-t-use-a-the-default-rbl.maps.vix.com.diff:
+    new; rblsmtpd.c: don't use a the default rbl.maps.vix.com if run without
+    -r switch.
+  * first upload to Debian/main (closes: #459318).
+  * debian/ucspi-tcp.NEWS.Debian: new; package introduced to Debian/main,
+    mention how to put on hold if upgrade from non-free is not desired.
+
+ -- Gerrit Pape <pape@smarden.org>  Wed, 09 Jan 2008 21:26:17 +0000
+
+ucspi-tcp (0.88-zarge2) sarge; urgency=low
+
+  * build against sarge's dietlibc-dev (0.28-3).
+
+ -- Gerrit Pape <pape@smarden.org>  Thu, 26 May 2005 19:01:37 +0000
+
+ucspi-tcp (0.88-zarge1) sarge; urgency=low
+
+  * debian/rules: minor cleanup.
+  * debian/implicit: update to revision 1.10.
+
+ -- Gerrit Pape <pape@smarden.org>  Sun, 15 Aug 2004 18:18:36 +0000
+
+ucspi-tcp (0.88-zarge0.3) sarge; urgency=low
+
+  * debian/rules: stop using debhelper, use implicit rules.
+  * debian/implicit: new; implicit Makefile rules.
+  * debian/README.Debian, debian/docs: rename to debian/ucspi-tcp.*.
+  * debian/dirs: remove; obsolete.
+  * debian/copyright: minor.
+  * debian/control: no longer Build-Depends: dephelper; remove
+    Standards-Version.
+
+ -- Gerrit Pape <pape@smarden.org>  Mon, 22 Mar 2004 14:25:30 +0000
+
+ucspi-tcp (0.88-zarge0.2) sarge; urgency=low
+
+  * use diet libc.
+  * debian/rules: set up diet program as c compiler wrapper; conditionally
+    overwrite PATH to have diet program used as c compiler wrapper; minor
+    cleanup.
+  * debian/gcc/gcc*: new; diet program as c compiler wrapper.
+  * debian/control: Build-Depends: dietlibc-dev; no longer Depends:
+    ${shlibs:Depends}.
+
+ -- Gerrit Pape <pape@smarden.org>  Wed, 12 Nov 2003 12:58:36 +0000
+
+ucspi-tcp (0.88-woody0.1) woody; urgency=low
+
+  * woody package; new Standards-Version: 3.5.2.
+  * just _recommend_ ucspi-tcp-doc.
+
+ -- Gerrit Pape <pape@smarden.org>  Mon, 15 Oct 2001 14:01:04 +0200
+
+ucspi-tcp (0.88-1) stable; urgency=low
+
+  * 1st debian version, no other changes.
+
+ -- Gerrit Pape <pape@innominate.com>  Thu,  1 Feb 2001 10:03:07 +0100
+
+ucspi-tcp (0.88-0.7) unstable; urgency=low
+
+  * binaries are now installed in /usr/local/bin.
+
+ -- Gerrit Pape <pape@innominate.com>  Mon, 18 Dec 2000 11:13:26 +0100
+
+ucspi-tcp (0.88-0.6) unstable; urgency=low
+
+  * home of binaries is /usr.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue, 22 Aug 2000 12:56:23 +0200
+
+ucspi-tcp (0.88-0.5) unstable; urgency=low
+
+  * removed all documentation -> will be in ucspi-tcp-doc.
+
+ -- Gerrit Pape <pape@innominate.de>  Mon, 14 Aug 2000 15:48:46 +0200
+
+ucspi-tcp (0.88-0.4) unstable; urgency=low
+
+  * forgotten man-pages for rblsmtpd, addcr, delcr added.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue,  4 Jul 2000 18:58:12 +0200
+
+ucspi-tcp (0.88-0.3) unstable; urgency=low
+
+  * man-pages added.
+
+ -- Gerrit Pape <pape@innominate.de>  Tue, 25 Apr 2000 09:23:02 +0200
+
+ucspi-tcp (0.88-0.2) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Gerrit Pape <pape@innominate.de>  Fri, 24 Mar 2000 13:05:58 +0100
+

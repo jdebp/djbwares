@@ -1,0 +1,14 @@
+#!/bin/sh -e
+redo-ifchange ./cc ./ccflags
+read cc < ./cc
+read ccflags < ./ccflags
+cppflags="-I."
+#if g++ -E --usage >/dev/null 2>&1
+#then
+#        ${cc} ${ccflags} ${cppflags} -o "$1" -c "$2"
+#        g++ -E ${ccflags} ${cppflags} "$2" -MD -MF "$3" >/dev/null || true
+#        . "$3" || true
+#else
+        ${cc} ${ccflags} ${cppflags} -o "$1" -c "$2" -MMD -MF "$3" 
+        sed -e "s!^$1:!!" -e 's/\\$//g' "$3" | xargs redo-ifchange
+#fi

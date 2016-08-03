@@ -1,0 +1,8 @@
+upgrade to iopause
+rely on tcpserver for OOBINLINE
+document use of leapsecs.dat in httpd
+
+include tools to create index.html
+include tools to create ~/public
+consider other protocols
+consider redirection instead of silent rewriting for index.html

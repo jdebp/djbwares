@@ -1,0 +1,85 @@
+#!/bin/sh -e
+# See http://skarnet.org./software/compile.html
+if [ \! -d package -o \! -d source ]
+then
+	echo "You are not in the right directory." 1>&2
+	exit 100
+fi
+
+# Atomically update the release directories ./command, ./library, ./include, and so forth.
+# The build and release directories need not be on the same disc volume.
+# And the files released must not be potentially overwritable and truncatable by the compiler/linker during subsequent builds.
+mkdir -p command manual config doc
+
+# ##############################################################################
+# Build all of the ...{new} files in ./command, ./config, and ./manual.
+cat package/commands1 package/commands8 | while read i
+do
+	rm -f -- command/"$i"{new}
+	install -m 0755 -- build/"$i" command/"$i"{new}
+	if objdump -a command/"$i"{new} >/dev/null 2>&1
+	then
+		 strip command/"$i"{new}
+	fi
+done
+# All of the commands that have their own manual pages
+cat package/commands1 package/extra-manpages1 | 
+while read i
+do
+	rm -f -- manual/"$i".1{new}
+	install -m 0644 -- build/"$i".1 manual/"$i".1{new}
+done
+cat package/extra-manpages3 | 
+while read i
+do
+	rm -f -- manual/"$i".3{new}
+	install -m 0644 -- build/"$i".3 manual/"$i".3{new}
+done
+cat package/commands8 package/extra-manpages8 | 
+while read i
+do
+	rm -f -- manual/"$i".8{new}
+	install -m 0644 -- build/"$i".8 manual/"$i".8{new}
+done
+# Other guide pages
+for i in COPYING
+do
+	rm -f -- doc/"$i"{new}
+	install -m 0644 -- build/"$i" doc/"$i"{new}
+done
+for i in dnsroots.global
+do
+	install -m 0644 -- build/"$i" config/"$i"{new}
+done
+
+# ##############################################################################
+# Rename the ...{new} files in ./command, ./config, and ./manual.
+cat package/commands1 package/commands8 | while read i
+do
+	mv -f -- command/"$i"{new} command/"$i"
+done
+# All of the commands that have their own manual pages
+cat package/commands1 package/extra-manpages1 | 
+while read i
+do
+	mv -f -- manual/"$i".1{new} manual/"$i".1
+done
+cat package/extra-manpages3 | 
+while read i
+do
+	mv -f -- manual/"$i".3{new} manual/"$i".3
+done
+cat package/commands8 package/extra-manpages8 | 
+while read i
+do
+	mv -f -- manual/"$i".8{new} manual/"$i".8
+done
+# Other doco
+for i in COPYING
+do
+	mv -f -- doc/"$i"{new} doc/"$i"
+done
+for i in dnsroots.global
+do
+	mv -f -- config/"$i"{new} config/"$i"
+done

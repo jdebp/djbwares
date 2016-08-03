@@ -1,0 +1,110 @@
+<refentry id="configure">
+
+<refmeta>
+<refentrytitle>configure</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<refmiscinfo class="version">2</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>configure</refname>
+<refpurpose>Obsolete configuration program</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>configure</command>
+<arg choice='req'><replaceable>acct</replaceable></arg>
+<arg choice='req'><replaceable>logacct</replaceable></arg>
+<arg choice='req'><replaceable>D</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>host</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+configure creates a directory <arg choice='plain'><replaceable>D</replaceable></arg> with three subdirectories:
+</para>
+
+<itemizedlist>
+<listitem><para>
+<arg choice='plain'><replaceable>D</replaceable></arg><filename>/file</filename> contains public files.
+</para></listitem>
+<listitem><para>
+<arg choice='plain'><replaceable>D</replaceable></arg><filename>/httpd</filename> is an HTTP service.
+</para></listitem>
+<listitem><para>
+<arg choice='plain'><replaceable>D</replaceable></arg><filename>/ftpd</filename> is an FTP service.
+</para></listitem>
+</itemizedlist>
+
+<para>
+The name <arg choice='plain'><replaceable>D</replaceable></arg> must start with a slash and must not contain any special characters. 
+Normally <arg choice='plain'><replaceable>D</replaceable></arg> is <filename>/public</filename>.
+You can run the HTTP and FTP services under svscan by creating symbolic links in the svscan directory:
+</para>
+
+<para>
+<command>ln -s <arg choice='plain'><replaceable>D</replaceable></arg>/httpd <arg choice='plain'><replaceable>D</replaceable></arg>/ftpd /service</command>
+</para>
+
+<para>
+The services will start within one minute, and will be restarted upon reboot. 
+You can use <command>svc</command> to control the services.
+configure arranges for the HTTP and FTP servers to chroot to <arg choice='plain'><replaceable>D</replaceable></arg><filename>/file</filename> and to run under the uid and gid of <arg choice='plain'><replaceable>acct</replaceable></arg>. 
+The name <arg choice='plain'><replaceable>acct</replaceable></arg> must not contain any special characters.
+</para>
+
+<para>
+configure creates four logs:
+</para>
+
+<itemizedlist>
+<listitem><para>
+The first line of <arg choice='plain'><replaceable>D</replaceable></arg>/httpd/log/status shows the current number of HTTP connections.
+</para></listitem>
+<listitem><para>
+<arg choice='plain'><replaceable>D</replaceable></arg>/httpd/log/main is an automatically rotated log directory showing all HTTP connections and file retrieval attempts.
+</para></listitem>
+<listitem><para>
+The first line of <arg choice='plain'><replaceable>D</replaceable></arg>/ftpd/log/status shows the current number of FTP connections.
+</para></listitem>
+<listitem><para>
+<arg choice='plain'><replaceable>D</replaceable></arg>/ftpd/log/main is an automatically rotated log directory showing all FTP connections and file retrieval attempts.
+</para></listitem>
+</itemizedlist>
+
+<para>
+The logs are owned by <arg choice='plain'><replaceable>logacct</replaceable></arg>. 
+The corresponding multilog processes run under the uid and gid of <arg choice='plain'><replaceable>logacct</replaceable></arg>. 
+The name <arg choice='plain'><replaceable>logacct</replaceable></arg> must not contain any special characters.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Structure of the public file area</title>
+
+<para>
+When the HTTP server is asked to retrieve a file named f for a host named v, it looks in <arg choice='plain'><replaceable>D</replaceable></arg>/file/v/f. When the FTP server is asked to retrieve a file named f (or the HTTP server is not provided a host name), it looks in <arg choice='plain'><replaceable>D</replaceable></arg>/file/0/f.
+configure creates a file/0 directory and symbolic links from file/host to file/0 for each host that you specify. You should include your host's full name, IP addresses, and any abbreviated host names used locally, all in lowercase.
+</para>
+
+<para>
+You can set up virtual hosts by creating more directories inside file.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by Daniel J. Bernstein.
+Documentation modernizations by Jonathan de Boyne Pollard.
+</para>
+</refsection>
+
+</refentry>

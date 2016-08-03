@@ -1,0 +1,6 @@
+command:syst
+config:syst
+manual:syst
+build:syst
+package:dist
+source:dist

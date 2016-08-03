@@ -1,0 +1,137 @@
+<refentry id="httpd">
+
+<refmeta>
+<refentrytitle>httpd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">nosh</refmiscinfo>
+<refmiscinfo class="version">1.24</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>httpd</refname>
+<refpurpose>UCSPI-TCP HTTP server for static content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>httpd</command>
+<arg choice='req'><replaceable>root</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+httpd prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
+</para>
+
+<para>
+httpd accepts <command>GET</command> and <command>HEAD</command> requests on standard input in HTTP/0.9, HTTP/1.0, and HTTP/1.1 formats, and responds on standard output:
+</para>
+
+<itemizedlist>
+<listitem><para>
+HTTP/0.9: httpd prints the requested file and exits.
+</para></listitem>
+<listitem><para>
+HTTP/1.0: httpd prints an HTTP/1.0 header and the requested file. 
+Then it exits.
+</para></listitem>
+<listitem><para>
+HTTP/1.1: httpd prints an HTTP/1.1 header and the requested file in chunked format. 
+Then it waits for further requests.
+</para></listitem>
+</itemizedlist>
+
+<para>
+If the file is unopenable or if httpd does not like the request, httpd prints an error message and exits. If httpd runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
+httpd also prints local log information on standard error.
+</para>
+
+<para>
+httpd has exact-prefix support for <code>If-Modified-Since:</code> it uses code 304 if the <code>Last-Modified</code> contents are an exact prefix of the <code>If-Modified-Since</code> contents.
+</para>
+
+<para>
+Normally httpd is run under a UCSPI-TCP server program to handle HTTP connections from hosts around the Internet (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection).
+</para>
+
+<refsection>
+<title>File handling</title>
+
+<para>
+A request for <code>http://v/f</code> refers to the file named <filename>./v/f</filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy, if <code>f</code> does not end with a slash. 
+A request for <code>http://v/f/</code> refers to the file named <filename>./v/f/index.html</filename>.
+httpd always converts the host name <code>v</code> to lowercase. 
+HTTP/0.9 requests and old HTTP/1.0 requests do not specify a host name; in this case httpd uses the host name <filename>0</filename>.
+</para>
+
+<para>
+If it successfully opens the file, httpd uses the file name to select a file type for HTTP/1.0 and HTTP/1.1.
+</para>
+</refsection>
+
+<refsection>
+<title>Unsupported features</title>
+
+<para>
+	httpd does not support file modification requests such as <command>POST</command>.
+httpd does not support SSI or CGI.
+</para>
+
+<para>
+httpd rejects requests specifying <code>Content-Length</code>, <code>Transfer-Encoding</code>, <code>Expect</code>, <code>If-Match</code>, <code>If-None-Match</code>, or <code>If-Unmodified-Since</code>.
+</para>
+
+<para>
+httpd does not generate its own directory listings, even if <filename>index.html</filename> does not exist. 
+httpd rejects requests for directory names without terminating slashes; it does not redirect the requests.
+</para>
+</refsection>
+
+</refsection>
+<refsection>
+<title>Security</title>
+
+<para>
+httpd chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
+httpd does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
+</para>
+
+<para>
+httpd will refuse to read a file if the file
+</para>
+
+<itemizedlist>
+<listitem><para>
+is unreadable to user;
+</para></listitem>
+<listitem><para>
+is unreadable to group;
+</para></listitem>
+<listitem><para>
+is unreadable to world;
+</para></listitem>
+<listitem><para>
+is world-executable without being user-executable; or
+</para></listitem>
+<listitem><para>
+is anything other than a regular file: a directory, socket, device, etc.
+</para></listitem>
+</itemizedlist>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by Daniel J. Bernstein.
+Documentation modernizations by Jonathan de Boyne Pollard.
+</para>
+</refsection>
+
+</refentry>

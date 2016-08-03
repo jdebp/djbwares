@@ -1,0 +1,12 @@
+daemontools for Debian
+----------------------
+
+This package provides the daemontools programs, installed into /usr/bin/,
+and man pages; it does not set up svscanboot to run on system boot,
+respawned by init.  To do so, install the daemontools-run package, which
+adds an entry with the name SV to /etc/inittab in order to provide service
+supervision on systems running sysvinit as init scheme.
+
+daemontools' default directory for services on Debian is /etc/service/.
+
+ -- Gerrit Pape <pape@smarden.org>, Mon, 07 Jan 2008 18:26:56 +0000

@@ -1,0 +1,15 @@
+multilog
+tai64n
+tai64nlocal
+setlock
+setuidgid
+softlimit
+supervise
+svc
+svok
+svscan
+svstat
+envdir
+envuidgid
+fghack
+pgrphack

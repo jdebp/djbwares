@@ -1,0 +1,21 @@
+Mon, 24 Apr 2000 18:46:53 +0200
+
+These man-pages were created from djb's documentation found at
+http://cr.yp.to/ucspi-tcp.html .
+
+Gzip the man-pages and copy them to a subdirectory man1/ of any directory
+found in Your $MANPATH:
+
+  # gzip *.1 ; cp *.1.gz /usr/share/man/man1/
+
+G. Pape <pape@smarden.org>
+
+Tue,  4 Jul 2000 18:53:38 +0200
+  * man-pages for rblsmtpd, addcr, delcr added.
+
+Wed,  2 May 2001 13:56:46 +0200
+  * two typos in tcpserver.1.
+
+Sun, 17 Mar 2002 15:32:59 +0100
+    * merged changes from http://cr.yp.to/ucspi-tcp/tcpclient.html into
+    tcpclient.1.

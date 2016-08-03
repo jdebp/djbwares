@@ -1,0 +1,120 @@
+<refentry id="ftpd">
+
+<refmeta>
+<refentrytitle>ftpd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<refmiscinfo class="version">2</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ftpd</refname>
+<refpurpose>UCSPI-TCP FTP server for static content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ftpd</command>
+<arg choice='req'><replaceable>root</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+ftpd prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
+</para>
+
+<para>
+ftpd accepts <command>PWD</command>, <command>CWD</command>, <command>CDUP</command>, <command>TYPE</command>, <command>PORT</command>, <command>PASV</command>, <command>SPSV</command>, <command>REST</command>, <command>RETR</command>, <command>LIST</command>, <command>NLST</command>, and <command>QUIT</command> requests on standard input in <command>FTP</command> format. It prints responses on standard output, and local log information on standard error.
+</para>
+
+<para>
+ftpd recognizes <command>USER</command>, <command>PASS</command>, and <command>ACCT</command>, but it does not check usernames or passwords. 
+It has minimal support for <command>STRU</command>, <command>MODE</command>, <command>SYST</command>, <command>HELP</command>, and <command>NOOP</command>.
+</para>
+
+<para>
+ftpd exits silently if it runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds.
+</para>
+
+<para>
+Normally ftpd is run under a UCSPI-TCP server program to handle FTP connections from hosts around the Internet (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection).
+Note that ftpd does not print the standard FTP greeting message; the greeting message is handled by the server (<command>line-banner</command> or the <arg choice='plain'>-B</arg> option to <command>tcpserver</command>).
+</para>
+
+<refsection>
+<title>File handling</title>
+
+<para>
+A request for a file or directory named <code>f</code> refers to <filename>./0/f</filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+ftpd has built-in support for <command>NLST</command> and <command>LIST</command>; it does not run an external <arg choice='plain'><replaceable>root</replaceable></arg><filename>/bin/ls</filename>. 
+It provides EPLF <command>LIST</command> responses, including EPLF options "i", "s", and "m".
+</para>
+</refsection>
+
+<refsection>
+<title>Unsupported features</title>
+
+<para>
+ftpd does not support file modification requests such as <command>STOR</command>.
+</para>
+</refsection>
+</refsection>
+
+<refsection>
+<title>Security</title>
+
+<para>
+ftpd chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
+ftpd does not allow dots immediately after slashes in file names. 
+It converts any such dots to colons before attempting to open the file.
+</para>
+
+<para>
+ftpd will refuse to read a file if the file
+</para>
+
+<itemizedlist>
+<listitem><para>
+is unreadable to user;
+</para></listitem>
+<listitem><para>
+is unreadable to group;
+</para></listitem>
+<listitem><para>
+is unreadable to world;
+</para></listitem>
+<listitem><para>
+is world-executable without being user-executable; or
+</para></listitem>
+<listitem><para>
+is anything but a regular file or directory: a socket, device, etc.
+</para></listitem>
+</itemizedlist>
+
+<para>
+In directory listings, ftpd will skip a file if the name begins with a dot. 
+It will also skip names that contain tildes, spaces, or control characters; note, however, that these files can still be accessed by someone who knows or guesses the name.
+</para>
+
+<para>
+ftpd uses local ports above 1024 for PORT connections, rather than the standard port 20. 
+It rejects remote ports below 1024, and it rejects third-party PORT. 
+It also rejects third-party PASV.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by Daniel J. Bernstein.
+Documentation modernizations by Jonathan de Boyne Pollard.
+</para>
+</refsection>
+
+</refentry>

@@ -1,0 +1,21 @@
+This package was debianized by Gerrit Pape <pape@smarden.org> on
+Fri, 24 Mar 2000 13:05:58 +0100.
+
+It was downloaded from
+ http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
+
+Upstream Author: D. J. Bernstein <djb@cr.yp.to>
+
+The man-pages in debian/ucspi-tcp-man/ were downloaded from
+ http://smarden.org/pape/djb/manpages/ucspi-tcp-0.88-man-20020317.tar.gz
+
+Copyright:
+
+D. J. Bernstein placed the ucspi-tcp package into the public domain.
+From http://cr.yp.to/distributors.html
+ What are the distribution terms for ucspi-tcp?
+ 2007.12.28: I hereby place the ucspi-tcp package (in particular,
+ ucspi-tcp-0.88.tar.gz, with MD5 checksum 39b619147db54687c4a583a7a94c9163)
+ into the public domain. The package is no longer copyrighted.
+
+The Debian diff is in the public domain.

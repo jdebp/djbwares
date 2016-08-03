@@ -1,0 +1,76 @@
+#!/bin/sh
+set -e
+
+test "$1" = 'configure' || exit 0
+
+if test -z "$2" || dpkg --compare-versions "$2" lt '1:0.76'; then
+  test -n "$(ls -1 /etc/service/)" ||
+    for i in /var/service /service /var/lib/svscan; do
+      test -d $i || continue
+      test -n "$(ls -1 $i)" || continue
+      echo "Found directory $i, copying content to /etc/service/..."
+      cp -a $i/* /etc/service/
+      echo "Moving $i to $i{old} and creating compatibility symlink..."
+      rm -rf $i'{old}'
+      mv $i $i'{old}'
+      ln -s /etc/service $i
+      break
+    done
+  # upgrade from unofficial daemontools-run
+  if grep -q '#-- daemontools-run begin' /etc/inittab; then
+    echo 'Removing SV inittab entry...'
+    rm -f /etc/inittab'{new}'
+    sed -e '/#-- daemontools-run begin/,/#-- daemontools-run end/d' \
+      /etc/inittab > /etc/inittab'{new}'
+    mv -f /etc/inittab'{new}' /etc/inittab
+    kill -s HUP 1
+    sleep 1
+  fi
+  # update from daemontools-installer
+  if grep -q 'SV:123456:respawn:/command/svscanboot' /etc/inittab; then
+    echo 'Removing SV inittab entry...'
+    rm -f /etc/inittab'{new}'
+    sed -e '/SV:123456:respawn:\/command\/svscanboot/d' \
+      /etc/inittab > /etc/inittab'{new}'
+    mv -f /etc/inittab'{new}' /etc/inittab
+    kill -s HUP 1
+    sleep 1
+  fi
+  # update from daemontools-installer (fhs version)
+  if grep -q 'SV:123456:respawn:/usr/bin/svscanboot' /etc/inittab; then
+    echo 'Removing SV inittab entry...'
+    rm -f /etc/inittab'{new}'
+    sed -e '/SV:123456:respawn:\/usr\/bin\/svscanboot/d' \
+      /etc/inittab > /etc/inittab'{new}'
+    mv -f /etc/inittab'{new}' /etc/inittab
+    kill -s HUP 1
+    sleep 1
+  fi
+fi
+if test -z "$2"; then
+  # not upgrading
+  if grep '^SV:' /etc/inittab >/dev/null; then
+    cat <<-\EOT >&2
+	
+	There already is an SV entry in /etc/inittab.  In order to have this
+	package add an entry with the name SV to have daemontools' service
+	supervision started through sysvinit, you need to remove or rename
+	the current SV entry first.
+	
+	Installation failed.
+	
+	EOT
+    exit 1
+  fi
+fi
+if ! grep '^SV:' /etc/inittab >/dev/null; then
+  echo 'Adding SV inittab entry...'
+  cp /etc/inittab /etc/inittab'{new}'
+  cat >>/etc/inittab'{new}' <<-\EOT
+	#-- daemontools-run begin
+	SV:123456:respawn:/usr/bin/svscanboot
+	#-- daemontools-run end
+	EOT
+  mv -f /etc/inittab'{new}' /etc/inittab
+  kill -s HUP 1
+fi

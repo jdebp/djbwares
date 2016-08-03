@@ -1,0 +1,11 @@
+#!/bin/sh -e
+# See http://skarnet.org./software/compile.html
+if [ \! -d package -o \! -d source ]
+then
+	echo "You are not in the right directory." 1>&2
+	exit 100
+fi
+
+# Create and populate the build directory.
+install -d -m 0755 build
+( cd source && ( 2>/dev/null pax -w -r -l -u -- * ../build/ || true ) )
