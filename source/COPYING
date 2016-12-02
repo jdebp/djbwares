@@ -7,6 +7,7 @@ Bernstein's softwares collected here are in the public domain.
 — Daniel J. Bernstein, The Future of Open Source Mathematical Software, Sage Days 6, 2007-11-11
 
 There are additional individual notices, reiterating this specifically for clockspeed, daemontools, djbdns, and ucspi-tcp, at http://cr.yp.to/distributors.html .
+It is reiterated for libtai at http://cr.yp.to/libtai.html .
 
 ptyget and publicfile rely upon the same Bernstein libraries that were made public domain in the later packages; and removing that duplication is part of the very raison d'être here.
 

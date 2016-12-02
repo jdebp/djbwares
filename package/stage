@@ -16,39 +16,76 @@ dest="${2}"
 absdest="`readlink -f "${dest}"`/"
 
 # binaries and doco
-for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd
+for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs
 do
 	if test -s package/"$i".commands1 || test -s package/"$i".aliases1 ;
 	then
 		install -d -m 0755 "${dest}"/"$i"/usr/local/bin 
 		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man1 
+		while read j ;
+		do
+			ln -f -- "${src}"/bin/"$j" "${dest}"/"$i"/usr/local/bin/ 
+			ln -f -- "${src}"/man/man1/"$j".1 "${dest}"/"$i"/usr/local/man/man1/ 
+		done < package/"$i".commands1 ;
+		while read c a ;
+		do
+			ln -f -s "$c" "${dest}"/"$i"/usr/local/bin/"$a" 
+			ln -f -s "$c".1 "${dest}"/"$i"/usr/local/man/man1/"$a".1 
+		done < package/"$i".aliases1 ;
 	fi
-	while read j ;
-	do
-		ln -f -- "${src}"/bin/"$j" "${dest}"/"$i"/usr/local/bin/ 
-		ln -f -- "${src}"/man/man1/"$j".1 "${dest}"/"$i"/usr/local/man/man1/ 
-	done < package/"$i".commands1 ;
 
 	if test -s package/"$i".commands8 || test -s package/"$i".aliases8 ;
 	then
 		install -d -m 0755 "${dest}"/"$i"/usr/local/sbin 
 		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man8 
+		while read j ;
+		do
+			ln -f -- "${src}"/sbin/"$j" "${dest}"/"$i"/usr/local/sbin/ 
+			ln -f -- "${src}"/man/man8/"$j".8 "${dest}"/"$i"/usr/local/man/man8/ 
+		done < package/"$i".commands8 ;
+		while read c a ;
+		do
+			ln -f -s "$c" "${dest}"/"$i"/usr/local/sbin/"$a" 
+			ln -f -s "$c".8 "${dest}"/"$i"/usr/local/man/man8/"$a".8 
+		done < package/"$i".aliases8 ;
 	fi
-	while read j ;
-	do
-		ln -f -- "${src}"/sbin/"$j" "${dest}"/"$i"/usr/local/sbin/ 
-		ln -f -- "${src}"/man/man8/"$j".8 "${dest}"/"$i"/usr/local/man/man8/ 
-	done < package/"$i".commands8 ;
 
-	while read c a ;
-	do
-		ln -f -s "$c" "${dest}"/"$i"/usr/local/bin/"$a" 
-		ln -f -s "$c".1 "${dest}"/"$i"/usr/local/man/man1/"$a".1 
-	done < package/"$i".aliases1 ;
+	if test -s package/"$i".functions3 ;
+	then
+		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man3 
+		while read j ;
+		do
+			ln -f -- "${src}"/man/man3/"$j".3 "${dest}"/"$i"/usr/local/man/man3/ 
+		done < package/"$i".functions3 ;
+		while read c a ;
+		do
+			ln -f -- "${dest}"/"$i"/usr/local/man/man3/"$c".3 "${dest}"/"$i"/usr/local/man/man3/"$a".3 
+		done < package/"$i".aliases3 ;
+	fi
 
-	while read c a ;
-	do
-		ln -f -s "$c" "${dest}"/"$i"/usr/local/sbin/"$a" 
-		ln -f -s "$c".8 "${dest}"/"$i"/usr/local/man/man8/"$a".8 
-	done < package/"$i".aliases8 ;
+	if test -s package/"$i".headers ;
+	then
+		install -d -m 0755 "${dest}"/"$i"/usr/local/include
+		while read j ;
+		do
+			ln -f -- "${src}"/include/"$j".h "${dest}"/"$i"/usr/local/include/ 
+		done < package/"$i".headers ;
+	fi
+
+	if test -s package/"$i".libraries ;
+	then
+		install -d -m 0755 "${dest}"/"$i"/usr/local/lib
+		while read j ;
+		do
+			ln -f -- "${src}"/lib/"$j".a "${dest}"/"$i"/usr/local/lib/ 
+		done < package/"$i".libraries ;
+	fi
+
 done
+
+case "`uname`" in
+Linux)	prefix="" ;;
+*BSD)	prefix="usr/local" ;;
+esac
+install -d -m 0755 "${dest}/leapsecs/${prefix}/etc/" 
+ln -f -- "${src}"/etc/leapsecs.dat "${dest}/leapsecs/${prefix}/etc/"

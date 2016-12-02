@@ -10,7 +10,7 @@ root="${1-/usr/local/}"
 user="`id -un`"
 group="`id -gn`"
 
-install -d -m 0755 "${root}"etc "${root}"bin "${root}"sbin "${root}"man "${root}"man/man1 "${root}"man/man3 "${root}"man/man8 "${root}"share "${root}"share/doc "${root}"share/doc/djbwares
+install -d -m 0755 "${root}"etc "${root}"bin "${root}"sbin "${root}"man "${root}"man/man1 "${root}"man/man3 "${root}"man/man8 "${root}"share "${root}"share/doc "${root}"share/doc/djbwares "${root}"include  "${root}"lib 
 
 (
 	fgrep -v configure package/commands1 
@@ -27,6 +27,13 @@ do
 	rm -f "${root}"man/man3/"$i.3"{new}
 	install -m 0644 -o "${user}" -g "${group}" -- manual/"$i.3" "${root}"man/man3/"$i.3"{new}
 	mv -f -- "${root}"man/man3/"$i.3"{new} "${root}"man/man3/"$i.3"
+done
+cat package/aliases3 | 
+while read -r c a
+do
+	rm -f "${root}"man/man3/"$a.3"{new}
+	ln -f -- "${root}"man/man3/"$c.3" "${root}"man/man3/"$a.3"{new}
+	mv -f -- "${root}"man/man3/"$a.3"{new} "${root}"man/man3/"$a.3"
 done
 (
 	cat package/commands8 
@@ -53,6 +60,21 @@ do
 	mv -f -- "${root}"sbin/"$i"{new} "${root}"sbin/"$i"
 done
 
+cat package/headers | 
+while read -r i
+do
+	rm -f "${root}"include/"$i".h{new}
+	install -m 0644 -o "${user}" -g "${group}" -- header/"$i".h "${root}"include/"$i".h{new}
+	mv -f -- "${root}"include/"$i".h{new} "${root}"include/"$i".h
+done
+cat package/libraries | 
+while read -r i
+do
+	rm -f "${root}"library/"$i".a{new}
+	install -m 0644 -o "${user}" -g "${group}" -- library/"$i".a "${root}"lib/"$i".a{new}
+	mv -f -- "${root}"lib/"$i".a{new} "${root}"lib/"$i".a
+done
+
 for i in COPYING
 do
 	# Documentation
@@ -62,3 +84,4 @@ do
 done
 
 install -m 0644 -- config/dnsroots.global "${root}"etc/
+install -m 0644 -- config/leapsecs.dat "${root}"etc/

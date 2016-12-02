@@ -5,4 +5,4 @@ then
 	exit 100
 fi
 
-exec rm -rf build/ command/
+exec rm -rf build/ command/ manual/ config/ doc/ header/ library/

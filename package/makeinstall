@@ -9,7 +9,7 @@ fi
 # Atomically update the release directories ./command, ./library, ./include, and so forth.
 # The build and release directories need not be on the same disc volume.
 # And the files released must not be potentially overwritable and truncatable by the compiler/linker during subsequent builds.
-mkdir -p command manual config doc
+install -d -- command manual config doc header library
 
 # ##############################################################################
 # Build all of the ...{new} files in ./command, ./config, and ./manual.
@@ -35,11 +35,29 @@ do
 	rm -f -- manual/"$i".3{new}
 	install -m 0644 -- build/"$i".3 manual/"$i".3{new}
 done
+cat package/aliases3 | 
+while read c a
+do
+	ln -f -- manual/"$c".3{new} manual/"$a".3{new}
+done
 cat package/commands8 package/extra-manpages8 | 
 while read i
 do
 	rm -f -- manual/"$i".8{new}
 	install -m 0644 -- build/"$i".8 manual/"$i".8{new}
+done
+# Headers and libraries
+cat package/headers | 
+while read i
+do
+	rm -f -- header/"$i".h{new}
+	install -m 0644 -- build/"$i".h header/"$i".h{new}
+done
+cat package/libraries | 
+while read i
+do
+	rm -f -- library/"$i".h{new}
+	install -m 0644 -- build/"$i".a library/"$i".a{new}
 done
 # Other guide pages
 for i in COPYING
@@ -47,7 +65,7 @@ do
 	rm -f -- doc/"$i"{new}
 	install -m 0644 -- build/"$i" doc/"$i"{new}
 done
-for i in dnsroots.global
+for i in dnsroots.global leapsecs.dat
 do
 	install -m 0644 -- build/"$i" config/"$i"{new}
 done
@@ -74,12 +92,28 @@ while read i
 do
 	mv -f -- manual/"$i".8{new} manual/"$i".8
 done
+cat package/aliases3 | 
+while read c a
+do
+	mv -f -- manual/"$a".3{new} manual/"$a".3
+done
+# Headers and libraries
+cat package/headers | 
+while read i
+do
+	mv -f -- header/"$i".h{new} header/"$i".h
+done
+cat package/libraries | 
+while read i
+do
+	mv -f -- library/"$i".a{new} library/"$i".a
+done
 # Other doco
 for i in COPYING
 do
 	mv -f -- doc/"$i"{new} doc/"$i"
 done
-for i in dnsroots.global
+for i in dnsroots.global leapsecs.dat
 do
 	mv -f -- config/"$i"{new} config/"$i"
 done

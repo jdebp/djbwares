@@ -79,3 +79,7 @@ envdir
 envuidgid
 fghack
 pgrphack
+easter
+yearcal
+nowutc
+leapsecs

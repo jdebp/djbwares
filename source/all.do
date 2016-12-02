@@ -19,6 +19,19 @@
 	echo hasshsgr.h 
 	echo haswaitp.h 
 	echo direntry.h
+	echo leapsecs.dat
+	redo-ifchange ../package/headers
+	cat ../package/headers |
+	while read i
+	do 
+		echo "$i.h" 
+	done
+	redo-ifchange ../package/libraries
+	cat ../package/libraries |
+	while read i
+	do 
+		echo "$i.a" 
+	done
 	redo-ifchange ../package/commands1 
 	cat ../package/commands1 | 
 	while read i

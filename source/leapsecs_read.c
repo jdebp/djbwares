@@ -20,13 +20,17 @@ int leapsecs_read()
   int i;
   struct tai u;
 
-  fd = open("/etc/leapsecs.dat",O_RDONLY | O_NDELAY);
+  fd = open("/usr/local/etc/leapsecs.dat",O_RDONLY | O_NDELAY);
   if (fd == -1) {
     if (errno != ENOENT) return -1;
-    if (leapsecs) free(leapsecs);
-    leapsecs = 0;
-    leapsecs_num = 0;
-    return 0;
+    fd = open("/etc/leapsecs.dat",O_RDONLY | O_NDELAY);
+    if (fd == -1) {
+      if (errno != ENOENT) return -1;
+      if (leapsecs) free(leapsecs);
+      leapsecs = 0;
+      leapsecs_num = 0;
+      return 0;
+    }
   }
 
   if (fstat(fd,&st) == -1) { close(fd); return -1; }

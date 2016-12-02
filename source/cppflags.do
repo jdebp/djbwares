@@ -4,10 +4,10 @@ ldflags="-g -pthread"
 if type >/dev/null clang++
 then
 	cc="clang"
-	ccflags="-g -Wall -Wextra -integrated-as"
+	ccflags="-g -pthread -std=gnu11 -Os -Weverything -Wno-conversion -Wno-sign-conversion -Wno-c99-compat -Wno-missing-prototypes -Wno-weak-vtables -Wno-packed -Wno-padded -Wpacked -Wno-exit-time-destructors -Wno-global-constructors -Wno-documentation-unknown-command -Wno-zero-length-array -Wno-non-virtual-dtor -integrated-as"
 	cxx="clang++"
-	cxxflags="-g -Wall -Wextra -integrated-as"
-elif type >/dev/null eg++
+	cxxflags="-g -pthread -std=gnu++11 -Os -Weverything -Wno-conversion -Wno-sign-conversion -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-missing-prototypes -Wno-weak-vtables -Wno-packed -Wno-padded -Wpacked -Wno-exit-time-destructors -Wno-global-constructors -Wno-documentation-unknown-command -Wno-zero-length-array -Wno-non-virtual-dtor -integrated-as"
+elif test "_`uname`" = _OpenBSD && type >/dev/null eg++
 then
 	cc="egcc"
 	ccflags="-g -Wall -Wextra"

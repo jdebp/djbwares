@@ -1,3 +1,5 @@
+/* Public domain. */
+
 #ifndef CALDATE_H
 #define CALDATE_H
 
@@ -7,13 +9,13 @@ struct caldate {
   int day;
 } ;
 
-extern unsigned int caldate_fmt();
-extern unsigned int caldate_scan();
+extern unsigned int caldate_fmt(char *s, const struct caldate *cd);
+extern unsigned int caldate_scan(char *s, struct caldate *cd);
 
-extern void caldate_frommjd();
-extern long caldate_mjd();
-extern void caldate_normalize();
+extern void caldate_frommjd(struct caldate *cd, long day, int *pwday, int *pyday);
+extern long caldate_mjd(const struct caldate *cd);
+extern void caldate_normalize(struct caldate *cd);
 
-extern void caldate_easter();
+extern void caldate_easter(struct caldate *cd);
 
 #endif

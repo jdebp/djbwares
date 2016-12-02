@@ -1,3 +1,5 @@
+/* Public domain. */
+
 #include "caldate.h"
 
 void caldate_frommjd(cd,day,pwday,pyday)
