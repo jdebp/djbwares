@@ -1,5 +1,6 @@
 /* Public domain. */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "leapsecs.h"
 #include "tai.h"
@@ -25,7 +26,7 @@ main()
   taia_tai(&now,&sec);
   caltime_utc(&ct,&sec,(int *) 0,(int *) 0);
 
-  printf("%d-%02d-%02d %02d:%02d:%02d.%s\n"
+  printf("%ld-%02d-%02d %02d:%02d:%02d.%s\n"
     ,ct.date.year
     ,ct.date.month
     ,ct.date.day

@@ -22,8 +22,9 @@
 #include "fmt.h"
 #include "scan.h"
 #include "ip.h"
+#include "ucspi.h"
 
-int safewrite(int fd,char *buf,int len)
+long safewrite(int fd,char *buf,int len)
 {
   int r;
   r = timeoutwrite(60,fd,buf,len);
@@ -39,7 +40,7 @@ void out_flush(void)
   substdio_flush(&out);
 }
 
-void out_put(char *s,int len)
+void out_put(const char *s,int len)
 {
   while (len > 0) {
     substdio_put(&out,s,1);
@@ -49,12 +50,12 @@ void out_put(char *s,int len)
   }
 }
 
-void out_puts(char *s)
+void out_puts(const char *s)
 {
   out_put(s,str_len(s));
 }
 
-int saferead(int fd,char *buf,int len)
+long saferead(int fd,char *buf,int len)
 {
   int r;
   out_flush();
@@ -304,9 +305,9 @@ void dir_move(char *to)
   }
 }
 
-void say_dir(char *code)
+void say_dir(const char *code)
 {
-  int i;
+  unsigned int i;
   char ch;
 
   out_puts(code);
@@ -419,7 +420,7 @@ void doit(void)
 {
   char *cmd;
   char *arg;
-  char *x;
+  const char *x;
   unsigned char ch;
 
   {
@@ -428,14 +429,12 @@ void doit(void)
     /* if it fails, bummer */
   }
 
-  x = env_get("TCPLOCALIP");
-  if (!x) x = "0.0.0.0";
-  if (!ip_scan(x,&iplocal))
+  x = ucspi_get_localip_str(NULL, NULL, NULL);
+  if (!x || !ip_scan(x,&iplocal))
     byte_zero(&iplocal,4);
 
-  x = env_get("TCPREMOTEIP");
-  if (!x) x = "0.0.0.0";
-  if (!ip_scan(x,&ipremote))
+  x = ucspi_get_remoteip_str(NULL, NULL, NULL);
+  if (!x || !ip_scan(x,&ipremote))
     byte_zero(&ipremote,4);
 
   if (!stralloc_copys(&dir,"")) _exit(21);

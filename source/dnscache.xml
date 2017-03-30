@@ -1,0 +1,277 @@
+<refentry id="dnscache">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnscache</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnscache</refname>
+<refpurpose>a caching proxy DNS server</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnscache</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnscache</command> is a proxy DNS server that speaks the DNS/UDP and DNS/TCP protocols.
+It accepts DNS queries from local programs (clients such as web browsers and mail transfer agents with DNS client libraries in them), sends queries of its own to hosts around the Internet, takes the responses that it receives and combines them into answers that it then sends back to the local clients.
+It caches the responses that it receieves, to save time later when it is asked the same or related questions again.
+</para>
+
+<para>
+When it starts <command>dnscache</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Client-facing front end</title>
+
+<refsection>
+<title>Listening addresses</title>
+
+<para>
+Normally <command>dnscache</command> is run via server programs such as <command>udp-socket-listen</command> and <command>tcp-socket-listen</command> to listen for DNS/UDP and DNS/TCP queries on an appropriate IP address.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having already-listening sockets passed to it by such programs, and uses the last open file descriptors in the list that refer to a UDP/IPv4 socket and a TCP/IPv4 socket.
+If no such open file descriptors are provided it falls back to opening its own UDP/IPv4 and TCP/IPv4 sockets, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
+If just one is provided, it falls back for the other.
+</para>
+
+<para>
+Typically the IP address is a non-routable machine-local or link-local one such as 127.0.0.1.
+It can also be a public IP address, providing this service to other machines.
+To control what other machines that is, there is an access control mechanism.
+<command>dnscache</command> discards UDP packets or TCP connections from IP address 1.2.3.4 unless it sees a file named <filename>ip/1.2.3.4</filename> or <filename>ip/1.2.3</filename> or <filename>ip/1.2</filename> or <filename>ip/1</filename>.
+A proper firewall is a more efficient mechanism for preventing client access, especially for DNS/TCP, however.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Responses to clients</title>
+
+<para>
+<command>dnscache</command>'s responses are generally much smaller than BIND's responses. 
+They do not include authority records (NS records of the source name servers and SOA records for negative answers) or additional records (A records relevant to NS or MX records). 
+When the answer section is truncated by UDP length limits, it is eliminated entirely.
+</para>
+
+<para>
+<command>dnscache</command> tries to prevent local users from snooping on other local users. 
+It discards non-recursive queries; it discards inverse queries; and it discards zone-transfer requests. 
+If the <envar>HIDETTL</envar> environment variable is set, <command>dnscache</command> always uses a TTL of 0 in its responses.
+Normally, it preserves the (current remaining) TTL, so that other proxies can use it as an upstream server.
+</para>
+
+<para>
+According to RFC 1035, the AA bit "specifies that the responding name server is an authority for the domain name in question section". 
+<command>dnscache</command> is not an authority for any domain names. 
+<command>dnscache</command> never sets the AA bit (except in NXDOMAIN responses, as required by RFC 2308, to work around a common client bug). 
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>Resources, query resoution, and caching</title>
+
+<refsection>
+<title>Resource use limits</title>
+
+<para>
+<command>dnscache</command> uses a fixed-size table, under 256K, to keep track of as many as 200 simultaneous UDP queries and 20 simultaneous TCP connections. 
+It also dynamically allocates memory, usually just a few bytes but occasionally much more, for each active query. 
+If it runs out of memory handling a query, it discards that query.
+</para>
+
+<para>
+<command>dnscache</command> asks the operating system to reserve a 128K buffer for bursts of incoming UDP queries. 
+If a new UDP query arrives when <command>dnscache</command> is already handling 200 simultaneous UDP queries, <command>dnscache</command> drops the oldest query. 
+If a new TCP connection arrives when <command>dnscache</command> is already handling 20 simultaneous TCP connections, <command>dnscache</command> drops the oldest connection.
+</para>
+
+<para>
+<command>dnscache</command> uses a fixed-size cache, as controlled by the value of the <envar>CACHESIZE</envar> environment variable. 
+Roughly 5% of the cache is used for a hash table. 
+The rest is used for cache entries (including 8-byte Y2038-compliant expiration times):
+<variablelist>
+<varlistentry>
+<term>A sets.</term><listitem><para>22 bytes plus 4 bytes per address plus the length of the owner name.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>NS sets or PTR sets or CNAME sets.</term><listitem><para>22 bytes plus the length of the owner name and all the data names.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>MX sets.</term><listitem><para>22 bytes plus 2 bytes per MX plus the length of all the names.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>Other record sets.</term><listitem><para>22 bytes plus 2 bytes per record plus the length of all the data strings plus the length of the owner name.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>Nonexistent domain or server failure.</term><listitem><para>22 bytes plus the length of the owner name.</para></listitem>
+</varlistentry>
+</variablelist>
+</para>
+
+<para>
+Sets larger than 8192 bytes are not cached.
+</para>
+
+<para>
+<command>dnscache</command> does not exit when it runs out of space in its cache; it simply removes the oldest entries to make more space.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Resolution and caching policies</title>
+
+<para>
+<command>dnscache</command> relies on a configured list of root name servers. 
+In contrast, some other servers start from a "hint file" listing (not necessarily root) name servers, and perform an intermediate extra step of asking those name servers where the root name servers are.
+</para>
+
+<para>
+<command>dnscache</command> does not cache (or pass along) records outside the server's bailiwick; those records could be poisoned. 
+Records for <filename>foo.dom</filename>, for example, are accepted only from the root servers, the <filename>dom</filename> servers, and the <filename>foo.dom</filename> servers.
+</para>
+
+<para>
+<command>dnscache</command> does not bypass its cache to obtain glue from the additional section of a response. 
+In particular, it will not use glue outside the server's bailiwick, or glue with TTL 0, or glue that violates other caching policies.
+</para>
+
+<para>
+<command>dnscache</command> caches records for at most a week.
+It interprets TTLs above 2147483647 as 0, on the grounds that such excessive values are the results of unsigned arithmetic underflow.
+</para>
+
+<para>
+<command>dnscache</command> does not cache SOA records. 
+However, it does use SOA TTLs to determine cache times (up to an hour) for zero-record responses and nonexistent domains.
+</para>
+
+<para>
+A server that returns a delegation response that (directly or indirectly) delegates back to itself is considered "lame".
+Responses from "lame" servers are logged, and what useful information they may contain, aside from the delegation, is cached (subject to the caching policies).
+</para>
+</refsection>
+
+<refsection>
+<title>Special names</title>
+
+<para>
+<command>dnscache</command> handles <filename>localhost</filename> internally, giving it an A record of 127.0.0.1.
+<command>dnscache</command> handles <filename>1.0.0.127.in-addr.arpa</filename> internally, giving it a PTR record of <filename>localhost</filename>.
+</para>
+
+<para>
+<command>dnscache</command> handles dotted-decimal domain names internally, giving (e.g.) the domain name <filename>192.48.96.2</filename> an A record of 192.48.96.2.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>Back end</title>
+
+<refsection>
+<title>IP addresses and ports</title>
+
+<para>
+<command>dnscache</command> sends outgoing requests from high ports of the IP address given by the value of the <envar>IPSEND</envar> environment variable. 
+Typically <envar>IPSEND</envar> is 0.0.0.0, meaning the machine's primary IP address.
+The ports are picked at random, as are the message IDs in the requests.
+The random number generator is seeded from a seed value, up to 128 bytes, that <command>dnscache</command> reads from its standard input at startup.
+The seed does not need to be preserved across successive incarnations of <command>dnscache</command>, and merely needs to be unknown and unpredictable outwith the <command>dnscache</command> process.
+It can just be a 128-byte snapshot of the system's random number generator read with the <citerefentry><refentrytitle>dd</refentrytitle><manvolnum>1</manvolnum></citerefentry> program.
+</para>
+
+<para>
+At startup, <command>dnscache</command> reads a list of dotted-decimal root server IP addresses, one address per line, from <filename>servers/@</filename>. 
+It also scans the <filename>servers/</filename> directory for server IP addresses for other domains. 
+If there are addresses listed in <filename>servers/moon.af.mil</filename>, for example, then <command>dnscache</command> will send queries for <filename><replaceable>anything</replaceable>.moon.af.mil</filename> to those addresses, and will not cache records for <filename><replaceable>anything</replaceable>.moon.af.mil</filename> from outside servers such as the root servers.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Forward only mode</title>
+
+<para>
+If the <envar>FORWARDONLY</envar> environment variable is set, <command>dnscache</command> treats <filename>servers/@</filename> as a list of IP addresses for other caching proxies, not for content servers. 
+It forwards queries to those caches the same way that a client does, rather than contacting a chain of servers according to NS records.
+In this mode, it ignores referral responses, which it should never receive from a caching proxy in the first place and which the world at large has an unfortunate habit of making refer to IP addresses such as 127.0.0.1, which would cause a proxy loop if they were to be followed.
+It logs such occurrences.
+</para>
+
+<para>
+For similar reasons, for correct operation the list in a <filename>servers/<replaceable>*</replaceable></filename> file should not include:
+<itemizedlist>
+<listitem><para>the IP address on which <command>dnscache</command> is itself listening;</para></listitem>
+<listitem><para>the IP address on which another proxy DNS server is listening; or</para></listitem>
+<listitem><para>any IP addresses equivalent to those.</para></listitem>
+</itemizedlist> 
+</para>
+
+</refsection>
+
+<refsection>
+<title>Repeated IP addresses</title>
+
+<para>
+If a server sends <command>dnscache</command> a repeated IP address, <command>dnscache</command> passes the repeated IP address along to the client. 
+The server's behavior violates RFC 2181, section 5.5, but there are reasonable uses of repeated IP addresses for load balancing, so <command>dnscache</command> does not go out of its way to remove repetitions when they occur.
+A previously widespread server bug used to unintentionally produce repeated IP addresses. 
+Here is an example (since fixed):
+<literallayout><userinput>
+% dnsq a ns-ext.vix.com ns-ext.vix.com
+</userinput><computeroutput>
+1 ns-ext.vix.com:
+117 bytes, 1+1+2+2 records, response, authoritative, noerror
+query: 1 ns-ext.vix.com
+answer: ns-ext.vix.com 3600 A 204.152.184.64
+authority: vix.com 3600 NS ns-ext.vix.com
+authority: vix.com 3600 NS ns1.gnac.com
+additional: ns-ext.vix.com 3600 A 204.152.184.64
+additional: ns1.gnac.com 130768 A 209.182.195.77
+</computeroutput></literallayout>
+</para>
+
+<para>
+This bug is the most common reason for users to see repeated IP addresses from <command>dnscache</command>.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnscache</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

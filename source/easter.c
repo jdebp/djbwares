@@ -23,7 +23,7 @@ int main(int argc, char** argv)
       caldate_frommjd(&cd,day,&weekday,&yearday);
       if (caldate_fmt((char *) 0,&cd) + 1 >= sizeof out) return(1);
       out[caldate_fmt(out,&cd)] = 0;
-      printf("%s %s  yearday %d  mjd %d\n",dayname[weekday],out,yearday,day);
+      printf("%s %s  yearday %d  mjd %ld\n",dayname[weekday],out,yearday,day);
     }
   }
   return(0);

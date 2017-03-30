@@ -1,0 +1,63 @@
+<refentry id="yearcal">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>yearcal</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>yearcal</refname>
+<refpurpose>print a calendar for one or more years</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>yearcal</command>
+<arg choice='req' rep='repeat'><replaceable>year</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>yearcal</command> prints the calendar for <replaceable>year</replaceable>.
+<replaceable>year</replaceable> can be negative or positive, and is a Proleptic Gregorian year number.
+</para>
+
+<para>
+<command>yearcal</command> outputs TeleType Model 37 control sequences for boldface and underline, which can be interpreted by <citerefentry><refentrytitle>less</refentrytitle><manvolnum>1</manvolnum></citerefentry> or converted to your terminal's own control sequences with <citerefentry><refentrytitle>ul</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The first column is Sunday, and months are printed on the right-hand side.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>easter</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>print the date of easter</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>yearcal</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s libtai toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

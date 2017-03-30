@@ -1,3 +1,13 @@
+djbwares (5) unstable; urgency=medium
+
+  * Added patches to enable using SSLREMOTEIP/SSLREMOTEPORT in server tools instead of TCPREMOTEIP/TCPREMOTEPORT, when PROTO says to do so.
+  * Added several DocBook XML manual pages, and added HISTORY sections to manuals.
+  * ip6.int has been replaced, very belatedly, by ip6.arpa in tinydns-data and dnscache .
+  * Added gopherd.
+  * Removed maps.vix.com as the compiled-in default for rblsmtpd.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Thu, 30 Mar 2017 16:40:05 +0100
+
 djbwares (4) unstable; urgency=medium
 
   * Added easter, yearcal, and nowutc commands from the libtai package.

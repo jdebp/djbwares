@@ -1,0 +1,77 @@
+<refentry id="dnsnamex">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsnamex</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsnamex</refname>
+<refpurpose>look up the domain name(s) of an IP address</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsnamex</command>
+<arg choice='req' rep='repeat'><replaceable>addr</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsnamex</command> looks up PTR resource records, for the reverse-lookup domain name corresponding with <replaceable>addr</replaceable>, in the Domain Name System and prints (all of) the domain name(s) of <replaceable>addr</replaceable> on a single line.
+If <replaceable>addr</replaceable> has no domain names, <command>dnsnamex</command> prints a blank line. 
+You can list several <replaceable>addr</replaceable>s; <command>dnsnamex</command> prints each result on a separate line.
+</para>
+
+<para>
+Note that the DNS protocol itself makes no guarantee of any particular ordering within a PTR resource record set.
+If there are multiple PTR resource records, ordering is determined by the actions of the content DNS server, what proxy DNS servers are in the path, and the local DNS client library; and is unspecified.
+</para>
+
+<para>
+Normally <command>dnsnamex</command> exits 0. 
+If it encounters a temporary problem that prevents it from determining the list of IP addresses, it prints an error message and exits 111.
+</para>
+
+<para>
+<command>dnsnamex</command> makes all DNS lookups using the locally configured DNS proxy server.
+See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsname</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that prints only one domain name</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsfilter</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a filter that looks up the domain name(es) for multiple IP addresses in parallel</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsnamex</command> was an addition to <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

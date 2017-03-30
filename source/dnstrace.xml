@@ -1,0 +1,65 @@
+<refentry id="dnstrace">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnstrace</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnstrace</refname>
+<refpurpose>diagnose DNS query resolution problems</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnstrace</command>
+<arg choice='req'><replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>fqdn</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>s</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnstrace</command> searches for all DNS servers that can affect the resolution of records of type <replaceable>t</replaceable> under the domain name <replaceable>fqdn</replaceable>, starting from the root content DNS server(s) <replaceable>s</replaceable>. 
+</para>
+
+<para>
+It uses the standard DNS resolution algorithm, but follows all possible paths in the algorithm. 
+It prints all responses it receives from content DNS servers; it also prints warnings about slow servers, dead servers, misdelegated ("lame") servers, and misformatted packets. 
+</para>
+
+<para>
+Beware that complete traces are large and incur non-trivial network traffic.
+As of January 2001, <command>dnstrace</command> produces more than 5 megabytes of output for the complete trace of <filename>cr.yp.to</filename> starting from all of the root servers. 
+It ends up sending more than 6000 queries to more than 200 different servers.
+</para>
+
+<para>
+The output of <command>dnstrace</command> is machine-parseable.
+To convert it to human-readable form, pass it through <citerefentry><refentrytitle>dnstracesort</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnstrace</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

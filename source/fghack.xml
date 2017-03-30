@@ -1,0 +1,49 @@
+<refentry id="fghack">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>fghack</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>fghack</refname>
+<refpurpose>an anti-backgrounding tool</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>fghack</command>
+<arg choice='req'><replaceable>child</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>fghack</command> runs <replaceable>child</replaceable> with many extra descriptors writing to a pipe.
+<command>fghack</command> reads and discards any data written to the pipe. 
+After <replaceable>child</replaceable> has exited and the pipe has been closed, <command>fghack</command> exits.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>fghack</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s daemontools toolset in 2001.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

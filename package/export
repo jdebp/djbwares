@@ -18,14 +18,14 @@ install -d -m 0755 "${root}"etc "${root}"bin "${root}"sbin "${root}"man "${root}
 ) | while read -r i
 do
 	rm -f "${root}"man/man1/"$i.1"{new}
-	install -m 0644 -o "${user}" -g "${group}" -- manual/"$i.1" "${root}"man/man1/"$i.1"{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- manual/"$i.1" "${root}"man/man1/"$i.1"{new}
 	mv -f -- "${root}"man/man1/"$i.1"{new} "${root}"man/man1/"$i.1"
 done
 cat package/extra-manpages3 | 
 while read -r i
 do
 	rm -f "${root}"man/man3/"$i.3"{new}
-	install -m 0644 -o "${user}" -g "${group}" -- manual/"$i.3" "${root}"man/man3/"$i.3"{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- manual/"$i.3" "${root}"man/man3/"$i.3"{new}
 	mv -f -- "${root}"man/man3/"$i.3"{new} "${root}"man/man3/"$i.3"
 done
 cat package/aliases3 | 
@@ -41,7 +41,7 @@ done
 ) | while read -r i
 do
 	rm -f "${root}"man/man8/"$i.8"{new}
-	install -m 0644 -o "${user}" -g "${group}" -- manual/"$i.8" "${root}"man/man8/"$i.8"{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- manual/"$i.8" "${root}"man/man8/"$i.8"{new}
 	mv -f -- "${root}"man/man8/"$i.8"{new} "${root}"man/man8/"$i.8"
 done
 
@@ -49,14 +49,14 @@ fgrep -v configure package/commands1 |
 while read -r i
 do
 	rm -f "${root}"bin/"$i"{new}
-	install -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"bin/"$i"{new}
+	install -p -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"bin/"$i"{new}
 	mv -f -- "${root}"bin/"$i"{new} "${root}"bin/"$i"
 done
 cat package/commands8 | 
 while read -r i
 do
 	rm -f "${root}"sbin/"$i"{new}
-	install -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"sbin/"$i"{new}
+	install -p -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"sbin/"$i"{new}
 	mv -f -- "${root}"sbin/"$i"{new} "${root}"sbin/"$i"
 done
 
@@ -64,14 +64,14 @@ cat package/headers |
 while read -r i
 do
 	rm -f "${root}"include/"$i".h{new}
-	install -m 0644 -o "${user}" -g "${group}" -- header/"$i".h "${root}"include/"$i".h{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- header/"$i".h "${root}"include/"$i".h{new}
 	mv -f -- "${root}"include/"$i".h{new} "${root}"include/"$i".h
 done
 cat package/libraries | 
 while read -r i
 do
 	rm -f "${root}"library/"$i".a{new}
-	install -m 0644 -o "${user}" -g "${group}" -- library/"$i".a "${root}"lib/"$i".a{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- library/"$i".a "${root}"lib/"$i".a{new}
 	mv -f -- "${root}"lib/"$i".a{new} "${root}"lib/"$i".a
 done
 
@@ -79,9 +79,9 @@ for i in COPYING
 do
 	# Documentation
 	rm -f -- "${root}"share/doc/djbwares/"$i"{new}
-	install -m 0644 -o "${user}" -g "${group}" -- doc/"$i" "${root}"share/doc/djbwares/"$i"{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- doc/"$i" "${root}"share/doc/djbwares/"$i"{new}
 	mv -f -- "${root}"share/doc/djbwares/"$i"{new} "${root}"share/doc/djbwares/"$i"
 done
 
-install -m 0644 -- config/dnsroots.global "${root}"etc/
-install -m 0644 -- config/leapsecs.dat "${root}"etc/
+install -p -m 0644 -- config/dnsroots.global "${root}"etc/
+install -p -m 0644 -- config/leapsecs.dat "${root}"etc/

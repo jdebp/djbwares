@@ -15,7 +15,7 @@
 char pid[FMT_ULONG];
 
 char recordbuf[512];
-buffer ssrecord = BUFFER_INIT(write,2,recordbuf,sizeof recordbuf);
+buffer ssrecord = BUFFER_INIT(buffer_unixwrite,2,recordbuf,sizeof recordbuf);
 
 void record(char *buf,int len,char *direction) /* 1 <= len <= 256 */
 {

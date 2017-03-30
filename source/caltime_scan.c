@@ -2,9 +2,7 @@
 
 #include "caltime.h"
 
-unsigned int caltime_scan(s,ct)
-char *s;
-struct caltime *ct;
+unsigned int caltime_scan(const char *s, struct caltime *ct)
 {
   char *t = s;
   unsigned long z;

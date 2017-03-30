@@ -1,0 +1,185 @@
+<refentry id="rblsmtpd">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>rblsmtpd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>rblsmtpd</refname>
+<refpurpose>UCSPI-TCP SMTP server wrapper that blocks mail from RBL-listed sites.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>rblsmtpd</command>
+<arg choice='req'><replaceable>opts</replaceable></arg>
+<arg choice='req'><replaceable>prog</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>rblsmtpd</command> normally just chains to <replaceable>prog</replaceable>, which is the command name and arguments of a UCSPI-TCP server program that is expected to carry out an SMTP conversation to receive incoming mail messages. 
+</para>
+
+<para>
+However, <command>rblsmtpd</command> does not invoke <replaceable>prog</replaceable>
+if it is told to block mail from this client. 
+Instead it carries out its own limited SMTP conversation, rejecting all attempts to send a message with a temporary or a permanent failure response.
+Meanwhile it prints one line on its standard error to log its activity.
+</para>
+
+<para>
+It drops the limited SMTP conversation after 60 seconds, even if the client has not quit by then.
+</para>
+
+<refsection>
+<title>Blocked clients</title>
+
+<para>
+Whether clients are blocked is determined by environment variables.
+Normally <command>rblsmtpd</command> runs under <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>; you can use <citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry> to set <envar>RBLSMTPD</envar> for selected clients. 
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> also sets up <envar>TCPREMOTEIP</envar> as the IP address of the remote host.
+</para>
+
+<para>
+If the <envar>RBLSMTPD</envar> environment variable is set and is nonempty, <command>rblsmtpd</command> blocks mail. 
+It uses <envar>RBLSMTPD</envar> as an error message to send to the client. 
+</para>
+
+<para>
+If <envar>RBLSMTPD</envar> is set and is empty, <command>rblsmtpd</command> does not block mail. 
+</para>
+
+<para>
+If <envar>RBLSMTPD</envar> is not set, <command>rblsmtpd</command> looks up <envar>TCPREMOTEIP</envar> in the RBL, and blocks mail if <envar>TCPREMOTEIP</envar> is blacklisted.
+</para>
+
+<para>
+You may supply any number of <arg choice='plain'>-r</arg> and <arg choice='plain'>-a</arg> options to control RBL lookup.
+<command>rblsmtpd</command> tries each list in turn until it finds one that blacklists or whitelists <envar>TCPREMOTEIP</envar>.
+</para>
+
+<para>
+Prior versions of <command>rblsmtpd</command> would default to using the RBL source <filename>rbl.maps.vix.com</filename> if you did not supply any blacklists.
+<ulink url="http://dnsbl.com/2007/02/status-of-rblmapsvixcom-invalid-domain.html">This list has been defunct for many years and is no longer a built-in default in this program</ulink>.
+Learning from this experience, there is no replacement built-in default; no blacklists supplied means no blacklisting done.
+</para>
+
+<para>
+If you want to run your own RBL blacklist or whitelist for <command>rblsmtpd</command>, you can use <citerefentry><refentrytitle>rbldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Temporary or permanent failure responses</title>
+
+<para>
+Normally, if <envar>RBLSMTPD</envar> is set, <command>rblsmtpd</command> uses a 451 error code in its limited SMTP conversation. 
+This tells legitimate clients to try again later. 
+It gives innocent relay operators a chance to see the problem, prohibit relaying, get off the RBL, and get the mail delivered. 
+</para>
+
+<para>
+However, if the value of <envar>RBLSMTPD</envar> begins with a hyphen, <command>rblsmtpd</command> removes the hyphen and uses a 553 error code.
+This tells legitimate clients to bounce the message immediately. 
+</para>
+
+<para>
+Command line options further alter this behaviour.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>Options</title>
+
+<variablelist>
+<varlistentry>
+<term><arg choice='plain'>-r <replaceable>base</replaceable></arg></term>
+<listitem>
+<para>
+Use <replaceable>base</replaceable> as an RBL source, a blacklist.
+An IP address <filename>a.b.c.d</filename> is listed by that source if the domain name <filename>d.c.b.a.<replaceable>base</replaceable></filename> has a TXT record in the Domain Name System.
+<command>rblsmtpd</command> uses the contents of the TXT record as an error message to send to the client.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-a <replaceable>base</replaceable></arg></term>
+<listitem>
+<para>
+Use <replaceable>base</replaceable> as an anti-RBL source, a whitelist.
+An IP address <filename>a.b.c.d</filename> is listed by that source if the domain name <filename>d.c.b.a.<replaceable>base</replaceable></filename> has an A record in the Domain Name System.
+<command>rblsmtpd</command> does not block mail for whitelisted IP addresses.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-B</arg></term>
+<listitem>
+<para>
+(Default.)
+Use a 451 error code for IP addresses blacklisted in the RBL.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-b</arg></term>
+<listitem>
+<para>
+Use a 553 error code for IP addresses blacklisted in the RBL.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-C</arg></term>
+<listitem>
+<para>
+(Default.)
+Handle RBL lookups in a "fail-open" mode. 
+If an RBL blacklist lookup fails temporarily, assume that the address is not listed; if an RBL whitelist lookup fails temporarily, assume that the address is listed. 
+Unfortunately, a knowledgeable attacker can force an RBL lookup to fail temporarily, so that his mail is not blocked.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-c</arg></term>
+<listitem>
+<para>
+Handle RBL lookups in a "fail-closed" mode. 
+If an RBL blacklist lookup fails temporarily, assume that the address is listed (but use a 451 error code even with <arg choice='plain'>-b</arg>). 
+If an RBL whitelist lookup fails temporarily, assume that the address is not listed (but use a 451 error code even if a subsequent RBL blacklist lookup succeeds and <arg choice='plain'>-b</arg> is used). 
+Unfortunately, this sometimes delays legitimate mail.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>rblsmtpd</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

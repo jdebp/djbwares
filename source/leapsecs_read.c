@@ -11,6 +11,13 @@
 struct tai *leapsecs = 0;
 int leapsecs_num = 0;
 
+static const char * filenames[4] = {
+  "/usr/local/etc/leapsecs.dat",
+  "/usr/local/share/libtai/leapsecs.dat",
+  "/etc/leapsecs.dat",
+  "/usr/share/libtai/leapsecs.dat",
+};
+
 int leapsecs_read()
 {
   int fd;
@@ -19,18 +26,18 @@ int leapsecs_read()
   int n;
   int i;
   struct tai u;
+  const char ** pfn;
 
-  fd = open("/usr/local/etc/leapsecs.dat",O_RDONLY | O_NDELAY);
-  if (fd == -1) {
-    if (errno != ENOENT) return -1;
-    fd = open("/etc/leapsecs.dat",O_RDONLY | O_NDELAY);
-    if (fd == -1) {
-      if (errno != ENOENT) return -1;
+  for (pfn = filenames ;; ++pfn) {
+    if (pfn >= filenames + sizeof filenames/sizeof *filenames) {
       if (leapsecs) free(leapsecs);
       leapsecs = 0;
       leapsecs_num = 0;
       return 0;
     }
+    fd = open(*pfn,O_RDONLY | O_NDELAY);
+    if (fd != -1) break;
+    if (errno != ENOENT) return -1;
   }
 
   if (fstat(fd,&st) == -1) { close(fd); return -1; }

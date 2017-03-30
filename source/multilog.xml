@@ -1,0 +1,235 @@
+<refentry id="multilog">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>multilog</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>multilog</refname>
+<refpurpose>reads a sequence of lines from stdin and appends selected lines to any number of logs.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>multilog</command>
+<arg choice='req'><replaceable>script</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<replaceable>script</replaceable> consists of any number of arguments. 
+Each argument specifies one action. 
+The actions are carried out in order for each line of input. 
+Note that actions may contain shell metacharacters that need to be quoted when <command>multilog</command> is run from a shell. 
+</para>
+
+<para>
+<command>multilog</command> exits 0 when it sees the end of stdin. 
+If stdin has a partial final line then <command>multilog</command> inserts a final newline. 
+</para>
+
+<para>
+<command>multilog</command> writes a message to stderr and exits 111, without reading any input, if it runs out of memory or if another <command>multilog</command> process is writing to one of the same automatically rotated logs.
+</para>
+
+<para>
+If <command>multilog</command> has trouble writing to disk after it starts reading input, it writes a message to stderr, pauses, and tries again, without losing any data. 
+Note that this may block any program feeding input to <command>multilog</command>.
+</para>
+
+<para>
+If <command>multilog</command> receives a TERM signal, it will read and process data until the next newline, and then exit, leaving stdin at the first byte of data it has not processed.
+</para>
+
+<refsection>
+<title>Selecting lines</title>
+
+<para>
+Each line is initially selected. 
+The action <blockquote><arg choice='plain'>-<replaceable>pattern</replaceable></arg></blockquote> deselects the line if <replaceable>pattern</replaceable> matches the line. 
+The action <blockquote><arg choice='plain'>+<replaceable>pattern</replaceable></arg></blockquote> selects the line if <replaceable>pattern</replaceable> matches the line. 
+</para>
+
+<para>
+<replaceable>pattern</replaceable> is a string of stars and non-stars. 
+It matches any concatenation of strings matched by all the stars and non-stars in the same order. 
+A non-star matches itself. 
+A star before the end of <replaceable>pattern</replaceable> matches any string that does not include the next character in <replaceable>pattern</replaceable>.
+A star at the end of <replaceable>pattern</replaceable> matches any string. 
+</para>
+
+<para>
+For example, the action <blockquote><arg choice='plain'>+hello</arg></blockquote> selects <computeroutput>hello</computeroutput>. 
+It does not select <computeroutput>hello world</computeroutput>. 
+The action <blockquote><arg choice='plain'>-named[*]: Cleaned cache *</arg></blockquote> deselects <computeroutput>named[135]: Cleaned cache of 3121 RRs</computeroutput>.
+The first star matches any string that does not include a right bracket. 
+The action <blockquote><arg choice='plain'>-*</arg></blockquote> deselects every line. 
+</para>
+
+<para>
+To save memory, <command>multilog</command> actually checks pattern against only the first 1000 characters of each line.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Alerts</title>
+
+<para>
+The action <blockquote><arg choice='plain'>e</arg></blockquote> prints (the first 200 bytes of) each selected line to stderr.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Status files</title>
+
+<para>
+The action <blockquote><arg choice='plain'>=<replaceable>file</replaceable></arg></blockquote> replaces the contents of <replaceable>file</replaceable> with (the first 1000 bytes of) each selected line, padded with newlines to 1001 bytes. 
+There is no protection of <replaceable>file</replaceable> against power outages. 
+</para>
+
+<para>
+For example, the sequence of actions <arg choice='plain'>-*</arg> <arg choice='plain'>+STAT*</arg> <arg choice='plain'>=log/status</arg> maintains <filename>log/status</filename> as a copy of the most recent line starting with <code>STAT</code>. 
+</para>
+
+</refsection>
+
+<refsection>
+<title>Timestamping</title>
+
+<para>
+The action <blockquote><arg choice='plain'>t</arg></blockquote> inserts an <code>@</code>, a precise timestamp, and a space in front of each line, using the same format as <citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+This is required to be the first action.
+</para>
+
+<para>
+Patterns apply to the line after the timestamp is inserted. 
+For example, if <literallayout>
+<userinput><command>multilog</command> <arg choice='plain'>t</arg> <arg choice='plain'>'-*'</arg> <arg choice='plain'>'+* fatal: *'</arg> <arg choice='plain'>./main</arg></userinput>
+</literallayout> reads the line <literallayout>
+<computeroutput>fatal: out of memory</computeroutput>
+</literallayout> then it will log a line such as <literallayout>
+<computeroutput>@400000003b4a39c23294b13c fatal: out of memory</computeroutput>
+</literallayout> with the first <arg choice='plain'>*</arg> matching the timestamp.
+</para>
+
+<para>
+You can use <citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry> to convert these timestamps to human-readable form.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Automatically rotated logs</title>
+
+<para>
+If <replaceable>dir</replaceable> starts with a dot or slash then the action <blockquote><arg choice='plain'><replaceable>dir</replaceable></arg></blockquote> appends each selected line to a log named <replaceable>dir</replaceable>.
+If <replaceable>dir</replaceable> does not exist, <command>multilog</command> creates it. 
+</para>
+
+<para>
+Do not attempt to write to one log from two simultaneous <command>multilog</command> processes, or two actions in one process.
+</para>
+
+<para>
+The log format is as follows.
+<filename><replaceable>dir</replaceable></filename> is a directory containing some number of old log files, a log file named <filename>current</filename>, and other files for <command>multilog</command> to keep track of its actions. 
+Each old log file has a name beginning with <filename>@</filename>, continuing with a precise timestamp showing when the file was finished, and ending with one of the following codes:
+</para>
+<variablelist>
+<varlistentry>
+<term><filename>.s</filename></term>
+<listitem><para>
+This file is completely processed and safely written to disk. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>.u</filename></term>
+<listitem><para>
+This file was being created at the moment of an outage. 
+It may have been truncated and has not been processed. 
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Beware that NFS, async filesystems, and softupdates filesystems may discard files that were not safely written to disk before an outage.
+</para>
+
+<para>
+While <command>multilog</command> is running, <filename>current</filename> has mode 644. 
+If <command>multilog</command> sees the end of stdin, it writes <filename>current</filename> safely to disk, and sets the mode of <filename>current</filename> to 744. 
+When it restarts, it sets the mode of <filename>current</filename> back to 644 and continues writing new lines. 
+</para>
+
+<para>
+When <command>multilog</command> decides that <filename>current</filename> is big enough, it writes <filename>current</filename> safely to disk, sets the mode of <filename>current</filename> to 744, and renames <filename>current</filename> as an old log file. 
+</para>
+
+<para>
+The action <blockquote><arg choice='plain'>s<replaceable>size</replaceable></arg></blockquote> sets the maximum file size for subsequent <arg choice='plain'><replaceable>dir</replaceable></arg> actions.
+<command>multilog</command> will decide that <filename>current</filename> is big enough if <filename>current</filename> has <replaceable>size</replaceable> bytes.
+(<command>multilog</command> will also decide that <filename>current</filename> is big enough if it sees a newline within 2000 bytes of the maximum file size; it tries to finish log files at line boundaries.)
+<replaceable>size</replaceable> must be between 4096 and 16777215. 
+The default maximum file size is 99999. 
+</para>
+
+<para>
+In versions 0.75 and above: If <command>multilog</command> receives an ALRM signal, it immediately decides that <filename>current</filename> is big enough, if <filename>current</filename> is nonempty.
+</para>
+
+<para>
+The action <blockquote><arg choice='plain'>n<replaceable>num</replaceable></arg></blockquote> sets the number of log files for subsequent <replaceable>dir</replaceable> actions. 
+After renaming <filename>current</filename>, if <command>multilog</command> sees <replaceable>num</replaceable> or more old log files, it removes the old log file with the smallest timestamp.
+<replaceable>num</replaceable> must be at least 2. 
+The default number of log files is 10. 
+</para>
+
+<para>
+The action <blockquote><arg choice='plain'>!<replaceable>processor</replaceable></arg></blockquote> sets a <replaceable>processor</replaceable> for subsequent <replaceable>dir</replaceable> actions.
+<command>multilog</command> will feed <filename>current</filename> through <replaceable>processor</replaceable> and save the output as an old log file instead of <filename>current</filename>.
+<command>multilog</command> will also save any output that <replaceable>processor</replaceable> writes to descriptor 5, and make that output readable on descriptor 4 when it runs <replaceable>processor</replaceable> on the next log file. 
+For reliability, <replaceable>processor</replaceable> must exit nonzero if it has any trouble creating its output; <command>multilog</command> will then run it again. 
+Note that running <replaceable>processor</replaceable> may block any program feeding input to <command>multilog</command>.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>cyclog</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a simpler log writer</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>multilog</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s daemontools toolset in 2001.
+It replaced an earler Bernstein program named <command>cyclog</command>.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>
+

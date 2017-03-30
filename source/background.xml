@@ -1,0 +1,48 @@
+<refentry id="background">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>background</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>background</refname>
+<refpurpose>run program without waiting for it</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>background</command>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>background</command> runs <replaceable>subprogram</replaceable> as a child process (not a process group leader) and then exits without waiting for <replaceable>subprogram</replaceable> to finish.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>background</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

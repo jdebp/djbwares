@@ -5,6 +5,7 @@
 #include "rules.h"
 #include "exit.h"
 #include "open.h"
+#include "ucspi.h"
 
 void found(char *data,unsigned int datalen)
 {
@@ -35,11 +36,11 @@ void found(char *data,unsigned int datalen)
 
 int main(int argc,char **argv)
 {
-  char *fnrules;
+  const char *fnrules;
   int fd;
-  char *ip;
-  char *info;
-  char *host;
+  const char *ip;
+  const char *info;
+  const char *host;
   (void)argc;	/* Silence a compiler warning. */
 
   fnrules = argv[1];

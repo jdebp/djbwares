@@ -1,0 +1,56 @@
+<refentry id="nowutc">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>nowutc</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>nowutc</refname>
+<refpurpose>print the current UTC time</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>nowutc</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>nowutc</command> prints the current UTC time as determined by the Bernstein libtai library.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>date</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>print the date</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>nowutc</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s libtai toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -1,0 +1,86 @@
+<refentry id="tinydns-get">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tinydns-get</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tinydns-get</refname>
+<refpurpose>query a content DNS server's database file directly</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tinydns-get</command>
+<arg choice='req'><replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>fqdn</replaceable></arg>
+<arg choice='opt'><replaceable>addr</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>tinydns-get</command> looks up resource records of type <replaceable>t</replaceable> for <replaceable>fqdn</replaceable> by directly reading a content DNS server's <filename>data.cdb</filename> file, in exactly the same way that <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> obtain their results from that same file.
+It prints the results in a compact human-readable format, the same as <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<filename>data.cdb</filename> is located in the current directory.
+<replaceable>t</replaceable> may be a name or a number.
+Currently recognized names are:
+<code>any</code>,
+<code>a</code>,
+<code>ns</code>,
+<code>mx</code>,
+<code>ptr</code>,
+<code>txt</code>,
+<code>cname</code>,
+<code>soa</code>,
+<code>hinfo</code>,
+<code>rp</code>,
+<code>sig</code>,
+<code>key</code>,
+<code>aaaa</code>,
+<code>axfr</code>, and
+<code>srv</code>.
+If <arg choice='plain'><replaceable>addr</replaceable></arg> is supplied <command>tinydns-get</command> simulates making a query from that location; this matters if <filename>data.cdb</filename> differentiates among clients in different locations.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to content DNS servers using the DNS protocol</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a tool that makes requests to proxy DNS servers</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tinydns-get</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -1,0 +1,101 @@
+<refentry id="ptyspawn">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>ptyspawn</refentrytitle>
+<manvolnum>8</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>ptyspawn</refname>
+<refpurpose>run a program under a pty</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ptyspawn</command>
+<arg choice='opt'>-2</arg>
+<arg choice='opt'>-3</arg>
+<arg choice='opt'>-x</arg>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>ptyspawn</command> runs <replaceable>subprogram</replaceable> under a pty.
+<command>ptyspawn</command> will exit when <replaceable>subprogram</replaceable> exits, with the same exit code.
+</para>
+
+<para>
+<command>ptyspawn</command> must be invoked with descriptor 4 pointing to the pty master, descriptor 5 pointing to the pty slave, and environment variable <envar>TTY</envar> giving the name of the pty slave.
+On POSIX systems, <command>ptyspawn</command> must not be a process group leader.
+</para>
+
+<para>
+If <replaceable>subprogram</replaceable> stops, <command>ptyspawn</command> writes its stop signal, as a single byte, to descriptor 9, if descriptor 9 is open.
+When <command>ptyspawn</command> receives a SIGCONT signal, it sends SIGCONT to <replaceable>subprogram</replaceable>'s process group.
+</para>
+
+<para>
+<replaceable>subprogram</replaceable> will have descriptors 0, 1, and 2 pointing to the pty slave.
+Its controlling tty will be that pty.
+Descriptor 3 will point to <filename>/dev/tty</filename>.
+Descriptors 4, 5, and 9 will be closed.
+<replaceable>subprogram</replaceable> will be a process group leader.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Options</title>
+
+<variablelist>
+
+<varlistentry>
+<term><arg choice='plain'>-2</arg></term>
+<listitem><para>
+Preserve descriptor 2 in <replaceable>subprogram</replaceable>; do not replace it with the pty slave.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg choice='plain'>-3</arg></term>
+<listitem><para>
+Preserve descriptor 3 in <replaceable>subprogram</replaceable>; do not replace it with <filename>/dev/tty</filename>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg choice='plain'>-x</arg></term>
+<listitem><para>
+Reserve the pty for exclusive use.
+This prevents all attempts to open the pty, even through <filename>/dev/tty</filename>.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>ptyspawn</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

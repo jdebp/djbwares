@@ -1,0 +1,64 @@
+<refentry id="exclon">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>exclon</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>exclon</refname>
+<refpurpose>reserve tty for exclusive use</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>exclon</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>exclon</command> attempts to reserve your terminal for exclusive use.
+This means that any attempt to open your terminal, including through <filename>/dev/tty</filename>, will fail.
+<command>excloff</command> attempts to undo the effect of <citerefentry><refentrytitle>exclon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+Exception:
+<code>root</code> can still open your terminal.
+On most systems this means that <citerefentry><refentrytitle>talk</refentrytitle><manvolnum>1</manvolnum></citerefentry> is not affected by <command>exclon</command> even though <citerefentry><refentrytitle>write</refentrytitle><manvolnum>1</manvolnum></citerefentry> is.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>excloff</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>the reverse of this command</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>exclon</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

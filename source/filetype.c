@@ -2,10 +2,10 @@
 #include "str.h"
 #include "exit.h"
 
-void filetype(char *fn,stralloc *contenttype)
+void filetype(const char *fn,stralloc *contenttype)
 {
-  char *x;
-  char *result;
+  const char *x;
+  const char *result;
   int i;
   char ch;
 
@@ -33,6 +33,7 @@ void filetype(char *fn,stralloc *contenttype)
     else if (str_equal(x,".jpeg")) result = "image/jpeg";
     else if (str_equal(x,".png")) result = "image/png";
     else if (str_equal(x,".mpeg")) result = "video/mpeg";
+    else if (str_equal(x,".css")) result = "text/css";
 
     if (!stralloc_cats(contenttype,result)) _exit(21);
   }

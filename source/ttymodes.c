@@ -82,7 +82,7 @@ struct ttymodes *tm;
 void ttymodes_sane(tm)
 struct ttymodes *tm;
 {
-  int i;
+  unsigned int i;
 #if !defined(_POSIX_VDISABLE)
   int j;
 #endif

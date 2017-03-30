@@ -1,11 +1,11 @@
 <refentry id="configure">
 
-<refmeta>
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
 <refentrytitle>configure</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class="manual">user commands</refmiscinfo>
 <refmiscinfo class="source">djbwares</refmiscinfo>
-<refmiscinfo class="version">2</refmiscinfo>
+<xi:include href="version.xml" />
 </refmeta>
 
 <refnamediv>
@@ -102,8 +102,8 @@ You can set up virtual hosts by creating more directories inside file.
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by Daniel J. Bernstein.
-Documentation modernizations by Jonathan de Boyne Pollard.
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

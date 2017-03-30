@@ -1,6 +1,7 @@
 configure
-httpd
 ftpd
+gopherd
+httpd
 sntpclock
 taiclock
 taiclockd

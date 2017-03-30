@@ -1,0 +1,89 @@
+<refentry id="dnsq">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsq</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsq</refname>
+<refpurpose>query a content DNS server using the DNS protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsq</command>
+<arg choice='req'><replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>fqdn</replaceable></arg>
+<arg choice='req'><replaceable>s</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsq</command> looks up resource records of type <replaceable>t</replaceable> for <replaceable>fqdn</replaceable> by making a Domain Name System request to a server at <replaceable>s</replaceable>.
+It prints the results in a human-readable format, more compact than the <citerefentry><refentrytitle>dig</refentrytitle><manvolnum>1</manvolnum></citerefentry> output format.
+</para>
+
+<para>
+<replaceable>s</replaceable> is expected to be the IP address or domain name of a content DNS server, and the request is marked as non-recursive.
+<replaceable>t</replaceable> may be a name or a number.
+Currently recognized names are:
+<code>any</code>,
+<code>a</code>,
+<code>ns</code>,
+<code>mx</code>,
+<code>ptr</code>,
+<code>txt</code>,
+<code>cname</code>,
+<code>soa</code>,
+<code>hinfo</code>,
+<code>rp</code>,
+<code>sig</code>,
+<code>key</code>,
+<code>aaaa</code>,
+<code>axfr</code>, and
+<code>srv</code>.
+</para>
+
+<para>
+Note that if you want to perform a zone transfer you should use <citerefentry><refentrytitle>axfr-get</refentrytitle><manvolnum>1</manvolnum></citerefentry>, not <command>dnsq</command> <arg>axfr</arg>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to proxy DNS servers</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>tinydns-get</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a tool that makes direct queries against a content DNS server's database</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsq</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

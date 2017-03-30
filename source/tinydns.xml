@@ -1,0 +1,140 @@
+<refentry id="tinydns">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tinydns</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tinydns</refname>
+<refpurpose>a general-purpose content DNS server using the UDP protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tinydns</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>tinydns</command> is a content DNS server that speaks the DNS/UDP protocol.
+It accepts DNS queries from hosts around the Internet, and responds with locally configured information.
+</para>
+
+<para>
+When it starts <command>tinydns</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+Normally <command>tinydns</command> is run via a server program such as <command>udp-socket-listen</command> to listen for DNS/UDP queries from hosts around the Internet.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
+If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
+It does not handle DNS/TCP.
+</para>
+
+<para>
+<command>tinydns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, and packets that contain anything other than a single query.
+</para>
+
+<refsection>
+<title>Answers</title>
+
+<para>
+<command>tinydns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>tinydns</command> includes NS records with answers to most queries. 
+This increases DNS packet sizes, but it draws queries away from parent servers, and reduces the frequency of long DNS delays. 
+With the default cache times, a client that uses a normal record at least once every day will always have the corresponding NS records cached and will never have to talk to parent servers.
+</para>
+
+<para>
+If a record set has ending time ("time to die") for the information; <command>tinydns</command> dynamically adjusts the TTLs that it publishes so that the records are not cached for more than a few seconds past the ending time.
+</para>
+
+<para>
+SOA resource records inform <command>tinydns</command> what requests to answer.
+It will only answer at all for domain names where there is a SOA resource record at or above that domain name in the namespace.
+</para>
+
+<para>
+There can be many SOA resource records for a domain, as the result of many . lines in the source data file.
+<command>tinydns</command> will return only one SOA record per domain when the request is actually for a domain's SOA resource record set. 
+</para>
+
+<para>
+NS resource records inform <command>tinydns</command> about delegation points (when they are not accompanied by SOA resource records).
+It will always answer with a delegation response for domain names at or below a delegation point in the namespace.
+</para>
+
+<para>
+<command>tinydns</command> returns IP addresses (i.e. A or AAAA records generated from + or = or @ or . or &#x26; lines in the source data file) in a random order in the answer section. 
+If there are more than 8 records, it returns a random set of 8.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Wildcards</title>
+
+<para>
+<command>tinydns</command> supports wildcards of the form <filename>*.<replaceable>fqdn</replaceable></filename>. 
+Information for <filename>*.<replaceable>fqdn</replaceable></filename> is provided for every domain name ending with <filename>.<replaceable>fqdn</replaceable></filename>, except names that have their own records and names that are covered by more specific wildcards. 
+</para>
+
+<para>
+For example, the lines (as written in the original database source file) <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
++*.u.heaven.af.mil:1.2.3.200</programlisting></literallayout> have the same effect as <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
++joe.u.heaven.af.mil:1.2.3.200
++bill.u.heaven.af.mil:1.2.3.200
++floyd.u.heaven.af.mil:1.2.3.200
++ishtar.u.heaven.af.mil:1.2.3.200
++joe.bob.u.heaven.af.mil:1.2.3.200
++sally.floyd.u.heaven.af.mil:1.2.3.200
++post.pink.floyd.u.heaven.af.mil:1.2.3.200</programlisting></literallayout> and so on. 
+</para>
+
+<para>
+As another example, the lines <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
+@*.u.heaven.af.mil::mail.heaven.af.mil</programlisting></literallayout> have the same effect as <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
+@joe.u.heaven.af.mil::mail.heaven.af.mil
+@bill.u.heaven.af.mil::mail.heaven.af.mil
+@floyd.u.heaven.af.mil::mail.heaven.af.mil
+@ishtar.u.heaven.af.mil::mail.heaven.af.mil
+@joe.bob.u.heaven.af.mil::mail.heaven.af.mil
+@sally.floyd.u.heaven.af.mil::mail.heaven.af.mil
+@post.pink.floyd.u.heaven.af.mil::mail.heaven.af.mil</programlisting></literallayout> and so on.
+</para>
+
+<para>
+Notice that the wildcard does not apply to <filename>pink.floyd.u.heaven.af.mil</filename>, because that name has its own records.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tinydns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

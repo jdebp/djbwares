@@ -1,11 +1,11 @@
 <refentry id="httpd">
 
-<refmeta>
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
 <refentrytitle>httpd</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class="manual">user commands</refmiscinfo>
-<refmiscinfo class="source">nosh</refmiscinfo>
-<refmiscinfo class="version">1.24</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
 </refmeta>
 
 <refnamediv>
@@ -56,16 +56,17 @@ httpd has exact-prefix support for <code>If-Modified-Since:</code> it uses code 
 </para>
 
 <para>
-Normally httpd is run under a UCSPI-TCP server program to handle HTTP connections from hosts around the Internet (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection).
+Normally httpd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle HTTP connections from hosts around the Internet.
+It can also be under a UCSPI-SSL server program.
 </para>
 
 <refsection>
 <title>File handling</title>
 
 <para>
-A request for <code>http://v/f</code> refers to the file named <filename>./v/f</filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy, if <code>f</code> does not end with a slash. 
-A request for <code>http://v/f/</code> refers to the file named <filename>./v/f/index.html</filename>.
-httpd always converts the host name <code>v</code> to lowercase. 
+A request for <code>http://<replaceable>v</replaceable>/<replaceable>f</replaceable></code>, where <replaceable>f</replaceable> does not end with a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+A request for <code>http://<replaceable>v</replaceable>/<replaceable>f</replaceable>/</code>, ending in a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable>/index.html</filename>.
+httpd always converts the host name <code><replaceable>v</replaceable></code> to lowercase. 
 HTTP/0.9 requests and old HTTP/1.0 requests do not specify a host name; in this case httpd uses the host name <filename>0</filename>.
 </para>
 
@@ -78,7 +79,7 @@ If it successfully opens the file, httpd uses the file name to select a file typ
 <title>Unsupported features</title>
 
 <para>
-	httpd does not support file modification requests such as <command>POST</command>.
+httpd does not support file modification requests such as <command>POST</command>.
 httpd does not support SSI or CGI.
 </para>
 
@@ -127,10 +128,17 @@ is anything other than a regular file: a directory, socket, device, etc.
 </refsection>
 
 <refsection>
+<title>History</title>
+<para>
+<command>httpd</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s publicfile toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
 <title>Author</title>
 <para>
-Original code and documentation by Daniel J. Bernstein.
-Documentation modernizations by Jonathan de Boyne Pollard.
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

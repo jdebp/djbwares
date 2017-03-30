@@ -2,7 +2,7 @@
 #define COMMANDS_H
 
 struct commands {
-  char *verb;
+  const char *verb;
   void (*action)(char *);
   void (*flush)(void);
 } ;

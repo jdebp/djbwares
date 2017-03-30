@@ -1,0 +1,59 @@
+<refentry id="nobuf">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>nobuf</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>nobuf</refname>
+<refpurpose>run a program without stdio block buffering</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>nobuf</command>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>nobuf</command> <replaceable>subprogram</replaceable> is similar to <replaceable>subprogram</replaceable> with one exception.
+If <replaceable>subprogram</replaceable> uses stdio, it will use block buffering rather than line buffering when its output is redirected; <command>nobuf</command> <replaceable>subprogram</replaceable> will always use line buffering.
+</para>
+
+<para>
+Internally, <command>nobuf</command> obtains a new pty and runs <replaceable>subprogram</replaceable> under it, transparently forwarding input and output.
+<command>nobuf</command> initializes the pty to remote mode, where tty processing is disabled, input is flow-controlled, and end-of-file is passed through to <replaceable>subprogram</replaceable>.
+</para>
+
+<para>
+<command>nobuf</command> is a synonym for <command>ptyget</command> <command>ptyio</command> <arg choice='plain'>-r</arg> <command>ptyspawn</command> <arg choice='plain'>-23x</arg>.
+<citerefentry><refentrytitle>ptyspawn</refentrytitle><manvolnum>1</manvolnum></citerefentry> options may be used with <command>nobuf</command>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>nobuf</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

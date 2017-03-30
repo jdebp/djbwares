@@ -1,0 +1,57 @@
+<refentry id="dnscache-showctl">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnscache-showctl</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnscache-showctl</refname>
+<refpurpose>dump a dnscache configuration.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnscache-showctl</command>
+<arg choice='opt' rep='repeat'><replaceable>dir</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnscache-showctl</command> outputs a summary of the configuration of one or more particular instances of <citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry>. 
+It treats each <arg choice='plain'><replaceable>dir</replaceable></arg> argument as a the name of a <citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> service directory.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>tinydns-showctl</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar command for <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry></para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnscache-showctl</command> was an add-on for <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2001.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

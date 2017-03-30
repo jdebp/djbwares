@@ -1,0 +1,66 @@
+<refentry id="http@">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>http@</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>http@</refname>
+<refpurpose>gets a web page from a remote host.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>http@</command>
+<arg choice='opt'><replaceable>host</replaceable><arg choice='opt'><replaceable>page</replaceable><arg choice='opt'><replaceable>port</replaceable></arg></arg></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>http@</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port <replaceable>port</replaceable> on <replaceable>host</replaceable>, sends an HTTP 1.0 request for <replaceable>page</replaceable>, and prints any data that it receives. 
+It uses <citerefentry><refentrytitle>delcr</refentrytitle><manvolnum>1</manvolnum></citerefentry> to remove CR (\015).
+Unprintable characters are output as-is. 
+</para>
+
+<para>
+The HTTP request is <literallayout><userinput>GET /<replaceable>page</replaceable> HTTP 1.0
+Host: <replaceable>host</replaceable></userinput></literallayout>
+</para>
+
+<para>
+If <replaceable>host</replaceable> is not supplied, <command>http@</command> connects to the local host. 
+If <replaceable>page</replaceable> is not supplied, <command>http@</command> requests <filename>/</filename>.
+If <replaceable>port</replaceable> is not supplied, <command>http@</command> uses port 80.
+</para>
+
+<para>
+TCP port 80 is the well-known port for the HTTP service.
+Some computers respond to HTTP requests on this port.
+For example, they may be running <userinput>tcpserver -R -H -l0 0 80 httpd /public/file/</userinput> using <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>httpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>http@</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

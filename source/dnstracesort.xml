@@ -1,0 +1,47 @@
+<refentry id="dnstracesort">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnstracesort</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnstracesort</refname>
+<refpurpose>convert dnstrace output to human-readable form</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnstracesort</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnstracesort</command> is a filter that converts the output of <citerefentry><refentrytitle>dnstrace</refentrytitle><manvolnum>1</manvolnum></citerefentry> from machine-parseable form into human-readable form.
+It uses TeleType Model 37 control sequences for boldface and underline, which can be interpreted by <citerefentry><refentrytitle>less</refentrytitle><manvolnum>1</manvolnum></citerefentry> or converted to your terminal's own control sequences with <citerefentry><refentrytitle>ul</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnstracesort</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

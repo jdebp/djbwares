@@ -3,9 +3,7 @@
 #include "caldate.h"
 #include "caltime.h"
 
-unsigned int caltime_fmt(s,ct)
-char *s;
-struct caltime *ct;
+unsigned int caltime_fmt(char *s, const struct caltime *ct)
 {
   unsigned int result;
   long x;

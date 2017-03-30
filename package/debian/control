@@ -7,9 +7,11 @@ Package: publicfile
 Architecture: amd64
 Section: web
 Depends: ${shlibs:Depends}
-Suggests: 
+Suggests: nosh-exec | ucspi-tcp | ucspi-ssl
 Recommends: 
-Description: Static content UCSPI HTTP and FTP servers
+Description: Static content UCSPI HTTP, FTP, and GOPHER servers
+ httpd, ftpd, and gopherd serve (the same) static content from a local
+ directory to remote users.
 
 Package: clockspeed
 Architecture: amd64
@@ -72,22 +74,30 @@ Description: just Bernstein taiclockd on its own
  are suitable for precise time synchronization over a local area network,
  without the hassles and potential security problems of an NTP server.
 
-Package: daemontools-run
-Section: admin
-Architecture: all
-Depends: daemontools (>> 1:0.76)
-Conflicts: runit
-Description: daemontools service supervision
- Starts svscanboot from inittab, and provides the directory /etc/service/
- for services to be supervised by daemontools.
-
 Package: djbdns
 Section: web
 Architecture: amd64
 Depends: ${shlibs:Depends}
 Suggests: 
 Recommends: 
-Description: djbdns built by Synety
+Description: djbdns built by JdeBP
+ dnscache is a caching proxy DNS server that takes queries from local
+ client programs, looks up data on remote servers, and combines those
+ data into the answers that it sends back to the local clients.
+ .
+ tinydns is a general purpose content DNS server, with ancillary tools
+ tinydns-data to compile its database, tinydns-edit to edit its
+ database (in scripts), and tinydns-get to check its database locally.
+ .
+ axfrdns is the equivalent content DNS server that provides the same
+ service from the same data except as DNS/TCP rather than as DNS/UDP.
+ .
+ walldns and rbldns are special purpose servers, with ancillary tols
+ walldns-data and rbldns-data.
+ .
+ dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnstrace, and
+ dnstracesort are various tools for diagnosing DNS problems and for
+ performing various DNS queries.
 
 Package: ptyget
 Architecture: amd64
@@ -155,42 +165,6 @@ Description: command-line tools for building TCP client-server applications
  Interface, using the TCP protocol. UCSPI tools are
  available for several different networks.
 
-Package: ucspi-tcp-ipv6
-Architecture: any
-Depends: ${shlibs:Depends}
-Replaces: ucspi-tcp-doc
-Conflicts: ucspi-tcp
-Provides: ucspi-tcp
-Section: net
-Description: command-line tools for building TCP client-server applications (IPv6)
- ucspi-tcp-ipv6 is the ucspi-tcp package with IPv6 support added.
- .
- tcpserver waits for incoming connections and, for each connection, runs a
- program of your choice. Your program receives environment variables showing
- the local and remote host names, IP addresses, and port numbers.
- .
- tcpserver offers a concurrency limit to protect you from running out of
- processes and memory. When you are handling 40 (by default) simultaneous
- connections, tcpserver smoothly defers acceptance of new connections.
- .
- tcpserver also provides TCP access control features, similar to
- tcp-wrappers/tcpd's hosts.allow but much faster. Its access control rules
- are compiled into a hashed format with cdb, so it can easily deal with
- thousands of different hosts.
- .
- This package includes a recordio tool that monitors all the input and output
- of a server.
- .
- tcpclient makes a TCP connection and runs a program of your choice. It sets
- up the same environment variables as tcpserver.
- .
- This package includes several sample clients built on top of tcpclient:
- who@, date@, finger@, http@, tcpcat, and mconnect.
- .
- tcpserver and tcpclient conform to UCSPI, the UNIX Client-Server Program
- Interface, using the TCP protocol. UCSPI tools are
- available for several different networks.
-
 Package: libtai
 Architecture: amd64
 Section: admin
@@ -232,3 +206,5 @@ Depends: ${shlibs:Depends}
 Suggests: 
 Recommends: 
 Description: leapsecs from libtai built by JdeBP 
+ This contains only the compiled leap seconds database.  The database
+ compiler tool is in the libtai package.

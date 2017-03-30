@@ -1,0 +1,95 @@
+<refentry id="pickdns-data">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>pickdns-data</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>pickdns-data</refname>
+<refpurpose>compile the database used by pickdns</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>pickdns-data</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>pickdns-data</command> compiles a database in source form, in the file <filename>data</filename>, into a compiled form, in the file <filename>data.cdb</filename>, that is used by <citerefentry><refentrytitle>pickdns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The compiled database in <filename>data.cdb</filename> is a Bernstein Constant Database file.
+</para>
+
+<para>
+<command>pickdns-data</command> updates <filename>data.cdb</filename> atomically, building a replacement in <filename>data.cdb.tmp</filename> and atomically renaming that replacement into place when it has completely and successfully built it it and written it to disc.
+So you can use it safely while <citerefentry><refentrytitle>pickdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> is running.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Data format</title>
+
+<para>
+Trailing whitespace is removed from all lines, then all non-empty lines are recognized as follows:
+</para>
+
+<variablelist>
+
+<varlistentry>
+<term><code>#<replaceable>comment</replaceable></code></term>
+<listitem><para>
+Comments are ignored.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>#<replaceable>location</replaceable>:<replaceable>prefix</replaceable></code></term>
+<listitem><para>
+All client IP addresses that match the IP address prefix <replaceable>prefix</replaceable> are to be taken as being in location <replaceable>location</replaceable>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>+<replaceable>name</replaceable>:<replaceable>addr</replaceable>:<replaceable>location</replaceable></code></term>
+<listitem><para>
+The domain name <replaceable>name</replaceable> maps to the IP address <replaceable>addr</replaceable> for clients in location <replaceable>location</replaceable>.
+The colon immediately precending it can be omitted if <replaceable>location</replaceable> is a zero-length string.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>-<replaceable>name</replaceable>:<replaceable>addr</replaceable>:<replaceable>location</replaceable></code></term>
+<listitem><para>
+This is an alternative comment line, and is ignored.
+This permits text-editing tools to turn entries off and on by changing the first character of the line between <code>-</code> and <code>+</code>.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>pickdns-data</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

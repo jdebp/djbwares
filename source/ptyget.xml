@@ -1,0 +1,82 @@
+<refentry id="ptyget">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>ptyget</refentrytitle>
+<manvolnum>8</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>ptyget</refname>
+<refpurpose>allocate a pty</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ptyget</command>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>ptyget</command> allocates a new pty, makes the master side available as fd 4 (non-blocking), makes the slave side available as fd 5, and runs <replaceable>subprogram</replaceable>.
+It passes <replaceable>subprogram</replaceable> a <envar>TTY</envar> environment variable giving the name of the pty slave.
+</para>
+
+<para>
+On current systems, <command>ptyget</command> is setuid <code>root</code> and setgid <code>tty</code>.
+It changes the ownership of the pty slave to the user, so that the user can open it, and makes it mode <code>600</code>, so that nobody else can open it.
+It also puts the pty slave under group <code>tty</code>.
+It will refuse to run if these protections fail.
+</para>
+
+<para>
+<command>ptyget</command> does not make any provisions to clean up when the user finishes using the pty.
+</para>
+
+</refsection>
+
+<refsection>
+<title>System-specific notes</title>
+
+<para>
+On systems with the POSIX 2001 compliant <citerefentry><refentrytitle>posix_openpt</refentrytitle><manvolnum>3</manvolnum></citerefentry>, <citerefentry><refentrytitle>ptsname</refentrytitle><manvolnum>3</manvolnum></citerefentry>, <citerefentry><refentrytitle>grantpt</refentrytitle><manvolnum>3</manvolnum></citerefentry>, and <citerefentry><refentrytitle>unlockpt</refentrytitle><manvolnum>3</manvolnum></citerefentry>, functions, <command>ptyget</command> doesn't know nor care where the master or slave actually are.
+It uses the library functions to do most of the work.
+</para>
+
+<para>
+On other pty/tty-based systems (e.g., BSD 4.4), the slave is <filename>/dev/tty<replaceable>xy</replaceable></filename> where <replaceable>xy</replaceable> are two characters.
+<command>ptyget</command> searches through masters starting from a random point (with a random increment to avoid secondary clustering).
+<command>ptyget</command> relies for security on the kernel's <citerefentry><refentrytitle>revoke</refentrytitle><manvolnum>3</manvolnum></citerefentry> function.
+</para>
+
+<para>
+On other ptmx/pts-based systems (e.g., Solaris), the slave is <filename>/dev/pts/<replaceable>N</replaceable></filename> where <replaceable>N</replaceable> is a nonnegative integer.
+<command>ptyget</command> does not invoke <command>/usr/lib/pt_chmod</command>.
+<command>ptyget</command> relies for security on the kernel's built-in slave locking.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>ptyget</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

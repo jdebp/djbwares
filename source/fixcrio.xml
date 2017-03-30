@@ -1,0 +1,73 @@
+<refentry id="fixcrio">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>fixcrio</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>fixcrio</refname>
+<refpurpose>inserts missing CRs at the ends of lines.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>fixcrio</command>
+<arg choice='req'><replaceable>prog</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>fixcrio</command> runs <command><replaceable>prog</replaceable></command> filtering its standard I/O.
+It inserts CR at the end of each line of input that it passes to <command><replaceable>prog</replaceable></command>'s input, and at the end of each line of output that it takes from <command><replaceable>prog</replaceable></command>'s output; wherever those lines do not already have a CR.
+</para>
+
+<para>
+The <command>fixcrio</command> process runs as a child of the <command><replaceable>prog</replaceable></command> process, so that service managers monitor and control the <command><replaceable>prog</replaceable></command> as the main program.
+It exits when it sees the end of <command><replaceable>prog</replaceable></command>'s output. 
+</para>
+
+</refsection>
+
+<refsection>
+<title>Usage</title>
+
+<para>
+One use of <command>fixcrio</command> is to wrap Unix programs that use plain LF newline sequences, so that they can be used as servers for Internet protocols that use CR+LF newline sequences.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>addcr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a standalone filter that adds CRs in a unidirectional I/O stream</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>fixcrio</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>
+

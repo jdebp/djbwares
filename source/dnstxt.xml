@@ -1,0 +1,58 @@
+<refentry id="dnstxt">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnstxt</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnstxt</refname>
+<refpurpose>look up the text records of a domain name</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnstxt</command>
+<arg choice='req' rep='repeat'><replaceable>fqdn</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnstxt</command> looks up the TXT resource records for <replaceable>fqdn</replaceable> in the Domain Name System, and prints them.
+If there are no TXT resource records, <command>dnstxt</command> prints a blank line.
+</para>
+
+<para>
+Normally <command>dnstxt</command> exits 0. 
+If it encounters a temporary problem that prevents it from determining the MX resource records, it prints an error message and exits 111.
+</para>
+
+<para>
+<command>dnstxt</command> makes all DNS lookups using the locally configured DNS proxy server.
+See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnstxt</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

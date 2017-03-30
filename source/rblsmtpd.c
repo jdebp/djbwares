@@ -13,6 +13,7 @@
 #include "commands.h"
 #include "pathexec.h"
 #include "dns.h"
+#include "ucspi.h"
 
 #define FATAL "rblsmtpd: fatal: "
 
@@ -25,7 +26,7 @@ void usage(void)
   strerr_die1x(100,"rblsmtpd: usage: rblsmtpd [ -b ] [ -R ] [ -t timeout ] [ -r base ] [ -a base ] smtpd [ arg ... ]");
 }
 
-char *ip_env;
+static const char *ip_env;
 static stralloc ip_reverse;
 
 void ip_init(void)
@@ -33,8 +34,7 @@ void ip_init(void)
   unsigned int i;
   unsigned int j;
 
-  ip_env = env_get("TCPREMOTEIP");
-  if (!ip_env) ip_env = "";
+  ip_env = ucspi_get_remoteip_str("", "", "");
 
   if (!stralloc_copys(&ip_reverse,"")) nomem();
 
@@ -58,7 +58,7 @@ static stralloc text; /* defined if decision is 2 or 3 */
 
 static stralloc tmp;
 
-void rbl(char *base)
+void rbl(const char *base)
 {
   if (decision) return;
   if (!stralloc_copy(&tmp,&ip_reverse)) nomem();
@@ -79,7 +79,7 @@ void rbl(char *base)
   }
 }
 
-void antirbl(char *base)
+void antirbl(const char *base)
 {
   if (decision) return;
   if (!stralloc_copy(&tmp,&ip_reverse)) nomem();
@@ -97,8 +97,8 @@ void antirbl(char *base)
 char strnum[FMT_ULONG];
 static stralloc message;
 
-char inspace[64]; buffer in = BUFFER_INIT(read,0,inspace,sizeof inspace);
-char outspace[1]; buffer out = BUFFER_INIT(write,1,outspace,sizeof outspace);
+char inspace[64]; buffer in = BUFFER_INIT(buffer_unixread,0,inspace,sizeof inspace);
+char outspace[1]; buffer out = BUFFER_INIT(buffer_unixwrite,1,outspace,sizeof outspace);
 
 void reject() { buffer_putflush(&out,message.s,message.len); }
 void accept() { buffer_putsflush(&out,"250 rblsmtpd.local\r\n"); }
@@ -106,7 +106,7 @@ void greet()  { buffer_putsflush(&out,"220 rblsmtpd.local\r\n"); }
 void quit()   { buffer_putsflush(&out,"221 rblsmtpd.local\r\n"); _exit(0); }
 void drop()   { _exit(0); }
 
-struct commands smtpcommands[] = {
+static struct commands smtpcommands[] = {
   { "quit", quit, 0 }
 , { "helo", accept, 0 }
 , { "ehlo", accept, 0 }
@@ -156,7 +156,6 @@ void rblsmtpd(void)
 
 int main(int argc,char **argv,char **envp)
 {
-  int flagwantdefaultrbl = 1;
   char *x;
   int opt;
 
@@ -183,7 +182,7 @@ int main(int argc,char **argv,char **envp)
       case 'c': flagfailclosed = 1; break;
       case 'C': flagfailclosed = 0; break;
       case 't': scan_ulong(optarg,&timeout); break;
-      case 'r': rbl(optarg); flagwantdefaultrbl = 0; break;
+      case 'r': rbl(optarg); break;
       case 'a': antirbl(optarg); break;
       default: usage();
     }
@@ -191,7 +190,6 @@ int main(int argc,char **argv,char **envp)
   argv += optind;
   if (!*argv) usage();
 
-  if (flagwantdefaultrbl) rbl("rbl.maps.vix.com");
   if (decision >= 2) rblsmtpd();
 
   pathexec_run(*argv,argv,envp);

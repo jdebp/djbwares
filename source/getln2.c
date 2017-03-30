@@ -16,7 +16,7 @@ int getln2(buffer *ss,stralloc *sa,char **cont,unsigned int *clen,int sep)
     if (n == 0) { *clen = 0; return 0; }
     x = buffer_PEEK(ss);
     i = byte_chr(x,n,sep);
-    if (i < n) { buffer_SEEK(ss,*clen = i + 1); *cont = x; return 0; }
+    if (i < (unsigned int)n) { buffer_SEEK(ss,*clen = i + 1); *cont = x; return 0; }
     if (!stralloc_readyplus(sa,n)) return -1;
     i = sa->len;
     sa->len = i + buffer_get(ss,sa->s + i,n);

@@ -21,6 +21,7 @@
 #include "scan.h"
 #include "qlog.h"
 #include "response.h"
+#include "ucspi.h"
 
 extern int respond(char *,char *,char *);
 
@@ -327,14 +328,13 @@ int main()
 
   axfr = env_get("AXFR");
   
-  x = env_get("TCPREMOTEIP");
+  x = ucspi_get_remoteip_str(NULL, NULL, NULL);
   if (x && ip4_scan(x,ip))
     ;
   else
     byte_zero(ip,4);
 
-  x = env_get("TCPREMOTEPORT");
-  if (!x) x = "0";
+  x = ucspi_get_remoteport_str("0", "0", "0");
   scan_ulong(x,&port);
 
   for (;;) {

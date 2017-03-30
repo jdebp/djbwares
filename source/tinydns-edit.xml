@@ -1,0 +1,80 @@
+<refentry id="tinydns-edit">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tinydns-edit</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tinydns-edit</refname>
+<refpurpose>edit the source data file used by a content DNS server</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tinydns-edit</command>
+<arg choice='req'><replaceable>data</replaceable></arg>
+<arg choice='req'><replaceable>tmp</replaceable></arg>
+<arg choice='req'>add</arg>
+<arg choice='req'><replaceable>type</replaceable></arg>
+<arg choice='req'><replaceable>name</replaceable></arg>
+<arg choice='req'><replaceable>addr</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>tinydns-edit</command> atomically modifies a database source file, the input compiled by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>, with the given modification.
+It reads the data file <replaceable>data</replaceable>, adds a record to it for domain name <replaceable>name</replaceable> of type <replaceable>type</replaceable> with IP address <replaceable>addr</replaceable>, and writes it to <replaceable>tmp</replaceable>.
+Then it atomically renames <replaceable>tmp</replaceable> to <replaceable>data</replaceable>.
+</para>
+
+<para>
+<replaceable>type</replaceable> can be one of 
+<code>ns</code>, implying a <code>.</code> record describing a content DNS server;
+<code>childns</code>, implying a <code>&#x26;</code> record describing a delegation;
+<code>host</code>, implying a <code>=</code> record describing a bidirectional name to address mapping;
+<code>alias</code>, implying a <code>+</code> record describing a unidirectional name to address mapping; or
+<code>mx</code>, implying a <code>.</code> record describing a mail exchanger.
+</para>
+
+<para>
+For <code>ns</code> and <code>childns</code> records there is an intermediate domain name of the form <filename><replaceable>a</replaceable>.ns.<replaceable>name</replaceable></filename>.
+For <code>mx</code> records there is an intermediate domain name of the form <filename><replaceable>a</replaceable>.mx.<replaceable>name</replaceable></filename>.
+<replaceable>a</replaceable> is a letter from "a" to "z".
+<command>tinydns-edit</command> checks existing records of the same type and for the record being added picks the first available unused letter.
+It aborts if there are no letters left.
+</para>
+
+<para>
+For <code>host</code> records it aborts if there is already a <code>=</code> record that has either <replaceable>name</replaceable> or <replaceable>addr</replaceable>.
+</para>
+
+<para>
+If any existing <code>ns</code>, <code>childns</code>, and <code>mx</code> records are found when adding that type, it copies their TTL.
+If no existing record is found, all records have a TTL of 1 day, except for <code>ns</code> and <code>childns</code> records which have a TTL of 3 days.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tinydns-edit</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

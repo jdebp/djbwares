@@ -12,14 +12,14 @@
 #include "httpdate.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
-#include "substdio.h"
+#include "buffer.h"
 #include "error.h"
 #include "getln.h"
 #include "byte.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
-long safewrite(int fd,char *buf,int len)
+int safewrite(int fd,const char *buf,int len)
 {
   int r;
   r = timeoutwrite(60,fd,buf,len);
@@ -27,22 +27,22 @@ long safewrite(int fd,char *buf,int len)
   return r;
 }
 
-char outbuf[1024];
-substdio out = SUBSTDIO_FDBUF(safewrite,1,outbuf,sizeof outbuf);
+static char outbuf[BUFFER_OUTSIZE];
+static buffer out = BUFFER_INIT(safewrite,1,outbuf,sizeof outbuf);
 
-void out_put(char *s,int len)
+void out_put(const char *s,int len)
 {
-  substdio_put(&out,s,len);
+  buffer_put(&out,s,len);
 }
 
-void out_puts(char *s)
+void out_puts(const char *s)
 {
-  substdio_puts(&out,s);
+  buffer_puts(&out,s);
 }
 
 void out_flush(void)
 {
-  substdio_flush(&out);
+  buffer_flush(&out);
 }
 
 char strnum[FMT_ULONG];
@@ -64,7 +64,7 @@ struct tai mtime;
 struct tai mtimeage;
 stralloc mtimestr = stralloc_static_0;
 
-void header(char *code,char *message)
+void header(const char *code,const char *message)
 {
   if (protocolnum == 1)
     out_puts("HTTP/1.0 ");
@@ -78,7 +78,7 @@ void header(char *code,char *message)
   out_puts("\r\n");
 }
 
-void barf(char *code,char *message)
+void barf(const char *code,const char *message)
 {
   if (protocolnum > 0) {
     tai_now(&now);
@@ -190,7 +190,7 @@ void get(void)
 stralloc field = stralloc_static_0;
 stralloc line = stralloc_static_0;
 
-long saferead(int fd,char *buf,int len)
+int saferead(int fd,char *buf,int len)
 {
   int r;
   out_flush();
@@ -199,8 +199,8 @@ long saferead(int fd,char *buf,int len)
   return r;
 }
 
-char inbuf[512];
-substdio in = SUBSTDIO_FDBUF(saferead,0,inbuf,sizeof inbuf);
+static char inbuf[BUFFER_INSIZE];
+static buffer in = BUFFER_INIT(saferead,0,inbuf,sizeof inbuf);
 
 void readline(void)
 {

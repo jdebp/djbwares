@@ -1,0 +1,71 @@
+<refentry id="rbldns">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>rbldns</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>rbldns</refname>
+<refpurpose>a RBL source content DNS server using the UDP protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>rbldns</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>rbldns</command> is a content DNS server that speaks the DNS/UDP protocol.
+It accepts DNS queries from hosts around the Internet, and responds with locally configured information.
+The queries ask about various IP addresses, taking the form of a reverse lookup, and responses show whether the addresses are on an RBL blacklist or whitelist.
+</para>
+
+<para>
+When it starts <command>rbldns</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+Normally <command>rbldns</command> is run via a server program such as <command>udp-socket-listen</command> to listen for DNS/UDP queries from hosts around the Internet.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
+If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
+It does not handle DNS/TCP.
+</para>
+
+<para>
+<command>rbldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, TXT, or ANY, and queries for domain names not beneath the <replaceable>base</replaceable> domain name.
+</para>
+
+<para>
+<command>rbldns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>rbldns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The reverse lookup domain names take the form <filename>d.c.b.a.<replaceable>base</replaceable></filename>, where <filename>a.b.c.d</filename> is the IP address being looked up and <replaceable>base</replaceable> is a domain name apex given by the value of the <envar>BASE</envar> environment variable.
+A queries are answered with the IP address given in the file.
+TXT queries are answered with the message given in the file; replacing a final <code>$</code> in the message, if one is present, with the IP address being asked about.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>rbldns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

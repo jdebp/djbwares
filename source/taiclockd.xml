@@ -1,11 +1,11 @@
 <refentry id="taiclockd">
 
-<refmeta>
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
 <refentrytitle>taiclockd</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class="manual">user commands</refmiscinfo>
 <refmiscinfo class="source">djbwares</refmiscinfo>
-<refmiscinfo class="version">2</refmiscinfo>
+<xi:include href="version.xml" />
 </refmeta>
 
 <refnamediv>
@@ -23,13 +23,19 @@
 <title>Description</title>
 
 <para>
-<command>taiclockd</command> announces the local UNIX clock through <ulink url="http://pobox.com/~djb/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
-It listens for TAICLOCK requests through UDP and responds with the system's current time.
+<command>taiclockd</command> announces the local UNIX clock through <ulink url="http://cr.yp.to/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
+It accepts TAICLOCK requests from hosts around the Internet, and responds with the system's current time.
+</para>
+
+<para>
+Normally <command>taiclockd</command> is run via a server program such as <command>udp-socket-listen</command> to listen for TAICLOCK queries from hosts around the Internet.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
+If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 4014 of the IP address given by the value of the <envar>IP</envar> environment variable.
 </para>
 
 <para>
 <emphasis>Do not run <code>taiclockd</code> if your system is tuned by <code>xntpd</code>.</emphasis>
-See Daniel J. Bernstein's <ulink url="http://cr.yp.to/proto/utctai.html">UTC, TAI, and UNIX time</ulink> paper for further discussion.
+See <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s <ulink url="http://cr.yp.to/proto/utctai.html">UTC, TAI, and UNIX time</ulink> paper for further discussion.
 </para>
 
 </refsection>
@@ -42,10 +48,17 @@ See Daniel J. Bernstein's <ulink url="http://cr.yp.to/proto/utctai.html">UTC, TA
 </refsection>
 
 <refsection>
+<title>History</title>
+<para>
+<command>taiclockd</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+</para>
+</refsection>
+
+<refsection>
 <title>Author</title>
 <para>
-Original code and documentation by Daniel J. Bernstein.
-Documentation modernizations by Jonathan de Boyne Pollard.
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

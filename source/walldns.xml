@@ -1,0 +1,73 @@
+<refentry id="walldns">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>walldns</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>walldns</refname>
+<refpurpose>an opaque content DNS server using the UDP protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>walldns</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>walldns</command> is a content DNS server that speaks the DNS/UDP protocol.
+It accepts DNS queries from hosts around the Internet, and responds with fixed information.
+The queries ask about various IP addresses, taking the form of a reverse lookup, to which it supplies generic responses that avoid revealing local host information.
+</para>
+
+<para>
+When it starts <command>walldns</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+Normally <command>walldns</command> is run via a server program such as <command>udp-socket-listen</command> to listen for DNS/UDP queries from hosts around the Internet.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
+If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
+It does not handle DNS/TCP.
+</para>
+
+<para>
+<command>walldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, PTR, or ANY, and queries for domain names not beneath <filename>in-addr.arpa</filename>.
+</para>
+
+<para>
+<command>walldns</command> answers queries in a fixed form.
+The reverse lookup domain names take the form <filename>d.c.b.a.in-addr.arpa</filename>, where <filename>a.b.c.d</filename> is the IP address being looked up.
+It publishes PTR responses mapping the IP address <filename>a.b.c.d</filename> back to the name <filename>d.c.b.a.in-addr.arpa</filename>.
+It publishes A responses mapping the name <filename>d.c.b.a.in-addr.arpa</filename> to the IP address <filename>a.b.c.d</filename>.
+This creates a bidirectional mapping that maps IP addresses to domain names that map back to those same IP addresses.
+<command>walldns</command> does not include any NS or SOA resource records in its responses; and uses TTLs of one week.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>walldns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

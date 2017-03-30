@@ -1,0 +1,58 @@
+<refentry id="date@">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>date@</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>date@</refname>
+<refpurpose>prints the date on a remote host.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>date@</command>
+<arg choice='opt'><replaceable>host</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>date@</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port 13 on <replaceable>host</replaceable> and prints any data that it receives. 
+It uses <citerefentry><refentrytitle>delcr</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>cat</refentrytitle><manvolnum>1</manvolnum></citerefentry> to remove CR (\015) and convert unprintable characters to a visible format. 
+</para>
+
+<para>
+If <replaceable>host</replaceable> is not supplied, <command>date@</command> connects to the local host. 
+</para>
+
+<para>
+TCP port 13 is the well-known port for the Daytime service.
+Some computers respond to connections on this port with a human-readable date.
+For example, they may be running <userinput>tcpserver -R -H -l0 0 13 date</userinput> using <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>date@</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

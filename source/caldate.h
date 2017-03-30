@@ -10,7 +10,7 @@ struct caldate {
 } ;
 
 extern unsigned int caldate_fmt(char *s, const struct caldate *cd);
-extern unsigned int caldate_scan(char *s, struct caldate *cd);
+extern unsigned int caldate_scan(const char *s, struct caldate *cd);
 
 extern void caldate_frommjd(struct caldate *cd, long day, int *pwday, int *pyday);
 extern long caldate_mjd(const struct caldate *cd);

@@ -1,0 +1,62 @@
+<refentry id="delcr">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>delcr</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>delcr</refname>
+<refpurpose>removes a CR (\015) at the end of each line of input, if a CR is present.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>delcr</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>delcr</command> reads input from stdin and writes it to stdout.
+It removes a CR (\015) at the end of each line of input, if a CR is present. 
+It does not remove a CR at the end of a partial final line.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>addcr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>the reverse of this filter</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a wrapper for a command that performs CR insertion on its standard I/O</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>delcr</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

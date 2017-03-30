@@ -1,0 +1,63 @@
+<refentry id="ptyrun">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>ptyrun</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>ptyrun</refname>
+<refpurpose>wrap a pty around a program</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ptyrun</command>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>ptyrun</command> obtains a new pty and runs <replaceable>subprogram</replaceable> under it, transparently forwarding input and output.
+<command>ptyrun</command> initializes the pty to sane mode.
+</para>
+
+<para>
+Descriptors 0, 1, and 2 of <replaceable>subprogram</replaceable> are redirected to the pty; its controlling terminal is set to the pty; descriptor 3 is redirected to <filename>/dev/tty</filename>; environment variable <envar>TTY</envar> gives the name of the pty.
+</para>
+
+<para>
+When <replaceable>subprogram</replaceable> exits, <command>ptyrun</command> exits with the same exit code.
+If <replaceable>subprogram</replaceable> stops, <command>ptyrun</command> immediately sends SIGCONT to <replaceable>subprogram</replaceable>'s process group.
+</para>
+
+<para>
+<command>ptyrun</command> is a synonym for <command>ptyget</command> <command>ptyio</command> <command>ptyspawn</command>.
+<citerefentry><refentrytitle>ptyspawn</refentrytitle><manvolnum>1</manvolnum></citerefentry> options may be used with <command>ptyrun</command>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>ptyrun</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

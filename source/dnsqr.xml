@@ -1,0 +1,98 @@
+<refentry id="dnsqr">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsqr</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsqr</refname>
+<refpurpose>query a proxy DNS server using the DNS protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsqr</command>
+<arg choice='req'><replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>fqdn</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsqr</command> looks up resource records of type <replaceable>t</replaceable> for <replaceable>fqdn</replaceable> by making a Domain Name System request to the configured local proxy DNS server(s).
+It prints the results in a human-readable format, more compact than the <citerefentry><refentrytitle>dig</refentrytitle><manvolnum>1</manvolnum></citerefentry> output format.
+</para>
+
+<para>
+It expects to query a proxy DNS server, and the request is marked as recursive.
+<replaceable>t</replaceable> may be a name or a number.
+Currently recognized names are:
+<code>any</code>,
+<code>a</code>,
+<code>ns</code>,
+<code>mx</code>,
+<code>ptr</code>,
+<code>txt</code>,
+<code>cname</code>,
+<code>soa</code>,
+<code>hinfo</code>,
+<code>rp</code>,
+<code>sig</code>,
+<code>key</code>,
+<code>aaaa</code>,
+<code>axfr</code>, and
+<code>srv</code>.
+</para>
+
+<refsection>
+<title>Configuring the location of the local proxy DNS server</title>
+
+<para>
+The local proxy DNS server is configured in <filename>/etc/resolv.conf</filename>.
+This can be overridden with the <envar>DNSCACHEIP</envar> environment variable, whose value comprises a list of whitespace-separated IP addresses.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry></term>
+<listitem><para>the configuration file consulted by this program and by the C library</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to content DNS servers</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>tinydns-get</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a tool that makes direct queries against a content DNS server's database</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsqr</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -31,7 +31,7 @@ static int dorule(void (*callback)(char *,unsigned int))
   return 1;
 }
 
-static int doit(void (*callback)(char *,unsigned int),char *ip,char *host,char *info)
+static int doit(void (*callback)(char *,unsigned int),const char *ip,const char *host,const char *info)
 {
   int r;
 
@@ -90,7 +90,7 @@ static int doit(void (*callback)(char *,unsigned int),char *ip,char *host,char *
   return dorule(callback);
 }
 
-int rules(void (*callback)(char *,unsigned int),int fd,char *ip,char *host,char *info)
+int rules(void (*callback)(char *,unsigned int),int fd,const char *ip,const char *host,const char *info)
 {
   int r;
   cdb_init(&c,fd);

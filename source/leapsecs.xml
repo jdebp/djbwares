@@ -1,0 +1,96 @@
+<refentry id="leapsecs">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>leapsecs</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>leapsecs</refname>
+<refpurpose>compile the leap seconds table used by the Bernstein TAI library</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>leapsecs</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>leapsecs</command> compiles the <filename>leapsecs.dat</filename> file, that is required by the Bernstein TAI library, from a source text file.
+It reads the source text file on its standard input, and writes the compiled data file on its standard output.
+</para>
+
+<para>
+The source file is <ulink url="http://cr.yp.to/libtai/leapsecs.txt">published by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname></ulink>, amongst many others.
+The only lines that <command>leapsecs</command> cares about begin with a <code>+</code> in the first column, followed by a date in ISO 8604 form.
+The leap second written to the table is an (assumed) positive leap second on the last second of that date.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Files</title>
+
+<variablelist>
+<varlistentry>
+<term><filename>/usr/local/etc/leapsecs.dat</filename></term>
+<listitem>
+<para>
+Primary location of the leap seconds table used by the djbwares toolset.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/usr/local/share/libtai/leapsecs.dat</filename></term>
+<listitem>
+<para>
+Secondary location of the leap seconds table used by the djbwares toolset.
+This is where the database file shipped in the leapsecs package is placed on the BSDs.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/etc/leapsecs.dat</filename></term>
+<listitem>
+<para>
+Tertiary location of the leap seconds table used by the djbwares toolset.
+Primary location of the leap seconds table used by the original Bernstein TAI library.
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><filename>/usr/share/libtai/leapsecs.dat</filename></term>
+<listitem>
+<para>
+Quaternary location of the leap seconds table used by the djbwares toolset.
+This is where the database file shipped in the leapsecs package is placed on Linux operating systems.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>leapsecs</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s libtai toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

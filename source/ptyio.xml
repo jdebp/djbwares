@@ -1,0 +1,152 @@
+<refentry id="ptyio">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>ptyio</refentrytitle>
+<manvolnum>8</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>ptyio</refname>
+<refpurpose>feed input to a pty and print its output</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ptyio</command>
+<arg choice='opt'>-t</arg>
+<arg choice='opt'>-T</arg>
+<arg choice='opt'>-r</arg>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>ptyio</command> copies its input to the master side of a pty.
+Meanwhile, it prints all output that shows up from the master.
+</para>
+
+<para>
+<command>ptyio</command> runs <replaceable>subprogram</replaceable> as a child process (not a process group leader).
+It supplies a "job control" pipe to <replaceable>subprogram</replaceable> as descriptor 9.
+After the pipe closes, <command>ptyio</command> will wait for <replaceable>subprogram</replaceable> to exit; then <command>ptyio</command> will exit with the same exit code.
+</para>
+
+<para>
+If <command>ptyio</command> reaches EOF or sees an error on its input, it stops reading input, but it continues printing output.
+If <command>ptyio</command> sees an error on its output, it sends SIGPIPE to <replaceable>subprogram</replaceable> and stops writing output.
+</para>
+
+<para>
+<command>ptyio</command> must be invoked with descriptor 4 pointing to the pty master and descriptor 5 pointing to the pty slave.
+It passes these descriptors to <replaceable>subprogram</replaceable>.
+It must also be invoked with environment variable <envar>TTY</envar> giving the name of the pty slave.
+It passes this variable to <replaceable>subprogram</replaceable>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Options</title>
+
+<variablelist>
+
+<varlistentry>
+<term><arg choice='plain'>-t</arg></term>
+<listitem><para>Attached to a tty.</para>
+<para>
+<command>ptyio</command> must be attached to a tty in one of the following places: descriptor 3; <filename>/dev/tty</filename> (i.e. controlling TTY); descriptor 2; descriptor 0; descriptor 1.
+Before running <replaceable>subprogram</replaceable>, <command>ptyio</command> sets the attached tty to raw mode, and copies the original mode to the pty.
+Before exiting, <command>ptyio</command> restores the original mode of the attached tty.
+</para>
+
+<para>
+Whenever <replaceable>subprogram</replaceable> writes a byte to the job control pipe, <command>ptyio</command> stops itself, using the stop signal given by that byte.
+It restores the mode of the attached tty before stopping.
+After <command>ptyio</command> continues, it sets the attached tty to raw mode again, and then sends SIGCONT to <replaceable>subprogram</replaceable>
+</para>
+
+<para>
+<command>ptyio</command> passes window-size changes through to the pty.
+</para>
+
+<para>
+Many programs handle tty modes incorrectly when they are run in the background; for example, try
+</para>
+
+<programlisting>
+(sleep 2;vi) &amp;; vi
+</programlisting>
+
+<para>
+<command>ptyio</command> handles this situation correctly.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg choice='plain'>-T</arg></term>
+<listitem><para>(Default.) Not attached to a tty.</para>
+<para>
+Before running <replaceable>subprogram</replaceable>, <command>ptyio</command> sets the pty mode to sane mode.
+Whenever <replaceable>subprogram</replaceable> writes a byte to the job control pipe, <command>ptyio</command> sends SIGCONT to <replaceable>subprogram</replaceable>.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg choice='plain'>-r</arg></term>
+<listitem><para>(Obsolete.) Remote mode.</para>
+<para>
+Before running <replaceable>subprogram</replaceable>, <command>ptyio</command> sets the pty mode to raw mode, and enables TIOCREMOTE on the master.
+After reaching end of file on standard input, <command>ptyio</command> writes 0-byte packets to the pty master, which (with correct TIOCREMOTE implementations) produces end-of-file for any program reading the pty slave.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>Raw mode</title>
+
+<para>
+Raw mode eliminates input echoing, input line buffering, input line editing, input signals (control-C producing SIGINT, control-Z producing SIGTSTP, etc.), output conversion of LF to CR LF, and XON/XOFF flow control.
+It is, unfortunately, not completely clean: if too much tty input arrives at once, the kernel will discard characters.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Sane mode</title>
+
+<para>
+Sane mode supports input echoing, input line buffering, input signals, input conversion of CR to LF, 8-bit input, output conversion of LF to CR LF, and XON/XOFF flow control.
+It supports the following keys: delete for ERASE, control-backslash for QUIT, control-C for INTR, control-D for EOF, control-O for DISCARD, control-R for REPRINT, control-T for STATUS, control-U for KILL, control-V for LNEXT, control-W for WERASE, control-Y for DSUSP, and control-Z for SUSP.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>ptyio</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

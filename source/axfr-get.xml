@@ -1,0 +1,112 @@
+<refentry id="axfr-get">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>axfr-get</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>axfr-get</refname>
+<refpurpose>perform old-style "zone transfer" database replication.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>axfr-get</command>
+<arg choice='req'><replaceable>apex</replaceable></arg>
+<arg choice='req'><replaceable>data</replaceable></arg>
+<arg choice='req'><replaceable>tmp</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>axfr-get</command> is a UCSPI-TCP/UCSPI-SSL client program that copies DNS data from a content DNS server across the network, using the old-style "zone transfer" mechanism.
+It sends a "zone transfer" request over the network to the server, reads the results back, and saves them in a database source file, the input that is compiled by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It expects to be run via a program such as <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> which makes the network connection to the server and sets up UCSPI environment variables.
+</para>
+
+<para>
+<command>axfr-get</command> performs a zone transfer for domain <replaceable>apex</replaceable> and updates <replaceable>data</replaceable> atomically. 
+It writes the results to <replaceable>tmp</replaceable> and renames that replacement into place as <replaceable>data</replaceable> when it has completed the "zone transfer", completely and successfully built the data file, and written it to disc.
+<replaceable>tmp</replaceable> and <replaceable>data</replaceable> thus must be on the same filesystem. 
+</para>
+
+<para>
+<command>axfr-get</command> writes the zone serial number as a comment at the top of the data file.
+It skips the zone transfer, leaving <replaceable>data</replaceable> alone, if <replaceable>data</replaceable> already exists, <replaceable>data</replaceable> has a serial number matching the zone serial number, and both serial numbers are nonzero. 
+</para>
+
+<para>
+Zone transfers often include duplicate records. 
+To eliminate them, you should feed the <command>axfr-get</command> results through <command>sort</command> <arg choice='plain'>-u</arg> before compiling them. 
+</para>
+
+<para>
+<command>axfr-get</command> discards all records not at or beneath the domain <replaceable>apex</replaceable>. 
+It accepts records for domain names in child zones, i.e. for domain names beneath delegation points, but since those delegation points are there <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> will not report those records except as glue. 
+If you plan to merge the <command>axfr-get</command> results for a domain and a child of the same domain, creating a single database source file encompassing both zones, make sure to eliminate records in the first output that are within the child zone. 
+</para>
+
+<para>
+<command>axfr-get</command> will accept arbitrarily large zone transfers.
+To limit the maximum file size to (for example) 1 megabyte, run <command>axfr-get</command> under <command>softlimit</command> <arg choice='plain'>-f</arg> <arg choice='plain'>1048576</arg>. 
+</para>
+
+<refsection>
+<title>Compatibility</title>
+
+<para>
+<command>axfr-get</command> handles BIND's RFC-1034-violating multiple-answers zone-transfer format. 
+</para>
+
+<para>
+There are some side effects of the behaviour of <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> (q.v.) that mean that what is published from a "zone transfer" replica will not appear as in the original:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+BIND's handling of wildcards such as <filename>*.example</filename> is not precisely simulated. 
+Under BIND, records for <filename>*.example</filename> do not apply to <filename>y.example</filename> or <filename>anything.y.example</filename> if there is a normal record for <filename>x.y.example</filename>. 
+With <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, the wildcard records apply to <filename>y.example</filename> and <filename>anything.y.example</filename> except <filename>x.y.example</filename>. 
+</para>
+</listitem>
+<listitem>
+<para>
+BIND's handling of multiple IP addresses for a single name are not precisely simulated if there are more than 8 of them.
+</para>
+</listitem>
+</itemizedlist>
+
+<para>
+The "zone transfer" mechanism is incapable of carrying all of the information that can be contained in a database source file.
+Do not use it to replicate from one <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> server to another.
+Use an ordinary remote file copying program such as <citerefentry><refentrytitle>rsync</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>axfr-get</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

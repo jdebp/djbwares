@@ -1,0 +1,201 @@
+<refentry id="gopherd">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>gopherd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>gopherd</refname>
+<refpurpose>UCSPI-TCP GOPHER server for static content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>gopherd</command>
+<arg choice='req'><replaceable>root</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+gopherd prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
+</para>
+
+<para>
+gopherd accepts requests on standard input in GOPHER and GOPHER+ formats.
+It supports three types of GOPHER+ request: "!" (information), "$" (directory), and "+" (view).
+</para>
+
+<para>
+To each request it responds on standard output.
+</para>
+
+<itemizedlist>
+<listitem><para>
+For GOPHER and information ("!") GOPHER+ requests it just prints the response and exits.
+(Information responses are printed in GOPHER format.
+This avoids a bug in some GOPHER+ clients that cannot accept information responses in GOPHER+ format.)
+</para></listitem>
+<listitem><para>
+For directory ("$") and view ("+") GOPHER+ requests it permits multiple transactions over a single connection.
+It prints the response, in explicitly-length-counted format, and attempts to accept another request on standard input.
+</para></listitem>
+</itemizedlist>
+
+<para>
+If gopherd does not like the request, it prints an error response and exits.
+If gopherd runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
+gopherd also prints local log information on standard error.
+</para>
+
+<para>
+Normally gopherd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle GOPHER connections from hosts around the Internet.
+</para>
+
+<refsection>
+<title>File handling</title>
+
+<para>
+gopherd determines its local host name <replaceable>v</replaceable> as explained in the section on "gophermap"s.
+It uses this in conjunction with the selector provided in the request by the client.
+</para>
+
+<para>
+A request for selector <code><replaceable>f</replaceable></code> not ending in a slash refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+</para>
+
+<itemizedlist>
+<listitem><para>
+GOPHER and view ("+") GOPHER+ requests obtain the file contents as they stand.
+(Note that a direct request for selector <code><replaceable>f</replaceable>/index.gopher</code> will thus retrieve the raw "gophermap".)
+</para></listitem>
+<listitem><para>
+Information ("!") GOPHER+ requests obtain the file metadata.
+</para></listitem>
+<listitem><para>
+Directory ("$") GOPHER+ requests are an error for this kind of selector and generate an error response.
+</para></listitem>
+</itemizedlist>
+
+<para>
+A request for selector <code><replaceable>f</replaceable>/</code> ending in a slash refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable>/index.gopher</filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+gopherd does not generate its own directory listings.
+</para>
+
+<itemizedlist>
+<listitem><para>
+GOPHER and view ("+") GOPHER+ requests obtain the file contents treated as a "gophermap".
+The "gophermap" is converted into a TAB-delimited multiple-record gopher menu.
+</para></listitem>
+<listitem><para>
+Information ("!") GOPHER+ requests obtain the file metadata.
+(The metadata of a directory's "gophermap" is thus seen as the directory's medatadata.)
+</para></listitem>
+<listitem><para>
+Directory ("$") GOPHER+ requests obtain the file contents treated as a "gophermap".
+The "gophermap" is converted into a series of information responses.
+</para></listitem>
+</itemizedlist>
+
+<para>
+If the file does not exist or is unopenable, gopher prints an error response and exits.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Gophermaps</title>
+
+<para>
+A gophermap is a slightly modified form of an ordinary TAB-delimited GOPHER menu.
+The modifications aim to enable "gophermap"s to be position independent, and are twofold:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+The second field of every record may be zero-length or not begin with a slash, in which case gopherd prepends the selector <replaceable>f</replaceable> used to obtain the "gophermap" itself and a slash.
+This allows the selectors in the second field to be relative pathnames.
+</para>
+</listitem>
+<listitem>
+<para>
+The third and fourth fields of every record may be zero-length, in which case gopherd substitutes its own local host name and port number.
+The local host name and port number are taken from UCSPI-TCP or UCSPI-SSL environment variables, in particular the <envar>PROTO</envar>, <envar>SSLLOCALHOST</envar>/<envar>TCPLOCALHOST</envar>, <envar>SSLLOCALIP</envar>/<envar>TCPLOCALIP</envar>, and <envar>SSLLOCALPORT</envar>/<envar>TCPLOCALPORT</envar> environment variables.
+The fallback local host name in the event of none of this information being provided is <filename>0</filename>.
+The fallback local port number in the event of none of this information being provided is <filename>70</filename>.
+</para>
+</listitem>
+</itemizedlist>
+
+</refsection>
+
+<refsection>
+<title>Unsupported features</title>
+
+<para>
+gopherd does not support modification requests such as (non-zero-length) GOPHER+ request data.
+</para>
+
+<para>
+gopherd does not support search engines.
+It ignores information item selection in "!" and "$" GOPHER+ requests, and view selection in "+" GOPHER+ requests.
+</para>
+</refsection>
+
+</refsection>
+<refsection>
+<title>Security</title>
+
+<para>
+gopherd chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
+gopherd does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
+</para>
+
+<para>
+gopherd will refuse to read a file if the file
+</para>
+
+<itemizedlist>
+<listitem><para>
+is unreadable to user;
+</para></listitem>
+<listitem><para>
+is unreadable to group;
+</para></listitem>
+<listitem><para>
+is unreadable to world;
+</para></listitem>
+<listitem><para>
+is world-executable without being user-executable; or
+</para></listitem>
+<listitem><para>
+is anything other than a regular file: a directory, socket, device, etc.
+</para></listitem>
+</itemizedlist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>gopherd</command> was added to the djbwares toolset in 2017.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -1,0 +1,100 @@
+<refentry id="rbldns-data">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>rbldns-data</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>rbldns-data</refname>
+<refpurpose>compile the database used by rbldns</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>rbldns-data</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>rbldns-data</command> compiles a database in source form, in the file <filename>data</filename>, into a compiled form, in the file <filename>data.cdb</filename>, that is used by <citerefentry><refentrytitle>rbldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The compiled database in <filename>data.cdb</filename> is a Bernstein Constant Database file.
+</para>
+
+<para>
+<command>rbldns-data</command> updates <filename>data.cdb</filename> atomically, building a replacement in <filename>data.cdb.tmp</filename> and atomically renaming that replacement into place when it has completely and successfully built it it and written it to disc.
+So you can use it safely while <citerefentry><refentrytitle>rbldns</refentrytitle><manvolnum>1</manvolnum></citerefentry> is running.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Data format</title>
+
+<para>
+Trailing whitespace is removed from all lines, then all non-empty lines are recognized as follows:
+</para>
+
+<variablelist>
+
+<varlistentry>
+<term><code>#<replaceable>comment</replaceable></code></term>
+<listitem><para>
+Comments are ignored.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>:<replaceable>addr</replaceable>:<replaceable>message</replaceable></code></term>
+<listitem><para>
+A record DNS queries are to be answered with <replaceable>addr</replaceable>.
+TXT record DNS queries are to be answered with <replaceable>message</replaceable>.
+</para><para>
+For example: <code>:127.0.0.2:See http://rbl.example.com/why/$</code>
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code><replaceable>ip</replaceable></code></term>
+<listitem><para>
+The IP address <replaceable>ip</replaceable> is on the RBL blacklist/whitelist.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code><replaceable>ip</replaceable>/<replaceable>n</replaceable></code></term>
+<listitem><para>
+All IP addresses that share the first <replaceable>n</replaceable> bits of <replaceable>ip</replaceable> are on the RBL blacklist/whitelist.
+This is CIDR notation.
+<replaceable>n</replaceable> must be at least 8; and all bits of <replaceable>ip</replaceable> past the <replaceable>n</replaceable>th must be 0.
+</para><para>
+For example: <code>1.2.3.0/24</code> means all <code>1.2.3.*</code> addresses.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>rbldns-data</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

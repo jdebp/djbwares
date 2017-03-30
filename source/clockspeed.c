@@ -2,6 +2,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "readwrite.h"
 #include "exit.h"
 #include "select.h"

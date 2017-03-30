@@ -1,11 +1,11 @@
 <refentry id="taiclock">
 
-<refmeta>
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
 <refentrytitle>taiclock</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class="manual">user commands</refmiscinfo>
 <refmiscinfo class="source">djbwares</refmiscinfo>
-<refmiscinfo class="version">2</refmiscinfo>
+<xi:include href="version.xml" />
 </refmeta>
 
 <refnamediv>
@@ -59,10 +59,17 @@ This is suitable for input to programs such as <citerefentry><refentrytitle>cloc
 </refsection>
 
 <refsection>
+<title>History</title>
+<para>
+<command>taiclock</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+</para>
+</refsection>
+
+<refsection>
 <title>Author</title>
 <para>
-Original code and documentation by Daniel J. Bernstein.
-Documentation modernizations by Jonathan de Boyne Pollard.
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

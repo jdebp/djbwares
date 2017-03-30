@@ -1,0 +1,77 @@
+<refentry id="sntpclock">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>sntpclock</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>sntpclock</refname>
+<refpurpose>check a system's clock through NTP</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>sntpclock</command>
+<arg choice='req'><replaceable>host</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>sntpclock</command> connects to an NTP server on <replaceable>host</replaceable>.
+<replaceable>host</replaceable> must be a dotted-decimal IP address.
+</para>
+
+<para>
+<command>sntpclock</command> prints to its standard output a 16-byte TAI64NA adjustment that, when added to the local UNIX clock, will produce the TAI clock on <replaceable>host</replaceable>.
+This is suitable for input to programs such as <citerefentry><refentrytitle>clockadd</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>clockview</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>sntpclock</command> limits the adjustment to 2 days.
+</para>
+
+<para>
+<command>sntpclock</command> does not bind to port 123; this means that it does not need to run as <code>root</code>.
+Note that some firewalls will not permit <command>sntpclock</command> requests.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Notes</title>
+
+<para>
+An NTP timestamp is a count of non-leap seconds.
+<command>sntpclock</command> uses a local leap-second table to convert the NTP timestamp to TAI with an epoch of 1970-01-01 00:00:10 TAI.
+For a discussion of the difference between UTC and TAI see <ulink url="http://cr.yp.to/proto/utctai.html">UTC and TAI</ulink>.
+</para>
+
+<para>
+The current NTP time scale will break down in 2036.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>sntpclock</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

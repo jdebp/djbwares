@@ -1,0 +1,83 @@
+<refentry id="dnsfilter">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsfilter</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsfilter</refname>
+<refpurpose>filter a stream, looking up the domain names of any IP addresses</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsfilter</command>
+<arg choice='opt'>-c <replaceable>queries</replaceable></arg>
+<arg choice='opt'>-l <replaceable>lines</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsfilter</command> is a filter that reads its standard input, writing it to its standard output.
+Any lines in its input that begin with an IP address are modified to include the domain name that that IP address maps to in the Domain Name System, if available; other lines are passed through as-is.
+</para>
+
+<para>
+If an IP address does not have a domain name listed in the DNS, <command>dnsfilter</command> leaves the line alone. 
+If an IP address has a domain name listed in the DNS, <command>dnsfilter</command> inserts an equals sign and the domain name before the first space or tab in the line. 
+If a DNS lookup fails temporarily, <command>dnsfilter</command> inserts a colon and a dash-separated error message before the first space or tab in the line. 
+</para>
+
+<para>
+While <command>dnsfilter</command> is looking up an address in the DNS, it reads ahead in the input and looks for more addresses to look up in parallel. 
+</para>
+
+</refsection>
+
+<refsection>
+<title>Options</title>
+
+<variablelist>
+<varlistentry>
+<term><arg choice='plain'>-c <replaceable>n</replaceable></arg></term>
+<listitem>
+<para>
+Do at most <replaceable>n</replaceable> DNS queries in parallel. Default: 10. 
+</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg choice='plain'>-l <replaceable>n</replaceable></arg></term>
+<listitem>
+<para>
+Read ahead at most <replaceable>n</replaceable> lines. Default: 1000.
+</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsfilter</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

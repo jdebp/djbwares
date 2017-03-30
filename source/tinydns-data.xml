@@ -1,0 +1,469 @@
+<refentry id="tinydns-data">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tinydns-data</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tinydns-data</refname>
+<refpurpose>compile the database used by tinydns</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tinydns-data</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>tinydns-data</command> compiles a database in source form, in the file <filename>data</filename>, into a compiled form, in the file <filename>data.cdb</filename>, that is used by <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The compiled database in <filename>data.cdb</filename> is a Bernstein Constant Database file.
+</para>
+
+<para>
+<command>tinydns-data</command> updates <filename>data.cdb</filename> atomically, building a replacement in <filename>data.cdb.tmp</filename> and atomically renaming that replacement into place when it has completely and successfully built it it and written it to disc.
+So you can use it safely while <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> is running.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Data format</title>
+
+<para>
+The DNS information in <filename>data</filename> is a series of lines.
+It is very easy for programs to edit; and can be mainpulated with with UNIX tools such as <citerefentry><refentrytitle>awk</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>sed</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+There are several types of lines, as shown below. 
+</para>
+
+<para>
+Each line starts with a special character and continues with a series of colon-separated fields. 
+In some cases the fields may be omitted; however, all colons must be included except at the end of the line. 
+Spaces and tabs at the end of a line are ignored.
+Blank lines are ignored. 
+</para>
+
+<refsection>
+<title>IP addresses</title>
+
+<para>
+Many lines contain an <replaceable>ip</replaceable> field that is an IP address.
+</para>
+
+<para>
+IPv4 addresses are written in the conventional human-readable form: 192.0.2.234, 10.20.40.80
+</para>
+
+<para>
+IPv6 addresses are written in the conventional human-readable form, except that (since they are field separator characters here) colons are changed to underscores and the double-colon convention is not used.
+All addresses must have all 8 groups: 2001_bd8_3_4_5_6_7_8, fd57_8012_f61c_0_20a2_9013_7ec4_7ab3
+</para>
+
+</refsection>
+
+<refsection>
+<title>Timestamps and scheduled changes</title>
+
+<para>
+Each line contains a <replaceable>ttl</replaceable> ("time to live") specifying the number of seconds that the line's DNS records may be cached.
+Beware that cache times below 300 seconds will be treated as 300 by some clients, and NS cache times below 2 seconds can cause lookup failures.
+You may omit <replaceable>ttl</replaceable>; <command>tinydns-data</command> will use default cache times, carefully selected to work well in normal situations.
+</para>
+
+<para>
+You may include a timestamp on each line. 
+If <replaceable>ttl</replaceable> is nonzero (or omitted), the timestamp is a starting time for the information in the line; the line will be ignored before that time.
+If <replaceable>ttl</replaceable> is zero, the timestamp is an ending time ("time to die") for the information in the line; <command>tinydns</command> dynamically adjusts <replaceable>ttl</replaceable> so that the line's DNS records are not cached for more than a few seconds past the ending time.
+A timestamp is an external TAI64 timestamp, printed as 16 lowercase hexadecimal characters.
+For example, the lines 
+<literallayout><programlisting>+www.heaven.af.mil:192.0.2.234:0:4000000038af1379
++www.heaven.af.mil:192.0.2.235::4000000038af1379</programlisting></literallayout> specify that <filename>www.heaven.af.mil</filename> will have address 192.0.2.234 until time 4000000038af1379 (2000-02-19 22:04:31 UTC) and will then switch to IP address 192.0.2.235. 
+</para>
+
+</refsection>
+
+<refsection>
+<title>Client locations</title>
+
+<para>
+You may include a client location <replaceable>lo</replaceable> on each line. 
+The line is ignored for clients outside that location. 
+Client locations are specified by % lines: 
+<literallayout><programlisting> %<replaceable>lo</replaceable>:<replaceable>ipprefix</replaceable></programlisting></literallayout> means that IP addresses starting with <replaceable>ipprefix</replaceable> are in location <replaceable>lo</replaceable>. 
+<replaceable>lo</replaceable> is a sequence of one or two ASCII letters. 
+A client is in only one location; longer prefixes override shorter prefixes. 
+For example, 
+<literallayout><programlisting>%in:192.168
+%ex
++jupiter.heaven.af.mil:192.168.1.2:::in
++jupiter.heaven.af.mil:192.0.2.234:::ex</programlisting></literallayout> specifies that <filename>jupiter.heaven.af.mil</filename> has address 192.168.1.2 for clients in the 192.168.* network and address 192.0.2.234 for everyone else.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Line types</title>
+
+<variablelist>
+
+<varlistentry>
+<term>
+<programlisting>
+#<replaceable>comment</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Comment line. 
+The line is ignored. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+.<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Apex name server for domain <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+an NS ("name server") record showing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as a name server for <replaceable>fqdn</replaceable>; 
+</para></listitem>
+<listitem><para>
+an A ("address") record showing ip as the IP address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>; and 
+</para></listitem>
+<listitem><para>
+an SOA ("start of authority") record for <replaceable>fqdn</replaceable> listing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as the primary name server and <filename>hostmaster@<replaceable>fqdn</replaceable></filename> as the contact address. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+You may have several name servers for one domain, with a different <replaceable>x</replaceable> for each server. 
+</para>
+<para>
+If <replaceable>x</replaceable> contains a dot then <command>tinydns-data</command> will use <replaceable>x</replaceable> as the server name rather than <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
+This feature is provided only for compatibility reasons; names not ending with <replaceable>fqdn</replaceable> will force clients to contact parent servers much more often than they otherwise would, and will reduce the overall reliability of DNS. 
+You should omit <replaceable>ip</replaceable> if <replaceable>x</replaceable> has IP addresses assigned elsewhere in the data file; in this case, <command>tinydns-data</command> will omit the A record. 
+</para>
+<para>
+Examples: 
+</para>
+<para>
+<literallayout><programlisting>.panic.mil:1.8.7.55:a</programlisting></literallayout> creates an NS record showing <filename>a.ns.panic.mil</filename> as a name server for <filename>panic.mil</filename>, an A record showing 1.8.7.55 as the IP address of <filename>a.ns.panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+</para>
+<para>
+<literallayout><programlisting>.panic.mil:1.8.7.56:dns2.panic.mil</programlisting></literallayout> creates an NS record showing <filename>dns2.panic.mil</filename> as a name server for <filename>panic.mil</filename>, an A record showing 1.8.7.56 as the IP address of <filename>dns2.panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+</para>
+<para>
+<literallayout><programlisting>.panic.mil::a.ns.heaven.af.mil</programlisting></literallayout> creates an NS record showing <filename>a.ns.heaven.af.mil</filename> as a name server for <filename>panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+&#x26;<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Delegation to name server for domain <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+an NS record showing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as a name server for <replaceable>fqdn</replaceable> and 
+</para></listitem>
+<listitem><para>
+an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+Normally &#x26; is used for domains delegated by this server to child servers, while . is used for domains delegated to this server. 
+</para>
+<para>
+You may have several name servers for one domain, with a different <replaceable>x</replaceable> for each server. 
+If <replaceable>x</replaceable> contains a dot then it is treated specially; as for . lines. 
+</para>
+<para>
+Examples: 
+</para>
+<para>
+<literallayout><programlisting>&#x26;serious.panic.mil:1.8.248.6:a</programlisting></literallayout> creates an NS record showing <filename>a.ns.serious.panic.mil</filename> as a name server for <filename>serious.panic.mil</filename>, and an A record showing 1.8.248.6 as the IP address of <filename>a.ns.serious.panic.mil</filename>. 
+</para>
+<para>
+<literallayout><programlisting>&#x26;serious.panic.mil:1.8.248.7:ns7.panic.mil</programlisting></literallayout> creates an NS record showing <filename>ns7.panic.mil</filename> as a name server for <filename>serious.panic.mil</filename>, and an A record showing 1.8.248.7 as the IP address of <filename>ns7.panic.mil</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+=<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Host <replaceable>fqdn</replaceable> with IP address <replaceable>ip</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+an A record showing <replaceable>ip</replaceable> as the IP address of <replaceable>fqdn</replaceable> and 
+</para></listitem>
+<listitem><para>
+a PTR ("pointer") record showing <replaceable>fqdn</replaceable> as the name of d.c.b.a.in-addr.arpa if ip is a.b.c.d. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+Remember to specify name servers for some suffix of <replaceable>fqdn</replaceable>; otherwise tinydns will not respond to queries about <replaceable>fqdn</replaceable>. 
+The same comment applies to other records described below. 
+Similarly, remember to specify name servers for some suffix of d.c.b.a.in-addr.arpa, if that domain has been delegated to you. 
+</para>
+<para>
+Example: 
+</para>
+<para>
+<literallayout><programlisting>=button.panic.mil:1.8.7.108</programlisting></literallayout> creates an A record showing 1.8.7.108 as the IP address of <filename>button.panic.mil</filename>, and a PTR record showing <filename>button.panic.mil</filename> as the name of <filename>108.7.8.1.in-addr.arpa</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
++<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Server side alias <replaceable>fqdn</replaceable> with IP address <replaceable>ip</replaceable>. 
+This is just like =<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable> except that <command>tinydns-data</command> does not create the PTR record. 
+</para>
+<para>
+Example: 
+</para>
+<para>
+<literallayout><programlisting>+button.panic.mil:1.8.7.109</programlisting></literallayout> creates an A record showing 1.8.7.109 as another IP address for <filename>button.panic.mil</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+-<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+This type of line is used by programs that automatically edit + lines in data to temporarily exclude addresses of overloaded or dead machines. 
+The line is ignored. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+@<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>dist</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Mail exchanger for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+an MX ("mail exchanger") record showing <filename><replaceable>x</replaceable>.mx.<replaceable>fqdn</replaceable></filename> as a mail exchanger for <replaceable>fqdn</replaceable> at distance <replaceable>dist</replaceable> and 
+</para></listitem>
+<listitem><para>
+an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.mx.<replaceable>fqdn</replaceable></filename>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+You may omit <replaceable>dist</replaceable>; the default distance is 0. 
+If <replaceable>x</replaceable> contains a dot then it is treated specially; see above. 
+You may create several MX records for <replaceable>fqdn</replaceable>, with a different <replaceable>x</replaceable> for each server. 
+Make sure to arrange for the SMTP server on each IP address to accept mail for <replaceable>fqdn</replaceable>. 
+</para>
+<para>
+Example: 
+</para>
+<para>
+<literallayout><programlisting>@panic.mil:1.8.7.88:mail.panic.mil</programlisting></literallayout> creates an MX record showing <filename>mail.panic.mil</filename> as a mail exchanger for <filename>panic.mil</filename> at distance 0, and an A record showing 1.8.7.88 as the IP address of <filename>mail.panic.mil</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+'<replaceable>fqdn</replaceable>:<replaceable>s</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+TXT ("text") record for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+a TXT record for <replaceable>fqdn</replaceable> containing the string <replaceable>s</replaceable>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+You may use octal \nnn codes to include arbitrary bytes inside <replaceable>s</replaceable>; for example, \072 is a colon. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+^<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+PTR record for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+a PTR record for <replaceable>fqdn</replaceable> pointing to the domain name <replaceable>p</replaceable>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+Usually a = line is a more convenient way to create a mapping from an IP address to a domain name.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+C<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Client side alias <replaceable>fqdn</replaceable> with target <replaceable>p</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+a CNAME record for <replaceable>fqdn</replaceable> pointing to the domain name <replaceable>p</replaceable>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+Don't use C<replaceable>fqdn</replaceable> if there are any other records for <replaceable>fqdn</replaceable>. 
+Don't use C<replaceable>fqdn</replaceable> for common aliases; use +<replaceable>fqdn</replaceable> instead. 
+Remember the wise words of Inigo Montoya: "You keep using CNAME records. I do not think they mean what you think they mean." 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+Z<replaceable>fqdn</replaceable>:<replaceable>mname</replaceable>:<replaceable>rname</replaceable>:<replaceable>ser</replaceable>:<replaceable>ref</replaceable>:<replaceable>ret</replaceable>:<replaceable>exp</replaceable>:<replaceable>min</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+SOA record for <replaceable>fqdn</replaceable> showing <replaceable>mname</replaceable> as the primary name server, <replaceable>rname</replaceable> (with the first . converted to @) as the contact address, <replaceable>ser</replaceable> as the serial number, <replaceable>ref</replaceable> as the refresh time, <replaceable>ret</replaceable> as the retry time, <replaceable>exp</replaceable> as the expire time, and <replaceable>min</replaceable> as the minimum time. 
+</para>
+<para>
+<replaceable>ser</replaceable>, <replaceable>ref</replaceable>, <replaceable>ret</replaceable>, <replaceable>exp</replaceable>, and <replaceable>min</replaceable> may be omitted; they default to, respectively, the modification time of the data file, 16384 seconds, 2048 seconds, 1048576 seconds, and 2560 seconds. 
+</para>
+<para>
+Usually a . line is a more convenient way to create SOA records.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>
+:<replaceable>fqdn</replaceable>:<replaceable>n</replaceable>:<replaceable>rdata</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+Generic record for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+a record of type <replaceable>n</replaceable> for <replaceable>fqdn</replaceable> showing <replaceable>rdata</replaceable>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+<replaceable>n</replaceable> must be an integer between 1 and 65535; it must not be 2 (NS), 5 (CNAME), 6 (SOA), 12 (PTR), 15 (MX), or 252 (AXFR). 
+The proper format of <replaceable>rdata</replaceable> depends on <replaceable>n</replaceable>. 
+You may use octal \nnn codes to include arbitrary bytes inside <replaceable>rdata</replaceable>.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>Example</title>
+
+<para>
+A typical data file:
+<literallayout><programlisting>=lion.heaven.af.mil:1.2.3.4
+@heaven.af.mil:1.2.3.4
+@3.2.1.in-addr.arpa:1.2.3.4
+
+=tiger.heaven.af.mil:1.2.3.5
+.heaven.af.mil:1.2.3.5:a
+.3.2.1.in-addr.arpa:1.2.3.5:a
+
+=bear.heaven.af.mil:1.2.3.6
+.heaven.af.mil:1.2.3.6:b
+.3.2.1.in-addr.arpa:1.2.3.6:b
+
+=cheetah.heaven.af.mil:1.2.3.248
+=panther.heaven.af.mil:1.2.3.249 </programlisting></literallayout>
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tinydns-data</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

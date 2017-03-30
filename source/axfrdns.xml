@@ -1,0 +1,104 @@
+<refentry id="axfrdns">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>axfrdns</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>axfrdns</refname>
+<refpurpose>a UCSPI-TCP general-purpose content DNS server </refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>axfrdns</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>axfrdns</command> is a content DNS server that speaks the DNS/TCP protocol.
+It accepts DNS queries on its standard input, and responds with locally configured information on its standard output.
+It is used for the "zone transfer" mechanism and for where the response size exceeds the packet size for the DNS/UDP protocol.
+</para>
+
+<para>
+Normally <command>axfrdns</command> is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle DNS/TCP connections from hosts around the Internet.
+It can also be run under a UCSPI-SSL server program.
+When it starts it changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>axfrdns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It provides "zone transfer" results from that file; and also answers normal client queries, such as the SOA queries sent via DNS/TCP that usually precede "zone transfer" requests.
+</para>
+
+<para>
+<command>axfrdns</command> aborts if it runs out of memory, or has trouble reading <filename>data.cdb</filename>, or receives a request larger than 512 bytes, or receives a truncated request, or receives a non-Internet-class query, or receives an inverse query, or receives a query containing anything other than a single query, or receives a request not answered by <filename>data.cdb</filename>, or waits 60 seconds with nothing happening.
+</para>
+
+<refsection>
+<title>Zone transfer</title>
+
+<para>
+The UCSPI-TCP or UCSPI-SSL server is responsible for rejecting connections from clients that are not authorized to perform "zone transfers", and for setting up control variables that limit authorized clients.
+</para>
+
+<para>
+<command>axfrdns</command> allows "zone transfers" for any domain name listed in the value of the <envar>AXFR</envar> environment variable, which is a slash-separated list of domain names.
+If <envar>AXFR</envar> is not set <command>axfrdns</command> allows "zone transfers" for all domain names that exist in <filename>data.cdb</filename>.
+For any "zone transfer" request that is not allowed by <envar>AXFR</envar>, it aborts.
+</para>
+
+<para>
+<command>axfrdns</command> provides every record that it can find inside the target domain. 
+This may include records that are, to the client, in child zones. 
+Some of these records (such as "glue" inside a child zone) are essential; others are not. 
+It is up to the client to decide which out-of-zone records to keep.
+<command>axfrdns</command> does not provide glue records outside the target domain.
+</para>
+
+<para>
+The "zone transfer" protocol does not support timestamps. 
+If a record is scheduled to be created in the future, <command>axfrdns</command> does not send it; after the starting time, the "zone transfer" client will continue claiming that the record doesn't exist, until it contacts <command>axfrdns</command> again. 
+Similarly, if a record is scheduled to die in the future, <command>axfrdns</command> sends it (with a 2-second TTL); after the ending time, the "zone transfer" client will continue providing the old record, until it contacts <command>axfrdns</command> again.
+</para>
+
+<para>
+"Zone transfer" clients rely on SOA serial numbers changing for every zone modification.
+<citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry> uses the modification time of the data file as its serial number for all zones. 
+So do not make more than one modification per second.
+</para>
+
+<para>
+BIND's "zone transfer" client, <command>named-xfer</command>, converts "zone transfer" data to zone-file format. 
+Beware: that zone-file format has no generic mechanism to express records of arbitrary types; <command>named-xfer</command> chokes if it does not recognize a record type used in <filename>data.cdb</filename>.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>axfrdns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

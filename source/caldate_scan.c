@@ -2,10 +2,10 @@
 
 #include "caldate.h"
 
-unsigned int caldate_scan(char *s, struct caldate *cd)
+unsigned int caldate_scan(const char *s, struct caldate *cd)
 {
   int sign = 1;
-  char *t = s;
+  const char *t = s;
   unsigned long z;
   unsigned long c;
 

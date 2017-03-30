@@ -84,8 +84,8 @@ do
 done
 
 case "`uname`" in
-Linux)	prefix="" ;;
+Linux)	prefix="usr" ;;
 *BSD)	prefix="usr/local" ;;
 esac
-install -d -m 0755 "${dest}/leapsecs/${prefix}/etc/" 
-ln -f -- "${src}"/etc/leapsecs.dat "${dest}/leapsecs/${prefix}/etc/"
+install -d -m 0755 "${dest}/leapsecs/${prefix}/share/libtai/" 
+ln -f -- "${src}"/etc/leapsecs.dat "${dest}/leapsecs/${prefix}/share/libtai/"

@@ -1,0 +1,65 @@
+<refentry id="tcpcat">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tcpcat</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tcpcat</refname>
+<refpurpose>gets data from a remote host.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tcpcat</command>
+<arg choice='opt'><replaceable>host</replaceable><arg choice='opt'><replaceable>port</replaceable></arg> </arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>tcpcat</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port <replaceable>port</replaceable> on <replaceable>host</replaceable>, and prints any data that it receives.
+It can be used to transfer binary data.
+It does no conversions; and sends no data to the server.
+</para>
+
+<para>
+Its default use is to enable UNIX tools to obtain data from a network QOTD server.
+If <replaceable>port</replaceable> is not supplied, the default is 17.
+If <replaceable>host</replaceable> is not supplied, the default is the local host.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a bidirectional client for line-by-line servers</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tcpcat</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

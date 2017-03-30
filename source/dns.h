@@ -74,7 +74,7 @@ extern int dns_name_packet_multi(stralloc *,const char *,unsigned int);
 extern void dns_name4_domain(char *,const char *);
 #define DNS_NAME4_DOMAIN 31
 extern void dns_name6_domain(char *,const char *);
-#define DNS_NAME6_DOMAIN 73
+#define DNS_NAME6_DOMAIN 75
 extern int dns_name4(stralloc *,const char *);
 extern int dns_name4_multi(stralloc *,const char *);
 extern int dns_txt_packet(stralloc *,const char *,unsigned int);

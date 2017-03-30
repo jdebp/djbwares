@@ -1,0 +1,53 @@
+<refentry id="mconnect-io">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>mconnect-io</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>mconnect-io</refname>
+<refpurpose>converse with a line-protocol network server.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>mconnect-io</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>mconnect-io</command> is a UCSPI-TCP/UCSPI-SSL client program that enables UNIX convention tools to have a conversation with a network server that speaks an Internet line-based protocol with CR+LF newlines.
+It is the internal workhorse of <citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It expects to be run via a program such as <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> which makes the network connection to the server and sets up UCSPI environment variables.
+</para>
+
+<para>
+Everything that it receives from its standard input, it sends to the network server, adding a CR at the end of every line (as if by <citerefentry><refentrytitle>addcr</refentrytitle><manvolnum>1</manvolnum></citerefentry>).
+Everything that it receives from the network server, it sends to its standard output.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>mconnect-io</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -3,6 +3,6 @@
 
 #include "tai.h"
 
-extern int file_open(char *,struct tai *,unsigned long *,int);
+extern int file_open(const char *,struct tai *,unsigned long *,int);
 
 #endif

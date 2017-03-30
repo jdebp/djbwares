@@ -7,9 +7,7 @@
 
 /* XXX: breaks tai encapsulation */
 
-void caltime_tai(ct,t)
-struct caltime *ct;
-struct tai *t;
+void caltime_tai(const struct caltime *ct, struct tai *t)
 {
   long day;
   long s;

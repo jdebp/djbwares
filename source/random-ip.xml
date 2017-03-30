@@ -1,0 +1,57 @@
+<refentry id="random-ip">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>random-ip</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>random-ip</refname>
+<refpurpose>generate IPv4 addresses randomly</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>random-ip</command>
+<arg choice='req'><replaceable>n</replaceable></arg>
+<arg choice='opt'><replaceable>a</replaceable><arg choice='opt'><replaceable>b</replaceable><arg choice='opt'><replaceable>c</replaceable><arg choice='opt'><replaceable>d</replaceable></arg></arg></arg></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>random-ip</command> prints <replaceable>n</replaceable> randomly-chosen IPv4 addresses in human-readable form.
+</para>
+
+<para>
+<replaceable>a</replaceable>, <replaceable>b</replaceable>, <replaceable>c</replaceable>, and <replaceable>d</replaceable> are the first, second, third, and fourth octets of an optional prefix to apply to all addresses.
+The presence of a prefix constrains the maximum value of <replaceable>n</replaceable> to 16777216 (1 octet), 65536 (2 octets), 256 (3 octets), or 1 (4 octets).
+</para>
+
+<para>
+<command>random-ip</command> makes no attempt to exclude invalid or reserved address ranges.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>random-ip</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2001.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

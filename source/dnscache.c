@@ -396,7 +396,7 @@ int main()
   int do_listen;
 
   udp53 = tcp53 = -1;
-  do_listen = 1;
+  do_listen = 0;
   x = env_get("LISTEN_PID");
   if (x) {
     pid = getpid();
@@ -427,23 +427,27 @@ int main()
     if (!ip4_scan(x,myipincoming))
       strerr_die3x(111,FATAL,"unable to parse IP address ",x);
 
-    udp53 = socket_udp();
-    if (udp53 == -1)
-      strerr_die2sys(111,FATAL,"unable to create UDP socket: ");
-    if (socket_bind4_reuse(udp53,myipincoming,53) == -1)
-      strerr_die2sys(111,FATAL,"unable to bind UDP socket: ");
+    if (udp53 == -1) {
+      udp53 = socket_udp();
+      if (udp53 == -1)
+	strerr_die2sys(111,FATAL,"unable to create UDP socket: ");
+      if (socket_bind4_reuse(udp53,myipincoming,53) == -1)
+	strerr_die2sys(111,FATAL,"unable to bind UDP socket: ");
+    }
 
-    tcp53 = socket_tcp();
-    if (tcp53 == -1)
-      strerr_die2sys(111,FATAL,"unable to create TCP socket: ");
-    if (socket_bind4_reuse(tcp53,myipincoming,53) == -1)
-      strerr_die2sys(111,FATAL,"unable to bind TCP socket: ");
+    if (tcp53 == -1) {
+      tcp53 = socket_tcp();
+      if (tcp53 == -1)
+	strerr_die2sys(111,FATAL,"unable to create TCP socket: ");
+      if (socket_bind4_reuse(tcp53,myipincoming,53) == -1)
+	strerr_die2sys(111,FATAL,"unable to bind TCP socket: ");
+      do_listen = 1;
+    }
 
     droproot(FATAL);
 
     socket_tryreservein(udp53,131072);
   } else {
-    do_listen = 0;
     droproot(FATAL);
   }
 

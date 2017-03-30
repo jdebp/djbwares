@@ -27,7 +27,7 @@ int main(int argc,const char *const *argv)
   const char *fn;
   DIR *dir;
   direntry *d;
-  int i;
+  unsigned int i;
   (void)argc;	/* Silence a compiler warning. */
 
   if (!*argv) die_usage();

@@ -31,7 +31,7 @@ int main()
 
   if (!pid) {
     buffer_init(&bin,myread,0,inbuf,sizeof inbuf);
-    buffer_init(&bout,write,7,outbuf,sizeof outbuf);
+    buffer_init(&bout,buffer_unixwrite,7,outbuf,sizeof outbuf);
 
     while (buffer_get(&bin,&ch,1) == 1) {
       if (ch == '\n') buffer_put(&bout,"\r",1);
@@ -41,7 +41,7 @@ int main()
   }
 
   buffer_init(&bin,myread,6,inbuf,sizeof inbuf);
-  buffer_init(&bout,write,1,outbuf,sizeof outbuf);
+  buffer_init(&bout,buffer_unixwrite,1,outbuf,sizeof outbuf);
 
   while (buffer_get(&bin,&ch,1) == 1)
     buffer_put(&bout,&ch,1);

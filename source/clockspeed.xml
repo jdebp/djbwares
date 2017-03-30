@@ -1,0 +1,66 @@
+<refentry id="clockspeed">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>clockspeed</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>clockspeed</refname>
+<refpurpose>speed up or slow down the local clock, continuously</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>clockspeed</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>clockspeed</command> resets the local UNIX clock every three seconds according to (1) an internal hardware tick counter and (2) occasional real-time measurements from a reliable source.
+</para>
+
+<para>
+<command>clockspeed</command> reads the real-time measurements from <filename>/usr/local/clockspeed/adjust</filename>.
+Each real-time measurement must be a single 16-byte packet, expressed as a TAI64NA time adjustment to the local UNIX clock.
+</para>
+
+<para>
+<command>clockspeed</command> does not place any limits on the possible adjustments.
+It is your responsibility to make sure that the measurements are reliable.
+</para>
+
+<para>
+After two real-time measurements, <command>clockspeed</command> can figure out the number of real attoseconds per tick.
+It saves this number in TAI64NA format in <filename>/usr/local/clockspeed/etc/atto</filename>, overwriting <filename>usr/local/clockspeed/etc/atto.tmp</filename> for reliability.
+It reads <filename>usr/local/clockspeed/etc/atto</filename> when it starts up again.
+</para>
+
+<para>
+<command>clockspeed</command> must be run by <code>root</code>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>clockspeed</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

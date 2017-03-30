@@ -1,0 +1,109 @@
+<refentry id="ptybandage">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>ptybandage</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>ptybandage</refname>
+<refpurpose>wrap a transparent pty around a program</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>ptybandage</command>
+<arg choice='req'><replaceable>subprogram</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>ptybandage</command> obtains a new pty and runs <replaceable>subprogram</replaceable> under it.
+This has the following effects:
+</para>
+
+<itemizedlist>
+
+<listitem>
+<para>
+Descriptors 0, 1, and 2 of <replaceable>subprogram</replaceable> are redirected to the pty.
+<command>ptybandage</command>'s input is transparently forwarded to the pty's input; the pty's output is transparently forwarded to <command>ptybandage</command>'s output.
+</para>
+</listitem>
+<listitem>
+<para>
+The pty's mode is set to the mode of <command>ptybandage</command>'s controlling tty.
+Meanwhile, <command>ptybandage</command>'s controlling tty is set to raw mode.
+</para>
+</listitem>
+<listitem>
+<para>
+When <replaceable>subprogram</replaceable> exits, <command>ptybandage</command> exits with the same exit code, after restoring the mode of its controlling tty.
+</para>
+</listitem>
+<listitem>
+<para>
+If <replaceable>subprogram</replaceable> stops, <command>ptybandage</command> stops with the same signal, temporarily restoring the mode of its controlling tty.
+When <command>ptybandage</command> continues, <replaceable>subprogram</replaceable>'s process group will receive a SIGCONT.
+</para>
+</listitem>
+<listitem>
+<para>
+<command>ptybandage</command> forwards window-size changes to the pty.
+</para>
+</listitem>
+<listitem>
+<para>
+The controlling tty of <replaceable>subprogram</replaceable> is replaced with the pty.
+</para>
+</listitem>
+<listitem>
+<para>
+As an added bonus, <command>ptybandage</command> gives <replaceable>subprogram</replaceable> descriptor 3 pointing to <filename>/dev/tty</filename>, and an environment variable <envar>TTY</envar> giving the name of the pty.
+Beware: <command>ptybandage</command> also closes descriptors 4, 5, and 9.
+</para>
+</listitem>
+
+</itemizedlist>
+
+<para>
+<command>ptybandage</command> is useful for handling programs that refuse to run inside a pipe.
+As far as <replaceable>subprogram</replaceable> can see, it is talking to a tty.
+<command>ptybandage</command> doesn't mind being put inside a pipe.
+</para>
+
+<para>
+<command>ptybandage</command> also fools <citerefentry><refentrytitle>isatty</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+If <replaceable>subprogram</replaceable> uses stdio, its output will be line-buffered.
+</para>
+
+<para>
+<command>ptybandage</command> is a synonym for <command>ptyget</command> <command>ptyio</command> <arg choice='plain'>-t</arg> <command>ptyspawn</command>.
+<citerefentry><refentrytitle>ptyspawn</refentrytitle><manvolnum>1</manvolnum></citerefentry> options may be used with <command>ptybandage</command>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>ptybandage</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ptyget toolset in 1996.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

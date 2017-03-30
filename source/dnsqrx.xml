@@ -1,0 +1,88 @@
+<refentry id="dnsqrx">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsqrx</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsqrx</refname>
+<refpurpose>query a proxy DNS server using the DNS protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsqrx</command>
+<arg choice='req'><replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>fqdn</replaceable></arg>
+<arg choice='req'><replaceable>s</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsqrx</command> looks up resource records of type <replaceable>t</replaceable> for <replaceable>fqdn</replaceable> by making a Domain Name System request to a proxy DNS server at <replaceable>s</replaceable>.
+It prints the results in a human-readable format, more compact than the <citerefentry><refentrytitle>dig</refentrytitle><manvolnum>1</manvolnum></citerefentry> output format.
+</para>
+
+<para>
+It expects to query a proxy DNS server, and the request is marked as recursive.
+<replaceable>t</replaceable> may be a name or a number.
+Currently recognized names are:
+<code>any</code>,
+<code>a</code>,
+<code>ns</code>,
+<code>mx</code>,
+<code>ptr</code>,
+<code>txt</code>,
+<code>cname</code>,
+<code>soa</code>,
+<code>hinfo</code>,
+<code>rp</code>,
+<code>sig</code>,
+<code>key</code>,
+<code>aaaa</code>,
+<code>axfr</code>, and
+<code>srv</code>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to the locally configured proxy DNS server</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to content DNS servers</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>tinydns-get</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a tool that makes direct queries against a content DNS server's database</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsqrx</command> was an addition to <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

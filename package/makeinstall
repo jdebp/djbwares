@@ -16,7 +16,7 @@ install -d -- command manual config doc header library
 cat package/commands1 package/commands8 | while read i
 do
 	rm -f -- command/"$i"{new}
-	install -m 0755 -- build/"$i" command/"$i"{new}
+	install -p -m 0755 -- build/"$i" command/"$i"{new}
 	if objdump -a command/"$i"{new} >/dev/null 2>&1
 	then
 		 strip command/"$i"{new}
@@ -27,47 +27,59 @@ cat package/commands1 package/extra-manpages1 |
 while read i
 do
 	rm -f -- manual/"$i".1{new}
-	install -m 0644 -- build/"$i".1 manual/"$i".1{new}
+	install -p -m 0644 -- build/"$i".1 manual/"$i".1{new}
+	rm -f -- doc/"$i".html{new}
+	install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
 done
 cat package/extra-manpages3 | 
 while read i
 do
 	rm -f -- manual/"$i".3{new}
-	install -m 0644 -- build/"$i".3 manual/"$i".3{new}
+	install -p -m 0644 -- build/"$i".3 manual/"$i".3{new}
+	case "$i" in
+	leapsecs)	;;
+	*)
+		rm -f -- doc/"$i".html{new}
+		install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
+		;;
+	esac
 done
 cat package/aliases3 | 
 while read c a
 do
 	ln -f -- manual/"$c".3{new} manual/"$a".3{new}
+	ln -f -- doc/"$c".html{new} doc/"$a".html{new}
 done
 cat package/commands8 package/extra-manpages8 | 
 while read i
 do
 	rm -f -- manual/"$i".8{new}
-	install -m 0644 -- build/"$i".8 manual/"$i".8{new}
+	install -p -m 0644 -- build/"$i".8 manual/"$i".8{new}
+	rm -f -- doc/"$i".html{new}
+	install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
 done
 # Headers and libraries
 cat package/headers | 
 while read i
 do
 	rm -f -- header/"$i".h{new}
-	install -m 0644 -- build/"$i".h header/"$i".h{new}
+	install -p -m 0644 -- build/"$i".h header/"$i".h{new}
 done
 cat package/libraries | 
 while read i
 do
 	rm -f -- library/"$i".h{new}
-	install -m 0644 -- build/"$i".a library/"$i".a{new}
+	install -p -m 0644 -- build/"$i".a library/"$i".a{new}
 done
 # Other guide pages
 for i in COPYING
 do
 	rm -f -- doc/"$i"{new}
-	install -m 0644 -- build/"$i" doc/"$i"{new}
+	install -p -m 0644 -- build/"$i" doc/"$i"{new}
 done
 for i in dnsroots.global leapsecs.dat
 do
-	install -m 0644 -- build/"$i" config/"$i"{new}
+	install -p -m 0644 -- build/"$i" config/"$i"{new}
 done
 
 # ##############################################################################
@@ -81,21 +93,28 @@ cat package/commands1 package/extra-manpages1 |
 while read i
 do
 	mv -f -- manual/"$i".1{new} manual/"$i".1
+	mv -f -- doc/"$i".html{new} doc/"$i".html
 done
 cat package/extra-manpages3 | 
 while read i
 do
 	mv -f -- manual/"$i".3{new} manual/"$i".3
+	case "$i" in
+	leapsecs)	;;
+	*)		mv -f -- doc/"$i".html{new} doc/"$i".html ;;
+	esac
 done
 cat package/commands8 package/extra-manpages8 | 
 while read i
 do
 	mv -f -- manual/"$i".8{new} manual/"$i".8
+	mv -f -- doc/"$i".html{new} doc/"$i".html
 done
 cat package/aliases3 | 
 while read c a
 do
 	mv -f -- manual/"$a".3{new} manual/"$a".3
+	mv -f -- doc/"$a".html{new} doc/"$a".html
 done
 # Headers and libraries
 cat package/headers | 

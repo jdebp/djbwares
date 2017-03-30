@@ -9,15 +9,15 @@
 #include "tai.h"
 #include "env.h"
 #include "open.h"
+#include "ucspi.h"
 
-static void log(char *fn,char *result1,char *result2,int flagread)
+static void log(const char *fn,const char *result1,const char *result2,int flagread)
 {
   int i;
   char ch;
-  char *x;
+  const char *x;
 
-  x = env_get("TCPREMOTEIP");
-  if (!x) x = "0";
+  x = ucspi_get_remoteip_str("0", "0", "0");
   substdio_puts(subfderr,x);
   substdio_puts(subfderr,flagread ? " read ": " dir ");
 
@@ -38,7 +38,7 @@ static void log(char *fn,char *result1,char *result2,int flagread)
   substdio_flush(subfderr);
 }
 
-int file_open(char *fn,struct tai *mtime,unsigned long *length,int flagread)
+int file_open(const char *fn,struct tai *mtime,unsigned long *length,int flagread)
 {
   struct stat st;
   int fd;

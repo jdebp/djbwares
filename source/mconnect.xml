@@ -1,0 +1,63 @@
+<refentry id="mconnect">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>mconnect</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>mconnect</refname>
+<refpurpose>connect to a line-protocol server on a remote host.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>mconnect</command>
+<arg choice='opt'><replaceable>host</replaceable><arg choice='opt'><replaceable>port</replaceable></arg></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>mconnect</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port <replaceable>port</replaceable> on <replaceable>host</replaceable>, and the runs <citerefentry><refentrytitle>mconnect-io</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+Its default use is to enable UNIX tools to have a conversation with a network SMTP server.
+If <replaceable>port</replaceable> is not supplied, the default is 25.
+If <replaceable>host</replaceable> is not supplied, the default is the local host.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a unidirectional straight pass-through client</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>mconnect</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

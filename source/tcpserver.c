@@ -31,7 +31,7 @@
 int verbosity = 1;
 int flagkillopts = 1;
 int flagdelay = 1;
-char *banner = "";
+const char *banner = "";
 int flagremoteinfo = 1;
 int flagremotehost = 1;
 int flagparanoid = 0;
@@ -44,7 +44,7 @@ char localportstr[FMT_ULONG];
 char localip[4];
 char localipstr[IP4_FMT];
 static stralloc localhostsa;
-char *localhost = 0;
+const char *localhost = 0;
 
 uint16 remoteport;
 char remoteportstr[FMT_ULONG];
@@ -71,13 +71,13 @@ buffer b;
 
 int flagdeny = 0;
 int flagallownorules = 0;
-char *fnrules = 0;
+const char *fnrules = 0;
 
 void drop_nomem(void)
 {
   strerr_die2sys(111,DROP,"out of memory");
 }
-void cats(char *s)
+void cats(const char *s)
 {
   if (!stralloc_cats(&tmp,s)) drop_nomem();
 }
@@ -85,7 +85,7 @@ void append(char *ch)
 {
   if (!stralloc_append(&tmp,ch)) drop_nomem();
 }
-void safecats(char *s)
+void safecats(const char *s)
 {
   char ch;
   int i;
@@ -101,7 +101,7 @@ void safecats(char *s)
   }
   cats("...");
 }
-void env(char *s,char *t)
+void env(const char *s,const char *t)
 {
   if (!pathexec_env(s,t)) drop_nomem();
 }
@@ -150,7 +150,7 @@ void doit(int t)
     socket_tcpnodelay(t);
 
   if (*banner) {
-    buffer_init(&b,write,t,bspace,sizeof bspace);
+    buffer_init(&b,buffer_unixwrite,t,bspace,sizeof bspace);
     if (buffer_putsflush(&b,banner) == -1)
       strerr_die2sys(111,DROP,"unable to print banner: ");
   }
@@ -302,7 +302,7 @@ optarg_num ( unsigned long * u )
 int
 main(int argc,char **argv)
 {
-  char *hostname;
+  const char *hostname;
   int opt;
   struct servent *se;
   char *x;
@@ -395,7 +395,7 @@ main(int argc,char **argv)
  
   localportstr[fmt_ulong(localportstr,localport)] = 0;
   if (flag1) {
-    buffer_init(&b,write,1,bspace,sizeof bspace);
+    buffer_init(&b,buffer_unixwrite,1,bspace,sizeof bspace);
     buffer_puts(&b,localportstr);
     buffer_puts(&b,"\n");
     buffer_flush(&b);

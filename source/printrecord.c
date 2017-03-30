@@ -95,11 +95,7 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     if (datalen != 4) { errno = error_proto; return 0; }
     if (!stralloc_cats(out," A ")) return 0;
     pos = dns_packet_copy(buf,len,pos,misc,4); if (!pos) return 0;
-    for (i = 0;i < 4;++i) {
-      ch = misc[i];
-      if (i) if (!stralloc_cats(out,".")) return 0;
-      if (!stralloc_catulong0(out,ch,0)) return 0;
-    }
+    if (!stralloc_catb(out,ipstr,ip4_fmt(ipstr,misc))) return 0;
   }
   else if (byte_equal(misc,2,DNS_T_AAAA)) {
     char ipstr[IP6_FMT];
