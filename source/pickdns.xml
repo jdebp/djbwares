@@ -57,6 +57,7 @@ It does not handle DNS/TCP.
 <command>pickdns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>pickdns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 It only answers A and AAAA queries.
 It finds all of the A or AAAA resource records in the database for the relevant domain name, orders them in a random order, and returns up to the first 3 of them in the response.
+All resource records are given a 5 second TTL.
 </para>
 
 </refsection>

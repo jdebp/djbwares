@@ -7,6 +7,8 @@
 #define QUERY_MAXLEVEL 5
 #define QUERY_MAXALIAS 16
 #define QUERY_MAXNS 16
+#define QUERY_MAXNS_A (QUERY_MAXNS * 4)
+#define QUERY_MAXNS_AAAA (QUERY_MAXNS * 16)
 
 struct query {
   unsigned int loop;
@@ -14,7 +16,8 @@ struct query {
   char *name[QUERY_MAXLEVEL];
   char *control[QUERY_MAXLEVEL]; /* pointing inside name */
   char *ns[QUERY_MAXLEVEL][QUERY_MAXNS];
-  char servers[QUERY_MAXLEVEL][64];
+  char servers_a[QUERY_MAXLEVEL][QUERY_MAXNS_A];
+  char servers_aaaa[QUERY_MAXLEVEL][QUERY_MAXNS_AAAA];
   char *alias[QUERY_MAXALIAS];
   uint32 aliasttl[QUERY_MAXALIAS];
   char localip[4];

@@ -30,34 +30,105 @@
 
 <para>
 <command>tinydns-edit</command> atomically modifies a database source file, the input compiled by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>, with the given modification.
-It reads the data file <replaceable>data</replaceable>, adds a record to it for domain name <replaceable>name</replaceable> of type <replaceable>type</replaceable> with IP address <replaceable>addr</replaceable>, and writes it to <replaceable>tmp</replaceable>.
+It reads the data file <replaceable>data</replaceable>, modifies it,
+and writes it to <replaceable>tmp</replaceable>.
 Then it atomically renames <replaceable>tmp</replaceable> to <replaceable>data</replaceable>.
+The two files must, of course, reside on the same volume in order that this can be achieved.
+</para>
+
+<para>
+On success, <command>tinydns-edit</command> returns zero.
+If, for any reason, an error occurs it will exit with a non-zero code and <replaceable>data</replaceable> will not be changed.
+</para>
+
+<para>
+The <arg choice='plain'>add</arg> verb is the only supported verb in this version.
+In response to it, <command>tinydns-edit</command> adds a record to the database for fully-qualified domain name <replaceable>name</replaceable> of type <replaceable>type</replaceable> with IP address <replaceable>addr</replaceable>.
 </para>
 
 <para>
 <replaceable>type</replaceable> can be one of 
-<code>ns</code>, implying a <code>.</code> record describing a content DNS server;
-<code>childns</code>, implying a <code>&#x26;</code> record describing a delegation;
-<code>host</code>, implying a <code>=</code> record describing a bidirectional name to address mapping;
-<code>alias</code>, implying a <code>+</code> record describing a unidirectional name to address mapping; or
-<code>mx</code>, implying a <code>.</code> record describing a mail exchanger.
+<variablelist>
+
+<varlistentry>
+<term><code>ns</code></term>
+<listitem>
+<para>
+A <code>.</code> record is created to describe a content DNS server. 
+This record specifies that the domain <replaceable>name</replaceable> is published by a DNS content server that is listening on the IP address <replaceable>addr</replaceable>.
+The name of the DNS content server is not directly specifiable. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>childns</code></term>
+<listitem>
+<para>
+A <code>&#x0026;</code> record is created describing a delegation. 
+This record specifies that queries for names in the domain <replaceable>name</replaceable> should be referred to a ("child") DNS content server that is listening on the IP address <replaceable>addr</replaceable>.
+The name of the DNS content server is not directly specifiable. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>mx</code></term>
+<listitem>
+<para>
+A <code>@</code> record is created describing a mail exchanger. 
+This record specifies that mail to names in the domain <replaceable>name</replaceable> should be sent to an SMTP server that is listening on the IP address <replaceable>addr</replaceable>.
+The name of the SMTP server is not directly specifiable. 
 </para>
 
 <para>
+It is not possible to specify the distance value for the SMTP server. 
+<command>tinydns-edit</command> will leave that field blank, meaning that tinydns-data (8) will use whatever the default value is.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>host</code></term>
+<listitem>
+<para>
+A <code>=</code> record is created describing a bidirectional name to address mapping. 
+This record specifies that the name <replaceable>name</replaceable> maps to the IP address <replaceable>addr</replaceable> and vice versa.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><code>alias</code></term>
+<listitem>
+<para>
+A <code>+</code> record is created describing a unidirectional name to address mapping. 
+This record specifies that the name <replaceable>name</replaceable> maps to the IP address <replaceable>addr</replaceable>address but that there is no reverse mapping.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</para>
+
+<para>
+Intermediate domain names are assigned by <command>tinydns-edit</command> itself.
 For <code>ns</code> and <code>childns</code> records there is an intermediate domain name of the form <filename><replaceable>a</replaceable>.ns.<replaceable>name</replaceable></filename>.
 For <code>mx</code> records there is an intermediate domain name of the form <filename><replaceable>a</replaceable>.mx.<replaceable>name</replaceable></filename>.
 <replaceable>a</replaceable> is a letter from "a" to "z".
-<command>tinydns-edit</command> checks existing records of the same type and for the record being added picks the first available unused letter.
+<command>tinydns-edit</command> checks existing records of the same pattern and for the record being added picks the first available unused letter.
 It aborts if there are no letters left.
 </para>
 
 <para>
 For <code>host</code> records it aborts if there is already a <code>=</code> record that has either <replaceable>name</replaceable> or <replaceable>addr</replaceable>.
+By the nature of <code>alias</code> records, <command>tinydns-edit</command> will not abort if there happen to already be existing records that use <replaceable>addr</replaceable>.
 </para>
 
 <para>
-If any existing <code>ns</code>, <code>childns</code>, and <code>mx</code> records are found when adding that type, it copies their TTL.
-If no existing record is found, all records have a TTL of 1 day, except for <code>ns</code> and <code>childns</code> records which have a TTL of 3 days.
+If any existing <code>ns</code>, <code>childns</code>, and <code>mx</code> records are found when adding that type, it copies their TTL for the record being added.
+Otherwise, where no existing records exist and for other types of records, a fixed default TTL is used.
+This is 1 day for all records, except for <code>ns</code> and <code>childns</code> records for which it is 3 days.
 </para>
 
 </refsection>
@@ -66,6 +137,7 @@ If no existing record is found, all records have a TTL of 1 day, except for <cod
 <title>History</title>
 <para>
 <command>tinydns-edit</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+This manual page was written on 2001-04-06, and revised in 2001-04-26, and again in 2017.
 </para>
 </refsection>
 

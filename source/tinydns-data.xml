@@ -115,9 +115,7 @@ For example,
 
 <varlistentry>
 <term>
-<programlisting>
 #<replaceable>comment</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -129,9 +127,7 @@ The line is ignored.
 
 <varlistentry>
 <term>
-<programlisting>
 .<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -174,9 +170,7 @@ Examples:
 
 <varlistentry>
 <term>
-<programlisting>
 &#x26;<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -212,9 +206,7 @@ Examples:
 
 <varlistentry>
 <term>
-<programlisting>
 =<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -245,9 +237,7 @@ Example:
 
 <varlistentry>
 <term>
-<programlisting>
 +<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -265,9 +255,7 @@ Example:
 
 <varlistentry>
 <term>
-<programlisting>
 -<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -279,9 +267,38 @@ The line is ignored.
 
 <varlistentry>
 <term>
-<programlisting>
+S<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>p</replaceable>:<replaceable>prio</replaceable>:<replaceable>wt</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</term>
+<listitem>
+<para>
+Service for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+a SRV ("service") record showing <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename> as a service for <replaceable>fqdn</replaceable> on port <replaceable>p</replaceable> with priority <replaceable>prio</replaceable> and weight <replaceable>wt</replaceable>, and 
+</para></listitem>
+<listitem><para>
+an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<para>
+You may omit <replaceable>prio</replaceable> and <replaceable>wt</replaceable>; the defaults are 0. 
+If <replaceable>x</replaceable> contains a dot then it is treated specially; see above. 
+You may create several SRV records for <replaceable>fqdn</replaceable>, with a different <replaceable>x</replaceable> for each server. 
+</para>
+<para>
+Example: 
+</para>
+<para>
+<literallayout><programlisting>S_sip._udp.panic.mil:1.8.7.88:sip.panic.mil:5060:10:20</programlisting></literallayout> creates a SRV record showing port 5060 of <filename>sip.panic.mil</filename> as a SIP/UDP service for <filename>panic.mil</filename> with priority 10 and wt 20, and an A record showing 1.8.7.88 as the IP address of <filename>sip.panic.mil</filename>. 
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
 @<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>dist</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -313,9 +330,7 @@ Example:
 
 <varlistentry>
 <term>
-<programlisting>
 '<replaceable>fqdn</replaceable>:<replaceable>s</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -335,9 +350,7 @@ You may use octal \nnn codes to include arbitrary bytes inside <replaceable>s</r
 
 <varlistentry>
 <term>
-<programlisting>
 ^<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -357,9 +370,7 @@ Usually a = line is a more convenient way to create a mapping from an IP address
 
 <varlistentry>
 <term>
-<programlisting>
 C<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -381,9 +392,7 @@ Remember the wise words of Inigo Montoya: "You keep using CNAME records. I do no
 
 <varlistentry>
 <term>
-<programlisting>
 Z<replaceable>fqdn</replaceable>:<replaceable>mname</replaceable>:<replaceable>rname</replaceable>:<replaceable>ser</replaceable>:<replaceable>ref</replaceable>:<replaceable>ret</replaceable>:<replaceable>exp</replaceable>:<replaceable>min</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>
@@ -400,9 +409,7 @@ Usually a . line is a more convenient way to create SOA records.
 
 <varlistentry>
 <term>
-<programlisting>
 :<replaceable>fqdn</replaceable>:<replaceable>n</replaceable>:<replaceable>rdata</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
-</programlisting>
 </term>
 <listitem>
 <para>

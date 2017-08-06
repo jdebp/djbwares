@@ -23,36 +23,10 @@ void oops(void)
   strerr_die2sys(111,FATAL,"unable to parse: ");
 }
 
-static struct dns_transmit tx;
-
-int resolve(char *q,char qtype[2],char servers[64])
-{
-  struct taia stamp;
-  struct taia deadline;
-  iopause_fd x[1];
-  int r;
-
-  if (dns_transmit_start(&tx,servers,0,q,qtype,"\0\0\0\0") == -1) return -1;
-
-  for (;;) {
-    taia_now(&stamp);
-    taia_uint(&deadline,120);
-    taia_add(&deadline,&deadline,&stamp);
-    dns_transmit_io(&tx,x,&deadline);
-    iopause(x,1,&deadline,&stamp);
-    r = dns_transmit_get(&tx,x,&stamp);
-    if (r == -1) return -1;
-    if (r == 1) break;
-  }
-
-  return 0;
-}
-
-char servers[64];
 static stralloc ip;
 static stralloc fqdn;
 
-char type[2];
+static char type[2];
 static char *q;
 
 static stralloc out;
@@ -62,6 +36,7 @@ static char seed[128];
 int main(int argc,char **argv)
 {
   uint16 u16;
+  char servers[64];
 
   dns_random_init(seed);
 
@@ -87,12 +62,12 @@ int main(int argc,char **argv)
   if (!dns_domain_todot_cat(&out,q)) oops();
   if (!stralloc_cats(&out,":\n")) oops();
 
-  if (resolve(q,type,servers) == -1) {
+  if (dns_resolve_servers(q,type,servers,0) == -1) {
     if (!stralloc_cats(&out,error_str(errno))) oops();
     if (!stralloc_cats(&out,"\n")) oops();
   }
   else {
-    if (!printpacket_cat(&out,tx.packet,tx.packetlen)) oops();
+    if (!printpacket_cat(&out,dns_resolve_tx.packet,dns_resolve_tx.packetlen)) oops();
   }
 
   buffer_putflush(buffer_1,out.s,out.len);

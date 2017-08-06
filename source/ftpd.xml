@@ -29,12 +29,17 @@ The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceab
 </para>
 
 <para>
-ftpd accepts <command>PWD</command>, <command>CWD</command>, <command>CDUP</command>, <command>TYPE</command>, <command>PORT</command>, <command>PASV</command>, <command>SPSV</command>, <command>REST</command>, <command>RETR</command>, <command>LIST</command>, <command>NLST</command>, and <command>QUIT</command> requests on standard input in <command>FTP</command> format. It prints responses on standard output, and local log information on standard error.
+ftpd accepts <command>FEAT</command>, <command>OPTS</command>, <command>HOST</command>, <command>PWD</command>, <command>CWD</command>, <command>CDUP</command>, <command>TYPE</command>, <command>PORT</command>, <command>EPSV</command>, <command>PASV</command>, <command>SPSV</command>, <command>REST</command>, <command>RETR</command>, <command>LIST</command>, <command>NLST</command>, and <command>QUIT</command> requests on standard input in <command>FTP</command> format. 
+It prints responses on standard output, and local log information on standard error.
 </para>
 
 <para>
 ftpd recognizes <command>USER</command>, <command>PASS</command>, and <command>ACCT</command>, but it does not check usernames or passwords. 
-It has minimal support for <command>STRU</command>, <command>MODE</command>, <command>SYST</command>, <command>HELP</command>, and <command>NOOP</command>.
+To work around a problem with various badly written FTP application-level gateways, it always asks for a password after a <command>USER</command> command if the username is "anonymous".
+</para>
+
+<para>
+It has minimal support for <command>STRU</command>, <command>MODE</command>, <command>SIZE</command>, <command>SYST</command>, <command>HELP</command>, and <command>NOOP</command>.
 </para>
 
 <para>
@@ -43,14 +48,25 @@ ftpd exits silently if it runs out of memory, encounters an I/O error, or does n
 
 <para>
 Normally ftpd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle FTP connections from hosts around the Internet.
-Note that ftpd does not print the standard FTP greeting message; the greeting message is handled by the server (<command>line-banner</command> or the <arg choice='plain'>-B</arg> option to <command>tcpserver</command>).
+Note that ftpd does not print the FTP greeting message; sending the greeting message is handled by the server (<command>line-banner</command> or the <arg choice='plain'>-B</arg> option to <command>tcpserver</command>).
 </para>
 
 <refsection>
 <title>File handling</title>
 
 <para>
-A request for a file or directory named <code><replaceable>f</replaceable></code> refers to <filename>./0/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+Initially, ftpd attempts to take the virtual host name <code><replaceable>v</replaceable></code> from UCSPI-TCP or UCSPI-SSL environment variables, in particular the <envar>PROTO</envar> and <envar>SSLLOCALHOST</envar>/<envar>TCPLOCALHOST</envar> environment variables.
+If those variables are not set, ftpd uses the host name <filename>0</filename> as an initial default.
+FTP clients may subsequently specify a host name with the <command>HOST</command> command.
+ftpd always converts the host name to lowercase. 
+</para>
+
+<para>
+A request for a file or directory named <code><replaceable>f</replaceable></code> refers to <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+ftpd thus advertises that it supports the TVFS feature.
+</para>
+
+<para>
 ftpd has built-in support for <command>NLST</command> and <command>LIST</command>; it does not run an external <arg choice='plain'><replaceable>root</replaceable></arg><filename>/bin/ls</filename>. 
 It provides EPLF <command>LIST</command> responses, including EPLF options "i", "s", and "m".
 </para>
@@ -60,8 +76,13 @@ It provides EPLF <command>LIST</command> responses, including EPLF options "i", 
 <title>Unsupported features</title>
 
 <para>
-ftpd does not support file modification requests such as <command>STOR</command>.
+ftpd does not support file/directory modification requests such as <command>STOR</command>, <command>STOU</command>, <command>APPE</command>, <command>DELE</command>, <command>RNFR</command>, and <command>RNTO</command>.
 </para>
+
+<para>
+ftpd does not support <command>REIN</command>.
+</para>
+
 </refsection>
 </refsection>
 

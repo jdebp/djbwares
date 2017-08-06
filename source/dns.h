@@ -65,6 +65,7 @@ extern int dns_transmit_get(struct dns_transmit *,const iopause_fd *,const struc
 
 extern int dns_resolvconfip(char *);
 extern int dns_resolve(const char *,const char *);
+extern int dns_resolve_servers(const char *,const char *,const char *,int);
 extern struct dns_transmit dns_resolve_tx;
 
 extern int dns_ip4_packet(stralloc *,const char *,unsigned int);
@@ -83,6 +84,7 @@ extern int dns_mx_packet(stralloc *,const char *,unsigned int);
 extern int dns_mx(stralloc *,const stralloc *);
 
 extern int dns_resolvconfrewrite(stralloc *);
+extern int dns_qualify_rules(stralloc *,const stralloc *,const stralloc *);
 extern int dns_ip4_qualify_rules(stralloc *,stralloc *,const stralloc *,const stralloc *);
 extern int dns_ip4_qualify(stralloc *,stralloc *,const stralloc *);
 

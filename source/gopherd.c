@@ -160,7 +160,7 @@ void get(void)
   pathdecode(&fn);
   if (!stralloc_0(&fn)) _exit(21);
 
-  fd = file_open(fn.s,&mtime,&length,1);
+  fd = file_open(fn.s,&mtime,&length,1,0,0);
   if (fd == -1)
     barf(1, fn.s, error_str(errno));
 

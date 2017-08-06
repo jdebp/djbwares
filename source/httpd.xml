@@ -57,7 +57,7 @@ httpd has exact-prefix support for <code>If-Modified-Since:</code> it uses code 
 
 <para>
 Normally httpd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle HTTP connections from hosts around the Internet.
-It can also be under a UCSPI-SSL server program.
+It can also be run under a UCSPI-SSL server program.
 </para>
 
 <refsection>

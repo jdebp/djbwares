@@ -57,6 +57,7 @@ gopherd also prints local log information on standard error.
 
 <para>
 Normally gopherd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle GOPHER connections from hosts around the Internet.
+It can also be run under a UCSPI-SSL server program.
 </para>
 
 <refsection>

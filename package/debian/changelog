@@ -1,3 +1,21 @@
+djbwares (6) unstable; urgency=medium
+
+  * dnscache now caches SOA resource records.
+  * dnscache is now more efficient at caching AAAA resource records, now caching them without explicit data lengths like it does for A resource records.
+  * dnscache now returns an AAAA address for localhost.
+  * ftpd now supports OPTS, FEAT, and SIZE from RFC 3659.
+  * ftpd now supports EPSV from RFC 2428.
+  * ftpd now supports HOST from RFC 7151 with the same virtual hosting system as httpd.
+  * ftpd now interoperates better with some (definitely broken, but alas widespread) FTP ALGs that do not like a 230 response to USER or a 202 response to PASS.
+  * ftpd now interoperates better with some (definitely broken, but alas widespread) WWW browsers that expect CWD to fail on non-directories.
+  * ftpd now logs the type of ls/cd/dir/read command.
+  * An oversight in the commentary for dnscache-showctl and tinydns-showctl with reference to the copyright licence has been fixed.
+  * The tinydns-data manual page now describes S records.
+  * There is now a host command.
+  * dnscache logging no longer prints A, AAAA, and SRV resource records in raw hexadecimal.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Sun, 06 Aug 2017 13:08:24 +0100
+
 djbwares (5) unstable; urgency=medium
 
   * Added patches to enable using SSLREMOTEIP/SSLREMOTEPORT in server tools instead of TCPREMOTEIP/TCPREMOTEPORT, when PROTO says to do so.

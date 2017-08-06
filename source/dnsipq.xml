@@ -16,7 +16,7 @@
 <refsynopsisdiv>
 <cmdsynopsis>
 <command>dnsipq</command>
-<arg choice='req' rep='repeat'><replaceable>fqdn</replaceable></arg>
+<arg choice='req' rep='repeat'><replaceable>dn</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -24,10 +24,10 @@
 <title>Description</title>
 
 <para>
-<command>dnsipq</command> first feeds <replaceable>fqdn</replaceable> through name qualification.
+<command>dnsipq</command> first feeds <replaceable>dn</replaceable> through name qualification.
 It then looks up A resource records for the result in the Domain Name System and prints the corresponding IP address(es) on a single line. 
 If the qualified <replaceable>fqdn</replaceable> does not exist, <command>dnsipq</command> prints a blank line. 
-You can list several <replaceable>fqdn</replaceable>s; <command>dnsipq</command> prints each result on a separate line.
+You can list several <replaceable>dn</replaceable>s; <command>dnsipq</command> prints each result on a separate line.
 </para>
 
 <para>

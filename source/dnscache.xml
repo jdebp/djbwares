@@ -111,10 +111,16 @@ The rest is used for cache entries (including 8-byte Y2038-compliant expiration 
 <term>A sets.</term><listitem><para>22 bytes plus 4 bytes per address plus the length of the owner name.</para></listitem>
 </varlistentry>
 <varlistentry>
+<term>AAAA sets.</term><listitem><para>22 bytes plus 16 bytes per address plus the length of the owner name.</para></listitem>
+</varlistentry>
+<varlistentry>
 <term>NS sets or PTR sets or CNAME sets.</term><listitem><para>22 bytes plus the length of the owner name and all the data names.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>MX sets.</term><listitem><para>22 bytes plus 2 bytes per MX plus the length of all the names.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>SOA sets.</term><listitem><para>22 bytes plus 20 bytes per SOA plus the length of all the names.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>Other record sets.</term><listitem><para>22 bytes plus 2 bytes per record plus the length of all the data strings plus the length of the owner name.</para></listitem>
@@ -173,8 +179,9 @@ Responses from "lame" servers are logged, and what useful information they may c
 <title>Special names</title>
 
 <para>
-<command>dnscache</command> handles <filename>localhost</filename> internally, giving it an A record of 127.0.0.1.
+<command>dnscache</command> handles <filename>localhost</filename> internally, giving it an A record of 127.0.0.1 and an AAAA record of ::1.
 <command>dnscache</command> handles <filename>1.0.0.127.in-addr.arpa</filename> internally, giving it a PTR record of <filename>localhost</filename>.
+<command>dnscache</command> handles <filename>1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa</filename> internally, giving it a PTR record of <filename>localhost</filename>.
 </para>
 
 <para>
@@ -204,6 +211,7 @@ It can just be a 128-byte snapshot of the system's random number generator read 
 At startup, <command>dnscache</command> reads a list of dotted-decimal root server IP addresses, one address per line, from <filename>servers/@</filename>. 
 It also scans the <filename>servers/</filename> directory for server IP addresses for other domains. 
 If there are addresses listed in <filename>servers/moon.af.mil</filename>, for example, then <command>dnscache</command> will send queries for <filename><replaceable>anything</replaceable>.moon.af.mil</filename> to those addresses, and will not cache records for <filename><replaceable>anything</replaceable>.moon.af.mil</filename> from outside servers such as the root servers.
+The list is capped at 16 IP addresses; the 17th and subsequent IP addresses being read, but discarded.
 </para>
 
 </refsection>

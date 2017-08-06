@@ -349,7 +349,7 @@ int main()
 	  rr_add(ip4,sizeof ip4);
 	  rr_finish(d2);
 	} else {
-	  iplen = ip6_scan(f[1].s,ip6) ;
+	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
 	    rr_add(ip6,sizeof ip6);
@@ -381,7 +381,7 @@ int main()
 	    rr_finish(dptr4);
 	  }
 	} else {
-	  iplen = ip6_scan(f[1].s,ip6) ;
+	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
 	    rr_add(ip6,sizeof ip6);
@@ -429,7 +429,7 @@ int main()
 	  rr_add(ip4,sizeof ip4);
 	  rr_finish(d2);
 	} else {
-	  iplen = ip6_scan(f[1].s,ip6) ;
+	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
 	    rr_add(ip6,sizeof ip6);

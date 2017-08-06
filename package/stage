@@ -16,7 +16,7 @@ dest="${2}"
 absdest="`readlink -f "${dest}"`/"
 
 # binaries and doco
-for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs
+for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host
 do
 	if test -s package/"$i".commands1 || test -s package/"$i".aliases1 ;
 	then

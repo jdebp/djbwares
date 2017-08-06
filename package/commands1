@@ -41,6 +41,7 @@ dnscache-showctl
 tinydns-showctl
 dnsnamex
 dnsqrx
+host
 ttydetach
 ptyrun
 ptybandage

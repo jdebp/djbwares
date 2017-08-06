@@ -55,6 +55,7 @@ The UCSPI-TCP or UCSPI-SSL server is responsible for rejecting connections from 
 <command>axfrdns</command> allows "zone transfers" for any domain name listed in the value of the <envar>AXFR</envar> environment variable, which is a slash-separated list of domain names.
 If <envar>AXFR</envar> is not set <command>axfrdns</command> allows "zone transfers" for all domain names that exist in <filename>data.cdb</filename>.
 For any "zone transfer" request that is not allowed by <envar>AXFR</envar>, it aborts.
+Thus, in order to prevent all "zone transfers" and only support ordinary DNS/TCP queries, set <envar>AXFR</envar> to an empty string.
 </para>
 
 <para>

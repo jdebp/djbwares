@@ -6,7 +6,7 @@ build:
 	package/compile
 
 binary: stage control
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		dpkg-deb -b debian/"$$i" ../ || exit 1 ; \
 	done
@@ -19,18 +19,18 @@ stage:
 
 control:
 	${RM} debian/files
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		echo 1>&2 "Building control file for "$$i"." ; \
 		${RM} debian/substvars ; \
 		install -d debian/"$$i"/DEBIAN || exit 1 ; \
-		dpkg-shlibdeps debian/"$$i"/usr/local/bin/* debian/"$$i"/usr/local/sbin/* || exit 1 ; \
+		dpkg-shlibdeps debian/"$$i"/usr/local/*bin/* || exit 1 ; \
 		debian/gencontrol "$$i" debian/"$$i" || exit 1 ; \
 	done
 
 clean:
 	${RM} debian/files debian/substvars
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		${RM} -r debian/"$$i"/ ; \
 	done

@@ -35,6 +35,11 @@ static void string(const char *s)
   buffer_puts(buffer_2,s);
 }
 
+static void character(const char c)
+{
+  buffer_PUTC(buffer_2,c);
+}
+
 static void line(void)
 {
   string("\n");
@@ -46,12 +51,30 @@ static void space(void)
   string(" ");
 }
 
-static void ip(const char i[4])
+static void ip4(const char *buf, unsigned int len)
 {
-  hex(i[0]);
-  hex(i[1]);
-  hex(i[2]);
-  hex(i[3]);
+  unsigned int i;
+
+  for (i = 0;i < 4;++i) {
+    if (i >= len)
+      string("?");
+    else
+      hex(buf[i]);
+  }
+}
+
+static void ip6(const char *buf, unsigned int len)
+{
+  unsigned int i;
+
+  for (i = 0;i < 16;++i) {
+    if (i >= len)
+      string("??");
+    else
+      hex(buf[i]);
+    if (i & 1 && i < 15)
+      character(':');
+  }
 }
 
 static void logid(const char id[2])
@@ -100,6 +123,27 @@ static void name(const char *q)
   }
 }
 
+static void u16p(const char * buf, unsigned int len, unsigned int off)
+{
+  if (off + 2 >= len) {
+    string("?");
+  } else {
+    uint16 u;
+    uint16_unpack_big(buf + off,&u);
+    u64 = u;
+    u64_print();
+  }
+}
+
+static void namep(const char * buf, unsigned int len, unsigned int off)
+{
+  if (off >= len) {
+    string("?");
+  } else {
+    name(buf + off);
+  }
+}
+
 void log_startup(void)
 {
   string("starting");
@@ -109,7 +153,7 @@ void log_startup(void)
 void log_query(uint64 *qnum,const char client[4],unsigned int port,const char id[2],const char *q,const char qtype[2])
 {
   string("query "); number(*qnum); space();
-  ip(client); string(":"); hex(port >> 8); hex(port & 255);
+  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255);
   string(":"); logid(id); space();
   logtype(qtype); space(); name(q);
   line();
@@ -134,7 +178,7 @@ void log_querydrop(uint64 *qnum)
 void log_tcpopen(const char client[4],unsigned int port)
 {
   string("tcpopen ");
-  ip(client); string(":"); hex(port >> 8); hex(port & 255);
+  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255);
   line();
 }
 
@@ -142,7 +186,7 @@ void log_tcpclose(const char client[4],unsigned int port)
 {
   const char *x = error_str(errno);
   string("tcpclose ");
-  ip(client); string(":"); hex(port >> 8); hex(port & 255); space();
+  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255); space();
   string(x);
   line();
 }
@@ -157,7 +201,7 @@ void log_tx(const char *q,const char qtype[2],const char *control,const char ser
   for (i = 0;i < 64;i += 4)
     if (byte_diff(servers + i,4,"\0\0\0\0")) {
       space();
-      ip(servers + i);
+      ip4(servers + i, 4);
     }
   line();
 }
@@ -189,28 +233,28 @@ void log_cachednxdomain(const char *dn)
 
 void log_nxdomain(const char server[4],const char *q,unsigned int ttl)
 {
-  string("nxdomain "); ip(server); space(); number(ttl); space();
+  string("nxdomain "); ip4(server,4); space(); number(ttl); space();
   name(q);
   line();
 }
 
 void log_nodata(const char server[4],const char *q,const char qtype[2],unsigned int ttl)
 {
-  string("nodata "); ip(server); space(); number(ttl); space();
+  string("nodata "); ip4(server,4); space(); number(ttl); space();
   logtype(qtype); space(); name(q);
   line();
 }
 
 void log_lame(const char server[4],const char *control,const char *referral)
 {
-  string("lame "); ip(server); space();
+  string("lame "); ip4(server,4); space();
   name(control); space(); name(referral);
   line();
 }
 
 void log_ignore_referral(const char server[4],const char * control, const char *referral)
 {
-  string("ignored referral "); ip(server); space();
+  string("ignored referral "); ip4(server,4); space();
   name(control); space(); name(referral);
   line();
 }
@@ -228,14 +272,25 @@ void log_rr(const char server[4],const char *q,const char type[2],const char *bu
 {
   unsigned int i;
 
-  string("rr "); ip(server); space(); number(ttl); space();
+  string("rr "); ip4(server,4); space(); number(ttl); space();
   logtype(type); space(); name(q); space();
 
-  for (i = 0;i < len;++i) {
-    hex(buf[i]);
-    if (i > 30) {
-      string("...");
-      break;
+  if (byte_equal(type,2,DNS_T_SRV)) {
+    u16p(buf,len,4); space();
+    u16p(buf,len,0); space();
+    u16p(buf,len,2); space();
+    namep(buf,len,6);
+  } else if (byte_equal(type,2,DNS_T_A)) {
+    ip4(buf, len);    
+  } else if (byte_equal(type,2,DNS_T_AAAA)) {
+    ip6(buf, len);
+  } else {
+    for (i = 0;i < len;++i) {
+      hex(buf[i]);
+      if (i > 30) {
+	string("...");
+	break;
+      }
     }
   }
   line();
@@ -243,7 +298,7 @@ void log_rr(const char server[4],const char *q,const char type[2],const char *bu
 
 void log_rrns(const char server[4],const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip(server); space(); number(ttl);
+  string("rr "); ip4(server,4); space(); number(ttl);
   string(" ns "); name(q); space();
   name(data);
   line();
@@ -251,7 +306,7 @@ void log_rrns(const char server[4],const char *q,const char *data,unsigned int t
 
 void log_rrcname(const char server[4],const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip(server); space(); number(ttl);
+  string("rr "); ip4(server,4); space(); number(ttl);
   string(" cname "); name(q); space();
   name(data);
   line();
@@ -259,7 +314,7 @@ void log_rrcname(const char server[4],const char *q,const char *data,unsigned in
 
 void log_rrptr(const char server[4],const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip(server); space(); number(ttl);
+  string("rr "); ip4(server,4); space(); number(ttl);
   string(" ptr "); name(q); space();
   name(data);
   line();
@@ -269,7 +324,7 @@ void log_rrmx(const char server[4],const char *q,const char *mx,const char pref[
 {
   uint16 u;
 
-  string("rr "); ip(server); space(); number(ttl);
+  string("rr "); ip4(server,4); space(); number(ttl);
   string(" mx "); name(q); space();
   uint16_unpack_big(pref,&u);
   number(u); space(); name(mx);
@@ -281,7 +336,7 @@ void log_rrsoa(const char server[4],const char *q,const char *n1,const char *n2,
   uint32 u;
   int i;
 
-  string("rr "); ip(server); space(); number(ttl);
+  string("rr "); ip4(server,4); space(); number(ttl);
   string(" soa "); name(q); space();
   name(n1); space(); name(n2);
   for (i = 0;i < 20;i += 4) {

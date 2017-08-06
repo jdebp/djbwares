@@ -18,8 +18,16 @@ then
 	for target in ptyget publicfile daemontools djbdns ucspi-tcp clockspeed libtai "${base}"
 	do
 		echo "Creating symlink ${target} -> ${base_plus_version}."
-		ln -s -f -- "${base_plus_version}" ../"${target}"{new}
-		mv -f ${no_target_dir} -- ../"${target}"{new} ../"${target}"
+		case "`uname`" in
+		OpenBSD)
+			ln -s -f -- "${base_plus_version}" "${target}"
+			mv -f -- "${target}" ../
+			;;
+		*)
+			ln -s -f -- "${base_plus_version}" ../"${target}"{new}
+			mv -f ${no_target_dir} -- ../"${target}"{new} ../"${target}"
+			;;
+		esac
 	done
 else
 	echo 1>&2 "This is not a versioned package."

@@ -483,4 +483,5 @@ int main()
 
   log_startup();
   doit();
+  /*NOTREACHED*/ return 0;
 }

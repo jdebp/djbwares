@@ -1,0 +1,108 @@
+<refentry id="host">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>host</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>host</refname>
+<refpurpose>query a proxy/content DNS server using the DNS protocol</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>host</command>
+<arg choice='opt'>-4</arg>
+<arg choice='opt'>-6</arg>
+<arg choice='opt'>-r</arg>
+<arg choice='opt'>-a</arg>
+<arg choice='opt'>-t <replaceable>t</replaceable></arg>
+<arg choice='req'><replaceable>n</replaceable></arg>
+<arg choice='opt'><replaceable>s</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>host</command> looks up resource records for <replaceable>n</replaceable>.
+If <replaceable>s</replaceable> is supplied it makes a Domain Name System request to a server at <replaceable>s</replaceable>, otherwise it makes a Domain Name System request to the configured local proxy DNS server(s).
+It prints the results in the same human-readable format as employed by <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+If <replaceable>t</replaceable> is supplied, that is the type of resource record that it looks up.
+<replaceable>t</replaceable> can be numeric or symbolic, just as for <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+The <arg choice='plain'>-a</arg> option is equivalent to <arg choice='plain'>-t any</arg>.
+</para>
+
+<orderedlist>
+<listitem><para>
+If the <arg choice='plain'>-6</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv4 address, <command>host</command> defaults <replaceable>t</replaceable> to "ptr" if it is not supplied and looks up the "a.b.c.d.in-addr.arpa." reverse-lookup domain corresponding to that IPv4 address.
+</para></listitem>
+<listitem><para>
+If the <arg choice='plain'>-4</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv6 address, <command>host</command> defaults <replaceable>t</replaceable> to "ptr" if it is not supplied and looks up the "a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.ip6.arpa." reverse-lookup domain corresponding to that IPv6 address.
+</para></listitem>
+<listitem><para>
+If the <arg choice='plain'>-6</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to "a" if it is not supplied.
+</para></listitem>
+<listitem><para>
+If the <arg choice='plain'>-4</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to "aaaa" if it is not supplied.
+</para></listitem>
+</orderedlist>
+
+<para>
+The <arg choice='plain'>-6</arg> and <arg choice='plain'>-4</arg> options are mutually exclusive.
+</para>
+
+<para>
+The <arg choice='plain'>-r</arg> option causes the lookup to use a non-recursive query.
+Note that this usually will not work if <replaceable>s</replaceable> is not supplied and <command>host</command> is thus defaulting to the configured local proxy DNS server(s), or <replaceable>s</replaceable> denotes proxy DNS servers.
+</para>
+
+<para>
+<command>host</command> has no "debug" mode, and its output is already verbose.
+It does not support non-Internet class queries, performing zone transfers (for which <citerefentry><refentrytitle>axfr-get</refentrytitle><manvolnum>1</manvolnum></citerefentry> is the proper tool), or variations from the normal UDP/TCP timeout and fallback mechanisms.
+It only employs one query type for any given invocation.
+</para>
+
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to the locally configured proxy DNS server</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar tool that makes requests to content DNS servers</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>tinydns-get</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a tool that makes direct queries against a content DNS server's database</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>host</command> was an addition to <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

@@ -22,7 +22,7 @@ void oops(void)
   strerr_die2sys(111,FATAL,"unable to parse: ");
 }
 
-char type[2];
+static char type[2];
 static char *q;
 
 static stralloc out;

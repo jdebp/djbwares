@@ -30,12 +30,10 @@ static int doit(stralloc *work,const char *rule)
   return stralloc_cats(work,rule + colon + 1);
 }
 
-int dns_ip4_qualify_rules(stralloc *out,stralloc *fqdn,const stralloc *in,const stralloc *rules)
+int dns_qualify_rules(stralloc *fqdn,const stralloc *in,const stralloc *rules)
 {
   unsigned int i;
   unsigned int j;
-  unsigned int plus;
-  unsigned int fqdnlen;
 
   if (!stralloc_copy(fqdn,in)) return -1;
 
@@ -44,6 +42,18 @@ int dns_ip4_qualify_rules(stralloc *out,stralloc *fqdn,const stralloc *in,const 
       if (!doit(fqdn,rules->s + i)) return -1;
       i = j + 1;
     }
+
+  return 0;
+}
+
+int dns_ip4_qualify_rules(stralloc *out,stralloc *fqdn,const stralloc *in,const stralloc *rules)
+{
+  unsigned int i;
+  unsigned int j;
+  unsigned int plus;
+  unsigned int fqdnlen;
+
+  if (-1 == dns_qualify_rules(fqdn,in,rules)) return -1;
 
   fqdnlen = fqdn->len;
   plus = byte_chr(fqdn->s,fqdnlen,'+');

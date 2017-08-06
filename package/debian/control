@@ -78,7 +78,7 @@ Package: djbdns
 Section: web
 Architecture: amd64
 Depends: ${shlibs:Depends}
-Suggests: 
+Suggests: djbdns-host
 Recommends: 
 Description: djbdns built by JdeBP
  dnscache is a caching proxy DNS server that takes queries from local
@@ -98,6 +98,8 @@ Description: djbdns built by JdeBP
  dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnstrace, and
  dnstracesort are various tools for diagnosing DNS problems and for
  performing various DNS queries.
+ .
+ axfrdns is a UCSPI-TCP server program.  dnscache, tinydns, walldns, and rbldns all understand the LISTEN_FDS protocol and can be run with their listening sockets passed to them by nosh tools or systemd.
 
 Package: ptyget
 Architecture: amd64
@@ -202,9 +204,22 @@ Description: libtai built by JdeBP
 Package: leapsecs
 Architecture: amd64
 Section: admin
-Depends: ${shlibs:Depends}
+Depends:
 Suggests: 
 Recommends: 
 Description: leapsecs from libtai built by JdeBP 
  This contains only the compiled leap seconds database.  The database
  compiler tool is in the libtai package.
+
+Package: djbdns-host
+Architecture: amd64
+Section: web
+Depends: ${shlibs:Depends}
+Suggests: djbdns
+Recommends: 
+Provides: host
+Conflicts: bind9-host, knot-host
+Description: host utility built upon djbdns libraries
+ This is a cut-down host utility, similar to the ones supplied with BIND, KnotDNS, and FreeBSD.
+ .
+ It has no dependence upon special DNS library packages, and it uses the conventional djbdns mechanisms for name qualification and suchlike.

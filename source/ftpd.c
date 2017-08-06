@@ -97,13 +97,17 @@ struct sockaddr_in sa;
 
 int fdlisten = -1; /* PASV socket; -1 if PASV not active */
 unsigned int portremote = 0;
+static int anonymous_login = 0;
+static int epsv_only = 0;
 
+stralloc host = stralloc_static_0;
 stralloc dir = stralloc_static_0;
+stralloc ndir = stralloc_static_0;
 stralloc fn = stralloc_static_0;
 
-void startlistening(char x[6])
+void startlistening(unsigned char x[6])
 {
-  int dummy;
+  socklen_t dummy;
   int opt;
 
   if (fdlisten != -1) { close(fdlisten); fdlisten = -1; }
@@ -131,6 +135,11 @@ void spsv(void)
 {
   unsigned char x[6];
 
+  if (epsv_only) {
+    out_puts("503 You promised EPSV only.\r\n");
+    return;
+  }
+
   startlistening(x);
 
   out_puts("227 ");
@@ -142,9 +151,19 @@ void pasv(void)
 {
   unsigned char x[6];
 
+  if (epsv_only) {
+    out_puts("503 You promised EPSV only.\r\n");
+    return;
+  }
+
   startlistening(x);
 
-  out_puts("227 =");
+  /* The = character is, per Bernstein, a bodge for Netscape.
+  ** The brackets are a bodge for Firefox, its descendant.
+  ** Yes, Firefox violates RFC 1123 section 4.1.2.6 .
+  ** It fails to parse the bracketless form if given it.
+  */
+  out_puts("227 =(");
   out_put(strnum,fmt_ulong(strnum,(unsigned long) x[0]));
   out_puts(",");
   out_put(strnum,fmt_ulong(strnum,(unsigned long) x[1]));
@@ -156,7 +175,27 @@ void pasv(void)
   out_put(strnum,fmt_ulong(strnum,(unsigned long) x[4]));
   out_puts(",");
   out_put(strnum,fmt_ulong(strnum,(unsigned long) x[5]));
-  out_puts("\r\n");
+  out_puts(")\r\n");
+}
+
+void epsv(const char *arg)
+{
+  unsigned char x[6];
+
+  if (*arg) {
+    if (case_equals(arg,"all")) { 
+      epsv_only = 1;
+    } else if (!case_equals(arg,"1")) { 
+      out_puts("504 I do not do that IP protocol.\r\n");
+      return; 
+    }
+  }
+
+  startlistening(x);
+
+  out_puts("229 =(|||");
+  out_put(strnum,fmt_ulong(strnum,(unsigned long)x[4] * 256U + x[5]));
+  out_puts("|)\r\n");
 }
 
 int portparse(char *arg,unsigned char x[6])
@@ -215,7 +254,9 @@ void get(char *arg,int how)
   unsigned long length;
   int dummy;
 
-  if (!stralloc_copys(&fn,"./0/")) _exit(21);
+  if (!stralloc_copys(&fn,"./")) _exit(21);
+  if (!stralloc_cat(&fn,&host)) _exit(21);
+  if (!stralloc_cats(&fn,"/")) _exit(21);
   if (*arg != '/') {
     if (!stralloc_cat(&fn,&dir)) _exit(21);
     if (!stralloc_append(&fn,"/")) _exit(21);
@@ -224,7 +265,7 @@ void get(char *arg,int how)
   pathdecode(&fn);
   if (!stralloc_0(&fn)) _exit(21);
 
-  fdfile = file_open(fn.s,&mtime,&length,how == FETCH_RETR);
+  fdfile = file_open(fn.s,&mtime,&length,how == FETCH_RETR,FETCH_LIST == how || FETCH_NLST == how,FETCH_NLST == how ? 2 : FETCH_LIST == how ? 3 : 0);
   if (fdfile == -1) {
     out_puts("550 Sorry, I can't open that file: ");
     out_puts(error_str(errno));
@@ -290,19 +331,47 @@ void get(char *arg,int how)
 
 void dir_moveup(void)
 {
-  dir.len = byte_rchr(dir.s,dir.len,'/');
+  if (!stralloc_copy(&ndir,&dir)) _exit(21);
+  ndir.len = byte_rchr(ndir.s,ndir.len,'/');
 }
 
-void dir_move(char *to)
+void dir_move(const char *to)
 {
   if (*to == '/') {
-    if (!stralloc_copys(&dir,"")) _exit(21);
+    if (!stralloc_copys(&ndir,"")) _exit(21);
     ++to;
-  }
+  } else
+    if (!stralloc_copy(&ndir,&dir)) _exit(21);
   if (*to) {
-    if (!stralloc_append(&dir,"/")) _exit(21);
-    if (!stralloc_cats(&dir,to)) _exit(21);
+    if (!stralloc_append(&ndir,"/")) _exit(21);
+    if (!stralloc_cats(&ndir,to)) _exit(21);
   }
+}
+
+int ok_dir()
+{
+  int fdfile;
+  struct tai mtime;
+  unsigned long length;
+
+  if (!stralloc_copys(&fn,"./")) _exit(21);
+  if (!stralloc_cat(&fn,&host)) _exit(21);
+  if (!stralloc_cats(&fn,"/")) _exit(21);
+  if (!stralloc_cat(&fn,&ndir)) _exit(21);
+  if (!stralloc_append(&fn,"/")) _exit(21);
+  pathdecode(&fn);
+  if (!stralloc_0(&fn)) _exit(21);
+
+  fdfile = file_open(fn.s,&mtime,&length,0,1,1);
+  if (fdfile == -1) {
+    out_puts("550 Sorry, I can't use that directory: ");
+    out_puts(error_str(errno));
+    out_puts(".\r\n");
+    return 0;
+  }
+  close(fdfile);
+  if (!stralloc_copy(&dir,&ndir)) _exit(21);
+  return 1;
 }
 
 void say_dir(const char *code)
@@ -324,22 +393,87 @@ void say_dir(const char *code)
   out_puts("\" \r\n");
 }
 
+void cwd(const char *arg) 
+{
+  dir_move(arg);
+  if (!ok_dir()) return;
+  say_dir("250 ");
+}
+
+void cdup()
+{
+  dir_moveup();
+  if (!ok_dir()) return;
+  say_dir("200 ");
+}
+
+void vhost(const char *h)
+{
+  if (!*h) {
+    out_puts("501 bad virtual host\r\n");
+    return;
+  }
+  if (!stralloc_copys(&host,h)) _exit(21);
+  case_lowerb(host.s,host.len);
+  out_puts("220 virtual host accepted\r\n");
+}
+
 void request(char *cmd,char *arg)
 {
   if (case_equals(cmd,"spsv")) { spsv(); return; }
   if (case_equals(cmd,"pasv")) { pasv(); return; }
+  if (case_equals(cmd,"epsv")) { epsv(arg); return; }
   if (case_equals(cmd,"port")) { port(arg); return; }
   if (case_equals(cmd,"rest")) { rest(arg); return; }
+  if (case_equals(cmd,"host")) { vhost(arg); return; }
   if (case_equals(cmd,"retr")) { get(arg,FETCH_RETR); return; }
   if (case_equals(cmd,"list")) { get(arg,*arg ? FETCH_LISTONE : FETCH_LIST); return; }
   if (case_equals(cmd,"nlst")) { get(arg,FETCH_NLST); return; }
+  if (case_equals(cmd,"feat")) {	/* RFC 2389 */
+    out_puts("211-I understand:\r\n"
+             " PIPELINING\r\n"	/* http://cr.yp.to/ftp/pipelining.html */
+             " EPLF\r\n"	/* http://cr.yp.to/ftp/list/eplf.html */
+             " HOST\r\n"	/* RFC 7151 */
+             " TVFS\r\n"	/* RFC 3659 */
+             "211 .\r\n");
+    return;
+  }
+  if (case_equals(cmd,"opts")) {	/* RFC 2389 */
+    out_puts("501 No options are available.\r\n");
+    return;
+  }
+  if (case_equals(cmd,"size")) {	/* RFC 3659 */
+    /* Respond 502 to this, and Google Chrome ups and quits the entire session.
+    */
+    out_puts("550 Check the result of FEAT first, as RFC 3659 instructs.\r\n");
+    return;
+  }
   if (case_equals(cmd,"quit")) {
     out_puts("221 Bye.\r\n");
     out_flush();
     _exit(0);
   }
   if (case_equals(cmd,"user")) {
-    out_puts("230 Hi. No need to log in; I'm an anonymous ftp server.\r\n");
+    /* The Bernstein original returned 230 here.
+    ** Whilst conformant to the protocol, this confused the heck out of certain FTP application-level gateways in routers.
+    ** The FTP ALGs did not understand that USER could return a 2xx rather than a 3xx.
+    */
+    anonymous_login = case_equals(arg,"anonymous");
+    out_puts(anonymous_login ? "331" : "230");
+    out_puts(" Hi. No need to log in; I'm an anonymous ftp server.\r\n");
+    return;
+  }
+  if (case_equals(cmd,"pass")) {
+    /* The Bernstein original returned 202 here.
+    ** Whilst conformant to the protocol, this confused the heck out of certain FTP application-level gateways in routers.
+    ** The FTP ALGs did not understand that PASS could be superfluous.
+    */
+    out_puts(anonymous_login ? "230" : "202");
+    out_puts(" Hi. No need to log in; I'm an anonymous ftp server.\r\n");
+    return;
+  }
+  if (case_equals(cmd,"acct")) {
+    out_puts("202 I don't need account information; I'm an anonymous FTP server.\r\n");
     return;
   }
   if (case_equals(cmd,"noop")) {
@@ -350,16 +484,8 @@ void request(char *cmd,char *arg)
     say_dir("257 ");
     return;
   }
-  if (case_equals(cmd,"cwd") || case_equals(cmd,"xcwd")) {
-    dir_move(arg);
-    say_dir("250 ");
-    return;
-  }
-  if (case_equals(cmd,"cdup") || case_equals(cmd,"xcup")) {
-    dir_moveup();
-    say_dir("200 ");
-    return;
-  }
+  if (case_equals(cmd,"cwd") || case_equals(cmd,"xcwd")) { cwd(arg); return; }
+  if (case_equals(cmd,"cdup") || case_equals(cmd,"xcup")) { cdup(); return; }
   if (case_equals(cmd,"stru")) {
     if ((*arg == 'f') || (*arg == 'F')) {
       out_puts("200 Thanks, I always do file structure.\r\n");
@@ -391,15 +517,16 @@ void request(char *cmd,char *arg)
     return;
   }
   if (case_equals(cmd,"syst")) {
+    /* See http://cr.yp.to/ftp/syst.html for the rationale. */
     out_puts("215 UNIX Type: L8\r\n");
     return;
   }
   if (case_equals(cmd,"help")) {
-    out_puts("214 publicfile home page: http://pobox.com/~djb/publicfile.html\r\n");
-    return;
-  }
-  if (case_equals(cmd,"pass") || case_equals(cmd,"acct")) {
-    out_puts("202 I don't need account information; I'm an anonymous FTP server.\r\n");
+    out_puts("214-See these:\r\n"
+             " Daniel J. Bernstein's FTP doco: http://cr.yp.to/ftp.html\r\n"
+             " publicfile home page: http://cr.yp.to/publicfile.html\r\n"
+             " djbwares home page: http://jdebp.eu./Source/djbwares/\r\n"
+	     "214 .\r\n");
     return;
   }
   if (case_equals(cmd,"allo")) {
@@ -428,6 +555,10 @@ void doit(void)
     setsockopt(0,SOL_SOCKET,SO_OOBINLINE,(char *) &opt,sizeof opt);
     /* if it fails, bummer */
   }
+
+  x = ucspi_get_localhost_str(NULL, NULL, NULL);
+  if (!x) x = "0";
+  if (!stralloc_copys(&host,x)) _exit(21);
 
   x = ucspi_get_localip_str(NULL, NULL, NULL);
   if (!x || !ip_scan(x,&iplocal))

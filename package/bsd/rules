@@ -10,7 +10,7 @@ build:
 
 # Target this in order to clean the build areas.
 clean:
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		rm -r -f bsd/"$$i"/ || exit 1 ; \
 	done
@@ -18,7 +18,7 @@ clean:
 
 # Target this in order to make the package files.
 binary: stage control
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		echo 1>&2 "Building package "$$i ; \
 		bsd/pkgcreate bsd/"$$i"/ bsd/"$$i"/ "$$i" || exit 1 ; \
@@ -31,7 +31,7 @@ stage:
 	package/stage bsd/tmp bsd
 
 control:
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
 	do \
 		echo 1>&2 "Building control file for "$$i"." ; \
 		bsd/gencontrol "$$i" bsd/"$$i" || exit 1 ; \

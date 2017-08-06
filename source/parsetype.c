@@ -5,7 +5,7 @@
 #include "uint16.h"
 #include "parsetype.h"
 
-int parsetype(char *s,char type[2])
+int parsetype(const char *s,char type[2])
 {
   unsigned long u;
 

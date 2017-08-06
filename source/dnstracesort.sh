@@ -12,7 +12,7 @@ awk -F: '
     }
     print
   }
-' | sort -t: +0 -2 +4 +3 -4 +2 -3 | uniq | awk -F: '
+' | sort -t: -k 1,3 -k 5 -k 4,5 -k 3,4 | uniq | awk -F: '
   {
     type = $1
     q = $2
