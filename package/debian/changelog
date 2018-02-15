@@ -1,3 +1,11 @@
+djbwares (7) unstable; urgency=medium
+
+  * A bug in tcpserver triggered when standard input is already closed, noted by Jorge Almeida, has been fixed.
+  * dnscache now has a FORWARDFIRST mode.
+  * Building now works even if one has a CDPATH.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Thu, 15 Feb 2018 17:19:10 +0000
+
 djbwares (6) unstable; urgency=medium
 
   * dnscache now caches SOA resource records.

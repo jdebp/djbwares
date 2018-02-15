@@ -19,12 +19,19 @@ stage:
 
 control:
 	${RM} debian/files
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
+	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai djbdns-host ; \
 	do \
 		echo 1>&2 "Building control file for "$$i"." ; \
 		${RM} debian/substvars ; \
 		install -d debian/"$$i"/DEBIAN || exit 1 ; \
 		dpkg-shlibdeps debian/"$$i"/usr/local/*bin/* || exit 1 ; \
+		debian/gencontrol "$$i" debian/"$$i" || exit 1 ; \
+	done
+	for i in leapsecs ; \
+	do \
+		echo 1>&2 "Building control file for "$$i"." ; \
+		${RM} debian/substvars ; \
+		install -d debian/"$$i"/DEBIAN || exit 1 ; \
 		debian/gencontrol "$$i" debian/"$$i" || exit 1 ; \
 	done
 

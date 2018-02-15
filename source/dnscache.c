@@ -473,6 +473,8 @@ int main()
     response_hidettl();
   if (env_get("FORWARDONLY"))
     query_forwardonly();
+  else if (env_get("FORWARDFIRST"))
+    query_forwardfirst();
 
   if (!roots_init())
     strerr_die2sys(111,FATAL,"unable to read servers: ");

@@ -401,8 +401,8 @@ main(int argc,char **argv)
     buffer_flush(&b);
   }
  
-  close(0);
-  close(1);
+  if (0 != s) close(0);
+  if (1 != s) close(1);
   printstatus();
  
   for (;;) {

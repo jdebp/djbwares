@@ -238,6 +238,21 @@ For similar reasons, for correct operation the list in a <filename>servers/<repl
 </refsection>
 
 <refsection>
+<title>Forward first mode</title>
+
+<para>
+If the <envar>FORWARDFIRST</envar> environment variable is set, <command>dnscache</command> permits back-end services that it contacts to be either caching proxies or content servers. 
+It behaves exactly as in normal mode, except that back-end queries have the "recursion desired" bit set to on instead of to off.
+This causes caching proxies to respond with fully resolved responses, whilst still performing query resolution locally if they do not.
+</para>
+
+<para>
+Forward first mode is overridden by forward only mode.
+</para>
+
+</refsection>
+
+<refsection>
 <title>Repeated IP addresses</title>
 
 <para>

@@ -31,5 +31,6 @@ extern void query_io(struct query *,iopause_fd *,struct taia *);
 extern int query_get(struct query *,iopause_fd *,struct taia *);
 
 extern void query_forwardonly(void);
+extern void query_forwardfirst(void);
 
 #endif

@@ -1,6 +1,6 @@
 Source: djbwares
 Priority: optional
-Maintainer: Jonathan de Boyne Pollard <jonathan.de.boyne.pollard@gmail.com>, Gerrit Pape <pape@smarden.org>
+Maintainer: Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>, Gerrit Pape <pape@smarden.org>
 Build-Depends: redo, xmlto, pax
 
 Package: publicfile

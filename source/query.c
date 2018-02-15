@@ -14,10 +14,18 @@
 #include "query.h"
 
 static int flagforwardonly = 0;
+static int recursiondesired = 0;
 
 void query_forwardonly(void)
 {
   flagforwardonly = 1;
+  recursiondesired = 1;
+}
+
+void query_forwardfirst(void)
+{
+  flagforwardonly = 0;
+  recursiondesired = 1;
 }
 
 static void cachegeneric(const char type[2],const char *d,const char *data,unsigned int datalen,uint32 ttl)
@@ -535,7 +543,7 @@ static int doit(struct query *z,int state)
   dns_sortip(z->servers_a[z->level],QUERY_MAXNS_A);
   dtype = z->level ? DNS_T_A : z->type;
   log_tx(z->name[z->level],dtype,z->control[z->level],z->servers_a[z->level],z->level);
-  if (dns_transmit_start(&z->dt,z->servers_a[z->level],flagforwardonly,z->name[z->level],dtype,z->localip) == -1) goto DIE;
+  if (dns_transmit_start(&z->dt,z->servers_a[z->level],recursiondesired,z->name[z->level],dtype,z->localip) == -1) goto DIE;
   return 0;
 
 
