@@ -2,7 +2,7 @@ caldate
 caldate_mjd
 caltime
 caltime_tai
-leapsecs
+leapsecs_init
 tai
 tai_now
 tai_pack

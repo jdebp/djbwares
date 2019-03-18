@@ -1,3 +1,9 @@
+djbwares (9) UNRELEASED; urgency=medium
+
+  * Fixed a build problem with the leapsecs_init.3 manual page.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Mon, 18 Mar 2019 20:06:05 +0000
+
 djbwares (8) unstable; urgency=medium
 
   * various minor doco corrections

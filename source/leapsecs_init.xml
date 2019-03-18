@@ -8,7 +8,7 @@
 <refentry id="leapsecs">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
-<refentrytitle>leapsecs</refentrytitle>
+<refentrytitle>leapsecs_init</refentrytitle>
 <manvolnum>3</manvolnum>
 <refmiscinfo class="manual">user commands</refmiscinfo>
 <refmiscinfo class="source">djbwares</refmiscinfo>
@@ -16,9 +16,13 @@
 </refmeta>
 
 <refnamediv>
-<refname>leapsecs</refname>
+<refname>leapsecs_init</refname>
+<refname>leapsecs_sub</refname>
+<refname>leapsecs_add</refname>
+<refname>leapsecs_read</refname>
 <refpurpose>handle UTC leap seconds</refpurpose>
 </refnamediv>
+
 <refsynopsisdiv>
 <funcsynopsis language="C++">
 <funcsynopsisinfo>
@@ -26,13 +30,13 @@
 </funcsynopsisinfo>
 <funcprototype>
 	<funcdef>int <function>leapsecs_sub</function></funcdef>
-	<paramdef>struct tai * <parameter>t<parameter></paramdef>
+	<paramdef>struct tai * <parameter>t</parameter></paramdef>
 </funcprototype>
 </funcsynopsis>
 <funcsynopsis language="C++">
 <funcprototype>
 	<funcdef>void <function>leapsecs_add</function></funcdef>
-	<paramdef>struct tai * <parameter>t<parameter></paramdef>
+	<paramdef>struct tai * <parameter>t</parameter></paramdef>
 	<paramdef>int <parameter>hit</parameter></paramdef>
 </funcprototype>
 </funcsynopsis>

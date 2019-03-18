@@ -28,7 +28,6 @@ do
 	cat package/commands${section} package/extra-manpages${section} | 
 	while read i
 	do
-		test _"${section}" != _3 || test _"${i}" != _leapsecs || continue
 		rm -f -- manual/"$i".${section}{new}
 		install -p -m 0644 -- build/"$i".${section} manual/"$i".${section}{new}
 		rm -f -- doc/"$i".html{new}
@@ -89,7 +88,6 @@ do
 	cat package/commands${section} package/extra-manpages${section} | 
 	while read i
 	do
-		test _"${section}" != _3 || test _"${i}" != _leapsecs || continue
 		mv -f -- manual/"$i".${section}{new} manual/"$i".${section}
 		mv -f -- doc/"$i".html{new} doc/"$i".html
 		mv -f -- doc/commands/"$i".xml{new} doc/commands/"$i".xml

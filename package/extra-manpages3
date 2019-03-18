@@ -4,7 +4,7 @@ caltime
 caltime_tai
 sgetopt
 subgetopt
-leapsecs
+leapsecs_init
 tai
 taia
 taia_now

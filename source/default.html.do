@@ -1,6 +1,11 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
+# vim: set filetype=sh:
+nam="`basename "$1"`"
+src="${nam}.xml"
 man="index.html"
-src="`basename "$1"`.xml"
-install -d tmp
-redo-ifchange "${src}"
-exec setlock tmp/index.html.lock sh -c "xmlto --skip-validation -o tmp html \"${src}\" && mv \"tmp/${man}\" \"$3\""
+install -d "tmp/${nam}"
+redo-ifchange "${src}" "version.xml"
+exec setlock "tmp/${nam}/index.html.lock" sh -c "xmlto --skip-validation -o \"tmp/${nam}\" html \"${src}\" && sed -e 's/href=\"${man}#/href=\"#/g' \"tmp/${nam}/${man}\" > \"$3\""
