@@ -109,6 +109,15 @@ void response_servfail(void)
   response[3] |= 2;
 }
 
+int response_noany(const char *d)
+{
+  if (!response_rstart(d,DNS_T_HINFO,86400)) return 0;
+  if (!response_addbytes("\7RFC8482",8)) return 0;
+  if (!response_addbytes("\0",1)) return 0;
+  response_rfinish(RESPONSE_ANSWER);
+  return 1;
+}
+
 void response_id(const char id[2])
 {
   byte_copy(response,2,id);

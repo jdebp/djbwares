@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="svstat">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>svstat</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>svstat</refname>
+<refpurpose>prints the status of services monitored by <citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>svstat</command>
+<arg repeat='rep' choice='req'><replaceable>services</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>services</replaceable> consists of any number of arguments, each argument naming a directory.
+<command>svstat</command> prints one human-readable line for each directory, saying whether <citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry> is successfully running in that directory, and reporting the status information maintained by <citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

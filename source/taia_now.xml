@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="taia_now">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>taia_now</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">library functions</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>taia_now</refname>
+<refpurpose>get current time, with 1-attosecond precision</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis language="C++">
+<funcsynopsysinfo>
+#include &lt;taia.h&gt;
+</funcsynopsysinfo>
+<funcprototype>
+	<funcdef>void <function>taia_now</function></funcdef>
+	<paramdef>struct taia *<parameter>t</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<function>taia_now</function> puts the current time into <replaceable>t</replaceable>.
+</para>
+
+<para>
+More precisely: <function>taia_now</function> puts into <replaceable>t</replaceable> its best guess as to the TAI64NA label for the 1-attosecond interval that contains the current time.
+</para>
+</refsection>
+
+<refsection><title>Notes</title>
+<para>
+This implementation of <function>tai_now</function> assumes that the <code>struct timeval</code> returned from <function>gettimeofday</function> represents the number of TAI seconds since 1970-01-01 00:00:10 TAI.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>gettimeofday</refentrytitle><manvolnum>2</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai_now</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

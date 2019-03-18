@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tcp-environ">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tcp-environ</refentrytitle>
+<manvolnum>5</manvolnum>
+<refmiscinfo class="manual">file formats</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tcp-environ</refname>
+<refpurpose>UCSPI-TCP environment variables</refpurpose>
+</refnamediv>
+
+<refsection><title>Description</title>
+<para>
+The following environment variables describe a TCP connection.
+They are set up by <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>, <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>, and <citerefentry><refentrytitle>tcp-env</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+Note that <envar>TCPLOCALHOST</envar>, <envar>TCPREMOTEHOST</envar>, and <envar>TCPREMOTEINFO</envar> can contain arbitrary characters and attacker-supplied information.
+</para>
+
+<variablelist>
+
+<varlistentry>
+<term><envar>PROTO</envar></term>
+<listitem><para>
+The string <code>TCP</code> or <code>TCP6</code>, indicating which family of environment variable names to use.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPLOCALHOST</envar></term>
+<listitem><para>
+The domain name of the local host, with uppercase letters converted to lowercase.
+If there is no currently available domain name for the local IP address, <envar>TCPLOCALHOST</envar> is not set.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPLOCALIP</envar></term>
+<listitem><para>
+The IPv4 address of the local host, in dotted-decimal form or the respective compactified IPv6 address.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPLOCALPORT</envar></term>
+<listitem><para>
+The local TCP port number, in decimal.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPREMOTEHOST</envar></term>
+<listitem><para>
+The domain name of the remote host, with uppercase letters converted to lowercase.
+If there is no currently available domain name for the remote IP address, <envar>TCPREMOTEHOST</envar> is not set.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPREMOTEINFO</envar></term>
+<listitem><para>
+A connection-specific string, perhaps a username, supplied by the remote host via 931/1413/IDENT/TAP.
+If the remote host did not supply connection information, <envar>TCPREMOTEINFO</envar> is not set.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPREMOTEIP</envar></term>
+<listitem><para>
+The IPv4 or compactified IPv6 address of the remote host.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCPREMOTEPORT</envar></term>
+<listitem><para>
+The remote TCP port number.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCP6INTERFACE</envar></term>
+<listitem><para>
+The interface name ("eth0") for IPv6 connections using link-local addresses.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCP6REMOTEIP</envar></term>
+<listitem><para>
+The compactified or IPv4-mapped IPv6 address of the remote host.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCP6REMOTEHOST</envar></term>
+<listitem><para>
+Identical to <envar>TCPREMOTEHOST</envar>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><envar>TCP6REMOTEPORT</envar></term>
+<listitem><para>
+Identical to <envar>TCPREMOTEPORT</envar>.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp-env</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp</refentrytitle><manvolnum>4</manvolnum></citerefentry>,
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

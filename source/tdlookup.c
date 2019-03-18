@@ -172,8 +172,9 @@ RESTART:
     while ((r = find(wild,wild != q))) {
       if (r == -1) return 0;
       flagfound = 1;
+      if (byte_diff(type,2,DNS_T_CNAME) && byte_equal(qtype,2,DNS_T_ANY)) continue;
       if (flaggavesoa && byte_equal(type,2,DNS_T_SOA)) continue;
-      if (byte_diff(type,2,qtype) && byte_diff(qtype,2,DNS_T_ANY) && byte_diff(type,2,DNS_T_CNAME)) continue;
+      if (byte_diff(type,2,qtype) && byte_diff(type,2,DNS_T_CNAME)) continue;
       if (byte_equal(type,2,DNS_T_A) && (dlen - dpos == 4)) {
 	addrttl = ttl;
 	i = dns_random(addrnum + 1);
@@ -227,7 +228,9 @@ RESTART:
 
   if (!flagfound)
     response_nxdomain();
-
+  else if (byte_equal(qtype,2,DNS_T_ANY)) {
+    if (!response_noany(*pqname)) return 0;
+  }
 
   AUTHORITY:
   aupos = response_len;

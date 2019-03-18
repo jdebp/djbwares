@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="setlock">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>setlock</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>setlock</refname>
+<refpurpose>runs another program with a file locked.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>setlock</command>
+<arg choice='opt'>-n</arg>
+<arg choice='opt'>-N</arg>
+<arg choice='opt'>-x</arg>
+<arg choice='opt'>-X</arg>
+<arg choice='req'><replaceable>fn</replaceable></arg>
+<arg choice='req'><replaceable>child</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>fn</replaceable> is a single argument.
+<replaceable>child</replaceable> consists of one or more arguments. 
+</para>
+
+<para>
+<command>setlock</command> opens <filename><replaceable>fn</replaceable></filename> for writing (creating it if it does not exist), obtains an exclusive lock on it, and runs <replaceable>child</replaceable>.
+</para>
+
+<para>
+Normally the lock disappears when <replaceable>child</replaceable> exits. 
+</para>
+
+<para>
+Here's the complete story:
+<replaceable>child</replaceable> is given a descriptor for a locked ofile pointing to the disk file named <filename><replaceable>fn</replaceable></filename>.
+The lock disappears when this ofile is 
+</para>
+<itemizedlist>
+<listitem><para>
+either closed by all the processes that have descriptors for it
+</para></listitem>
+<listitem><para>
+or explicitly unlocked. 
+</para></listitem>
+</itemizedlist>
+</refsection>
+
+<refsection><title>Options</title>
+<variablelist>
+<varlistentry>
+<term><arg>-n</arg></term>
+<listitem><para>
+No delay.
+If <filename><replaceable>fn</replaceable></filename> is locked by another process, <command>setlock</command> gives up. 
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg>-N</arg></term>
+<listitem><para>
+(Default.)
+Delay.
+If <filename><replaceable>fn</replaceable></filename> is locked by another process, <command>setlock</command> waits until it can obtain a new lock. 
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg>-x</arg></term>
+<listitem><para>
+If <filename><replaceable>fn</replaceable></filename> cannot be opened (or created) or locked, <command>setlock</command> exits zero. 
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><arg>-X</arg></term>
+<listitem><para>
+(Default.)
+If <filename><replaceable>fn</replaceable></filename> cannot be opened (or created) or locked, <command>setlock</command> prints an error message and exits nonzero.
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

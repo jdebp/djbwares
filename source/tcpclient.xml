@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tcpclient">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tcpclient</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tcpclient</refname>
+<refpurpose>creates an outgoing TCP connection.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tcpclient</command>
+<arg choice='opt' repeat='rep'><replaceable>opts</replaceable></arg>
+<arg choice='req'><replaceable>host</replaceable></arg>
+<arg choice='req'><replaceable>port</replaceable></arg>
+<arg choice='req'><replaceable>prog</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>opts</replaceable> is a series of getopt-style options.
+<replaceable>host</replaceable> is one argument.
+<replaceable>port</replaceable> is one argument.
+<replaceable>prog</replaceable> consists of one or more arguments. 
+</para>
+
+<para>
+<command>tcpclient</command> attempts to connect to a TCP server.
+If it is successful, it runs <replaceable>prog</replaceable>, with descriptor 6 reading from the network and descriptor 7 writing to the network.
+It also sets up several environment variables (see <citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>).
+</para>
+
+<para>
+The server's address is given by <replaceable>host</replaceable> and <replaceable>port</replaceable>.
+<replaceable>port</replaceable> may be a name from the <filename>/etc/services</filename> table or a number.
+<replaceable>host</replaceable> may be 0, referring to the local machine, or a dotted-decimal IP address, or a host name; it is fed through qualification using <function>dns_ip4_qualify</function>.
+</para>
+
+<para>
+If the server has several IP addresses, <command>tcpclient</command> tries each address in turn.
+</para>
+
+<para>
+<command>tcpclient</command> prints messages about failed connection attempts and other problems to standard error.
+If all connection attempts fail, it exits with status 111.
+On successful connection, the exit status is (of course) whatever the exit status of <replaceable>prog</replaceable> is.
+</para>
+</refsection>
+
+<refsection><title>Options</title>
+
+<refsection><title>General options</title>
+<variablelist>
+<varlistentry>
+<term><arg>-q</arg></term>
+<listitem><para>
+Quiet.
+Do not print error messages. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-Q</arg></term>
+<listitem><para>
+(Default.)
+Print error messages. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-v</arg></term>
+<listitem><para>
+Verbose.
+Print error messages and status messages. 
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection><title>Connection options</title>
+<variablelist>
+<varlistentry>
+<term><arg>-T</arg> <replaceable>x</replaceable>+<replaceable>y</replaceable></term>
+<listitem><para>
+Give up on the connection attempt after <replaceable>x</replaceable>+<replaceable>y</replaceable> seconds.
+Default: 2+58. When a host has several IP addresses,
+<command>tcpclient</command> tries to connect to the first IP address, waits <replaceable>x</replaceable> seconds, tries to connect to the second IP address, waits <replaceable>x</replaceable> seconds, etc.; then it retries each address that timed out, waiting <replaceable>y</replaceable> seconds per address.
+You may omit <arg>+<replaceable>y</replaceable></arg> to skip the second try.
+Before version 0.88, <command>tcpclient</command> will use only <replaceable>x</replaceable> (default: 60). 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-i</arg> <replaceable>localip</replaceable></term>
+<listitem><para>
+Use <replaceable>localip</replaceable> as the IP address for the local side of the connection; quit if <replaceable>localip</replaceable> is not available.
+Normally <command>tcpclient</command> lets the operating system choose an address. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-p</arg> <replaceable>localport</replaceable></term>
+<listitem><para>
+Use <replaceable>localport</replaceable> as the TCP port for the local side of the connection; quit if <replaceable>localport</replaceable> is not available.
+Normally <command>tcpclient</command> lets the operating system choose a port. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-d</arg></term>
+<listitem><para>
+Delay sending data for a fraction of a second whenever the remote host is responding slowly.
+This is currently the default, but it may not be in the future; if you want it, set it explicitly. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-D</arg></term>
+<listitem><para>
+Never delay sending data; enable the <code>TCP_NODELAY</code> socket option. 
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection><title>Data-gathering options</title>
+<variablelist>
+<varlistentry>
+<term><arg>-h</arg></term>
+<listitem><para>
+(Default.)
+Look up the remote host name in DNS to set the environment variable <envar>TCPREMOTEHOST</envar>. 
+</para>
+<caution>
+This option queries attacker-supplied servers for attacker-supplied information, which should not be trusted or, really, used at all.
+Use <arg>-H</arg> wherever possible.
+</caution>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-H</arg></term>
+<listitem><para>
+Do not look up the remote host name in DNS; remove the environment variable <envar>TCPREMOTEHOST</envar>. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-l</arg> <replaceable>localname</replaceable></term>
+<listitem><para>
+Do not look up the local host name in DNS; use <replaceable>localname</replaceable> for the environment variable <envar>TCPLOCALHOST</envar>.
+A common choice for localname is 0.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-r</arg></term>
+<listitem><para>
+(Default.)
+Attempt to obtain <envar>TCPREMOTEINFO</envar> from the remote host.
+</para>
+<caution>
+This option queries attacker-supplied servers for attacker-supplied information, which should not be trusted or, really, used at all.
+Use <arg>-R</arg> wherever possible.
+Other compatible tools (such as <citerefentry><refentrytitle>s6-tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>) have indeed reversed the default.
+</caution>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-R</arg></term>
+<listitem><para>
+Do not attempt to obtain <envar>TCPREMOTEINFO</envar> from the remote host. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-t</arg> <replaceable>n</replaceable></term>
+<listitem><para>
+Give up on the <envar>TCPREMOTEINFO</envar> connection attempt after <replaceable>n</replaceable> seconds.
+Default: 26. 
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

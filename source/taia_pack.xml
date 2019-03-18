@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="taia_pack">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>taia_pack</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>taia_pack</refname>
+<refpurpose>convert TAI64NA labels to external format</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<programlisting>
+#include &lt;taia.h&gt;
+
+void \fBtaia_pack\fP(\fIbuf\fR,&amp;\fIt\fR);
+
+void \fBtaia_unpack\fP(\fIbuf\fR,&amp;\fIt\fR);
+
+char \fIbuf\fR[\fBTAIA_PACK\fP];
+
+struct taia \fIt\fR;
+</programlisting>
+</refsynopsisdiv>
+<refsection><title>Description</title>
+<command>taia_pack</command>
+converts a TAI64NA label
+from internal format in
+<replaceable>t</replaceable>
+to TAI64NA format in
+<replaceable>buf</replaceable>.
+
+<command>taia_unpack</command>
+converts a TAI64NA label
+from TAI64NA format in
+<replaceable>buf</replaceable>
+to internal format in
+<replaceable>t</replaceable>.
+
+<command>TAIA_PACK</command>
+is 16.
+
+See
+<command>http://pobox.com/~djb/proto/tai64.txt</command>
+for more information about TAI64NA format.
+</refsection>
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

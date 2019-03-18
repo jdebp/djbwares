@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="dnscache-showctl">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -43,14 +50,14 @@ It treats each <arg choice='plain'><replaceable>dir</replaceable></arg> argument
 <refsection>
 <title>History</title>
 <para>
-<command>dnscache-showctl</command> was an add-on for <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2001.
+<command>dnscache-showctl</command> was an add-on for <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2001.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tinydns-conf">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tinydns-conf</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tinydns-conf</refname>
+<refpurpose>obsolete program for creating service definitions</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tinydns-conf</command>
+<arg choice='req' rep='repeat'><replaceable>year</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+tinydns-conf sets up a DNS publication service.
+
+This is a reference page. For tutorial information, see the instructions for running a DNS server.
+
+Interface
+     tinydns-conf acct logacct D ip
+tinydns-conf creates a service directory D that runs tinydns. The name D must start with a slash and must not contain any special characters. Normally D is /etc/tinydns.
+
+You can run the service under svscan by creating a symbolic link in the svscan directory:
+
+     ln -s D /service
+The service will start within five seconds, and will be restarted upon reboot. You can use svc to control the service.
+tinydns-conf arranges for tinydns to chroot to D/root and to run under the uid and gid of acct. The name acct must not contain any special characters.
+
+tinydns-conf creates D/root/Makefile to run tinydns-data upon request.
+
+tinydns-conf arranges for tinydns to listen for UDP packets on port 53 of ip, and to send outgoing packets from ip.
+
+tinydns-conf creates an automatically rotated log directory in D/log/main. The logs are owned by logacct. The corresponding multilog processes run under the uid and gid of logacct. The name logacct must not contain any special characters.
+</para>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>tinydns-conf</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

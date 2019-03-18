@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="configure">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -102,8 +109,8 @@ You can set up virtual hosts by creating more directories inside file.
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

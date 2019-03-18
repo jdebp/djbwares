@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="argv0">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>argv0</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>argv0</refname>
+<refpurpose>runs a program with a specified 0th argument.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>argv0</command>
+<arg choice='req'><replaceable>realname</replaceable></arg>
+<arg choice='req'><replaceable>zero</replaceable></arg>
+<arg choice='req'><replaceable>args</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>realname</replaceable> is one argument.
+<replaceable>zero</replaceable> is one argument.
+<replaceable>args</replaceable> is any number of arguments. 
+</para>
+
+<para>
+<command>argv0</command> runs the program stored as <replaceable>realname</replaceable> on disk, with <replaceable>zero</replaceable> as the 0th argument (rather than <replaceable>realname</replaceable>) and <replaceable>args</replaceable> as the remaining arguments.
+</para>
+</refsection>
+
+<refsection><title>Applications</title>
+<para>
+Some programs pay special attention to the 0th argument.
+<command>argv0</command> makes these programs usable from shell scripts. 
+</para>
+
+<informalexample>
+For example, <userinput>argv0 /bin/csh -csh</userinput> runs <command>/bin/csh</command> with a 0th argument of <code>-csh</code>.
+<command>/bin/csh</command> will think it is a login shell and behave accordingly. 
+</informalexample>
+
+<informalexample>
+As another example, the command 
+<userinput>
+tcpserver 0 ftp argv0 tcpd ftpd -l -A
+</userinput>
+has a similar effect to the line 
+<programlisting>
+ftp stream tcp nowait root tcpd ftpd -l -A
+</programlisting>
+in <filename>/etc/inetd.conf</filename>.
+The <command>tcpd</command> program is run with 0th argument <arg>ftpd</arg> and remaining arguments <arg>-l</arg> <arg>-A</arg>.
+Note that <command>tcpd</command> can and should be replaced by the <arg>-x</arg> option of <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>:
+<userinput>
+tcpserver -x ftp.tcp 0 ftp ftpd -l -A
+</userinput>
+</informalexample>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

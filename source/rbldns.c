@@ -30,7 +30,7 @@ static int doit(char *q,char qtype[2])
 
   flaga = byte_equal(qtype,2,DNS_T_A);
   flagtxt = byte_equal(qtype,2,DNS_T_TXT);
-  if (byte_equal(qtype,2,DNS_T_ANY)) flaga = flagtxt = 1;
+  if (byte_equal(qtype,2,DNS_T_ANY)) goto NO_ANY;
   if (!flaga && !flagtxt) goto REFUSE;
 
   if (dd(q,base,reverseip) != 4) goto REFUSE;
@@ -79,6 +79,10 @@ static int doit(char *q,char qtype[2])
 
   return 1;
 
+
+NO_ANY:
+  if (!response_noany(q)) return 0;
+  return 1;
 
   REFUSE:
   response[2] &= ~4;

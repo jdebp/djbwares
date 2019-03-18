@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="gopherd">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -146,7 +153,7 @@ gopherd does not support modification requests such as (non-zero-length) GOPHER+
 </para>
 
 <para>
-gopherd does not support search engines.
+gopherd does not have a search engine.
 It ignores information item selection in "!" and "$" GOPHER+ requests, and view selection in "+" GOPHER+ requests.
 </para>
 </refsection>
@@ -195,7 +202,7 @@ is anything other than a regular file: a directory, socket, device, etc.
 <refsection>
 <title>Author</title>
 <para>
-Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

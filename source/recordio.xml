@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="recordio">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>recordio</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>recordio</refname>
+<refpurpose>records the input and output of a program.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>recordio</command>
+<arg choice='req'><replaceable>prog</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<command>recordio</command> runs <replaceable>prog</replaceable>.
+It prints lines to descriptor 2 showing the input and output of <replaceable>prog</replaceable>.
+</para>
+
+<para>
+At the beginning of each line on descriptor 2, <command>recordio</command> inserts the <replaceable>prog</replaceable> process ID, along with <computeroutput>&lt;</computeroutput> for input or <computeroutput>&gt;</computeroutput> for output.
+At the end of each line it inserts <computeroutput>+</computeroutput>, a space, or <computeroutput>[EOF]</computeroutput>; a space indicates that there was a new line in the input or output, and <computeroutput>[EOF]</computeroutput> indicates the end of input or output.
+</para>
+
+<para>
+<command>recordio</command> prints every packet of input and output immediately.
+It does not attempt to combine packets into coherent lines.
+</para>
+
+<informalexample>
+For example,
+<userinput>
+recordio sh -c 'cat /dev/fd/8 2&gt;&amp;1' &gt; /dev/null
+</userinput>
+could produce 
+<screen><computeroutput>5135 &gt; cat: /dev/fd/8: Bad file descriptor 
+5135 &gt; [EOF]
+</computeroutput></screen>
+or 
+<screen><computeroutput>5135 &gt; cat: +
+5135 &gt; /dev/fd/8+
+5135 &gt; : +
+5135 &gt; Bad file descriptor 
+5135 &gt; [EOF]
+</computeroutput></screen>
+if the <command>cat</command> program prints several packets. 
+</informalexample>
+
+<para>
+<command>recordio</command> uses several lines for long packets to guarantee that each line is printed atomically. 
+</para>
+
+<para>
+<command>recordio</command> runs as a child process of <replaceable>prog</replaceable>.
+It exits when it sees the end of <replaceable>prog</replaceable>'s output.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

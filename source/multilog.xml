@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="multilog">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -65,13 +72,13 @@ A star before the end of <replaceable>pattern</replaceable> matches any string t
 A star at the end of <replaceable>pattern</replaceable> matches any string. 
 </para>
 
-<para>
+<informalexample>
 For example, the action <blockquote><arg choice='plain'>+hello</arg></blockquote> selects <computeroutput>hello</computeroutput>. 
 It does not select <computeroutput>hello world</computeroutput>. 
 The action <blockquote><arg choice='plain'>-named[*]: Cleaned cache *</arg></blockquote> deselects <computeroutput>named[135]: Cleaned cache of 3121 RRs</computeroutput>.
 The first star matches any string that does not include a right bracket. 
 The action <blockquote><arg choice='plain'>-*</arg></blockquote> deselects every line. 
-</para>
+</informalexample>
 
 <para>
 To save memory, <command>multilog</command> actually checks pattern against only the first 1000 characters of each line.
@@ -96,9 +103,9 @@ The action <blockquote><arg choice='plain'>=<replaceable>file</replaceable></arg
 There is no protection of <replaceable>file</replaceable> against power outages. 
 </para>
 
-<para>
+<informalexample>
 For example, the sequence of actions <arg choice='plain'>-*</arg> <arg choice='plain'>+STAT*</arg> <arg choice='plain'>=log/status</arg> maintains <filename>log/status</filename> as a copy of the most recent line starting with <code>STAT</code>. 
-</para>
+</informalexample>
 
 </refsection>
 
@@ -112,6 +119,8 @@ This is required to be the first action.
 
 <para>
 Patterns apply to the line after the timestamp is inserted. 
+</para>
+<informalexample>
 For example, if <literallayout>
 <userinput><command>multilog</command> <arg choice='plain'>t</arg> <arg choice='plain'>'-*'</arg> <arg choice='plain'>'+* fatal: *'</arg> <arg choice='plain'>./main</arg></userinput>
 </literallayout> reads the line <literallayout>
@@ -119,7 +128,7 @@ For example, if <literallayout>
 </literallayout> then it will log a line such as <literallayout>
 <computeroutput>@400000003b4a39c23294b13c fatal: out of memory</computeroutput>
 </literallayout> with the first <arg choice='plain'>*</arg> matching the timestamp.
-</para>
+</informalexample>
 
 <para>
 You can use <citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry> to convert these timestamps to human-readable form.
@@ -127,7 +136,7 @@ You can use <citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1
 
 </refsection>
 
-<refsection>
+<refsection id="ROTATION" xreflabel="ROTATION">
 <title>Automatically rotated logs</title>
 
 <para>
@@ -218,7 +227,7 @@ Note that running <replaceable>processor</replaceable> may block any program fee
 <refsection>
 <title>History</title>
 <para>
-<command>multilog</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s daemontools toolset in 2001.
+<command>multilog</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s daemontools toolset in 2001.
 It replaced an earler Bernstein program named <command>cyclog</command>.
 </para>
 </refsection>
@@ -226,8 +235,8 @@ It replaced an earler Bernstein program named <command>cyclog</command>.
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

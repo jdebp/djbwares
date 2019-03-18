@@ -51,6 +51,28 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     if (!stralloc_cats(out,x)) return 0;
     if (!dns_domain_todot_cat(out,d)) return 0;
   }
+  else if (byte_equal(misc,2,DNS_T_HINFO)) {
+    if (!stralloc_cats(out," HINFO ")) return 0;
+    for (i = 0;i < 2;++i) {
+      pos = dns_packet_copy(buf,len,pos,misc,1); if (!pos) return 0;
+      u16 = misc[0];
+      while (u16) {
+	--u16;
+	pos = dns_packet_copy(buf,len,pos,misc,1); if (!pos) return 0;
+	if ((misc[0] >= 33) && (misc[0] <= 126) && (misc[0] != '\\')) {
+	  if (!stralloc_catb(out,misc,1)) return 0;
+	}
+	else {
+	  ch = misc[0];
+	  misc[3] = '0' + (7 & ch); ch >>= 3;
+	  misc[2] = '0' + (7 & ch); ch >>= 3;
+	  misc[1] = '0' + (7 & ch);
+	  misc[0] = '\\';
+	  if (!stralloc_catb(out,misc,4)) return 0;
+	}
+      }
+    }
+  }
   else if (byte_equal(misc,2,DNS_T_MX)) {
     if (!stralloc_cats(out," MX ")) return 0;
     pos = dns_packet_copy(buf,len,pos,misc,2); if (!pos) return 0;
@@ -106,10 +128,15 @@ unsigned int printrecord_cat(stralloc *out,const char *buf,unsigned int len,unsi
     if (!stralloc_catb(out,ipstr,ip6_fmt(ipstr,misc,':'))) return 0;
   }
   else {
-    if (!stralloc_cats(out," ")) return 0;
-    uint16_unpack_big(misc,&u16);
-    if (!stralloc_catulong0(out,u16,0)) return 0;
-    if (!stralloc_cats(out," ")) return 0;
+    if (byte_equal(misc,2,DNS_T_TXT)) {
+      if (!stralloc_cats(out," TXT ")) return 0;
+    }
+    else {
+      if (!stralloc_cats(out," ")) return 0;
+      uint16_unpack_big(misc,&u16);
+      if (!stralloc_catulong0(out,u16,0)) return 0;
+      if (!stralloc_cats(out," ")) return 0;
+    }
     while (datalen--) {
       pos = dns_packet_copy(buf,len,pos,misc,1); if (!pos) return 0;
       if ((misc[0] >= 33) && (misc[0] <= 126) && (misc[0] != '\\')) {

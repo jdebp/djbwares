@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tai64n">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tai64n</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tai64n</refname>
+<refpurpose>puts a precise timestamp on each line.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tai64n</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<command>tai64n</command> reads lines from stdin.
+For each line, it writes 
+<orderedlist>
+<listitem><para>
+an <computeroutput>@</computeroutput>, 
+</para></listitem>
+<listitem><para>
+a precise timestamp, 
+</para></listitem>
+<listitem><para>
+a space, and 
+</para></listitem>
+<listitem><para>
+a copy of the input line 
+</para></listitem>
+</orderedlist>
+to stdout.
+The timestamp indicates the moment that <command>tai64n</command> read the first character of the line. 
+</para>
+
+<para>
+<command>tai64n</command> does not allocate any memory after it starts.
+</para>
+</refsection>
+
+<refsection><title>Timestamps</title>
+<para>
+Timestamps used by <command>tai64n</command> are 12-byte TAI64N labels in external TAI64N format, printed as 24 lowercase hexadecimal characters.
+You can use <citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry> to convert the timestamps to a human-readable format. 
+</para>
+
+<para>
+For example, the timestamp 4000000037c219bf2ef02e94 refers to the nanosecond beginning exactly 935467455.787492500 seconds after the beginning of 1970 TAI; 37c219bf hexadecimal is 935467455, and 2ef02e94 hexadecimal is 787492500. 
+</para>
+
+<para>
+The current implementation of <command>tai64n</command> relies on the UNIX <citerefentry><refentrytitle>gettimeofday</refentrytitle><manvolnum>3</manvolnum></citerefentry> library routine to return the current time as the number of TAI seconds since 1970-01-01 00:00:10 TAI.
+Because it does, this implementation only has a resolution of microseconds, adding 500 nanoseconds to each UNIX time that it obtains so that every timestamp is halfway through a microsecond.
+Beware that most <code>gettimeofday()</code> implementations are not Y2038-compliant.
+Furthermore, most clocks are not set accurately. 
+</para>
+</refsection>
+
+<refsection><title>Exit codes</title>
+<para>
+<command>tai64n</command> exits 0 when it sees end of input.
+It exits 111 without an error message if it has trouble reading stdin or writing stdout. 
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

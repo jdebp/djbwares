@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="getopt">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>getopt</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>getopt</refname>
+<refpurpose>get option character from command line</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<programlisting>
+#include &lt;getopt.h&gt;
+
+char *\fBoptarg\fP;
+
+int \fBoptind\fP;
+
+int \fBoptpos\fP;
+
+int \fBopteof\fP;
+
+int \fBoptproblem\fP;
+
+char *\fBoptprogname\fP;
+
+int \fBopterr\fP;
+
+int \fBgetopt(\fP\fIargc,argv,opts\fR\fB)\fP;
+
+int \fIargc\fR;
+
+char **\fIargv\fR;
+
+char *\fIopts\fR;
+</programlisting>
+</refsynopsisdiv>
+<refsection><title>Description</title>
+This is a clone version of
+the standard
+<command>getopt</command>
+library,
+built on top of
+<citerefentry><refentrytitle>.BR subgetopt</refentrytitle><manvolnum>3</manvolnum></citerefentry> .
+
+See
+<citerefentry><refentrytitle>.B subgetopt</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+for a detailed description of
+<command>getopt</command>
+processing.
+The main difference between
+<command>getopt</command>
+and
+<command>subgetopt</command>
+is that
+<command>getopt</command>
+prints error messages
+in case of problems.
+To turn off these error messages, set
+<command>opterr</command>
+(default nonzero)
+to zero.
+
+This clone version of
+<command>getopt</command>
+also provides an
+<command>optprogname</command>
+variable.
+There are two uses for this variable:
+
+<citerefentry><refentrytitle></refentrytitle><manvolnum>1</manvolnum></citerefentry>
+By default
+<command>optprogname</command>
+is null.
+When
+<command>getopt</command>
+sees this,
+it
+attempts to initialize
+<command>optprogname</command>
+from
+<replaceable>argv\fB[0]</replaceable>,
+stripping the directory name.
+The calling program can use
+<command>optprogname</command>
+after calling
+<command>getopt</command>
+at least once.
+This is appropriate if the name of the program should be
+determined from its command line.
+
+<citerefentry><refentrytitle></refentrytitle><manvolnum>2</manvolnum></citerefentry>
+<command>getopt</command>
+prints
+<command>optprogname</command>
+at the beginning
+of any error messages.
+So the calling program can,
+before calling
+<command>getopt</command>,
+initialize
+<command>optprogname</command>
+as desired.
+This is appropriate if the name of the program should not be
+determined from its command line.
+</refsection>
+<refsection><title>Compatibility</title>
+Old versions of
+<command>getopt</command>
+do not include
+<command>opterr</command>.
+<command>optpos</command>,
+<command>opteof</command>,
+<command>optproblem</command>,
+and
+<command>optprogname</command>
+are specific to this clone version of
+<command>getopt</command>.
+
+Many features of this clone version of
+<command>getopt</command>
+are poorly defined, if available at all,
+in most versions of
+<command>getopt</command>.
+For example, the standard
+<command>getopt</command>
+interface does not define
+<command>optind</command>
+until the end of the option list.
+And
+<command>optarg</command>
+is not defined
+unless
+<command>getopt</command>
+has just returned
+an option which takes an argument.
+In this clone version,
+<command>optind</command>
+and
+<command>optpos</command>
+always indicate the next character to be read,
+and
+<command>optarg</command>
+is null whenever
+the current option does not take an argument.
+See
+<citerefentry><refentrytitle>.B subgetopt</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+for precise definitions of the parsing procedure.
+
+When it reaches the end of the option list,
+this version of
+<command>getopt</command>
+always returns
+<command>opteof</command>,
+which is the same as
+<command>subgetoptdone</command>,
+which is initialized to
+<command>SUBGETOPTDONE</command>,
+which is defined as -1.
+The standard behavior is to return
+EOF
+from
+<citerefentry><refentrytitle>.B stdio</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+This is incompatible
+on any weird machine where
+EOF is different from -1.
+The calling program could set
+<command>opteof</command>
+to EOF to imitate the standard behavior.
+
+Like most versions of
+<command>getopt</command>,
+this clone version allows, but does not demand, that
+option arguments be
+separated from the option by whitespace, i.e., be
+in the next command-line argument.
+
+Some versions of
+<command>getopt</command>
+provide an
+<command>optopt</command>
+variable.
+<command>optopt</command>
+is incompatible across systems:
+for example,
+GNU
+<command>getopt</command>
+uses it the same way that this clone version uses
+<command>optproblem</command>,
+while
+BSD
+<command>getopt</command>
+uses it to
+indicate the last option character returned by
+<command>getopt</command>.
+This clone version does not provide
+<command>optopt</command>.
+The use of
+<command>optopt</command>
+is strongly discouraged.
+
+Some versions of
+<command>getopt</command>
+do not recognize a double hyphen as the end of arguments.
+This version allows a double hyphen, or in fact any argument beginning
+with two hyphens.
+
+A lone hyphen is always recognized as the end of arguments.
+Some versions of
+<command>getopt</command>
+allow lone hyphens as options.
+This practice is wrong and is strongly discouraged.
+</refsection>
+<refsection><title>Syntax note</title>
+<command>getopt</command>
+is actually a macro abbreviation for
+<command>getoptmine</command>.
+The external
+<command>opterr</command>
+and
+<command>optprogname</command>
+variables
+are macros for
+<command>getopterr</command>
+and
+<command>getoptprogname</command>.
+All the other
+<command>opt</command>
+variables are macros
+for
+<command>subgetopt</command>.
+These macros are defined in
+<command><getopt.h></command>,
+unless
+<command>GETOPTNOSHORT</command>
+is defined.
+Further macros are defined in
+<command><subgetopt.h></command>,
+which is included by
+<command><getopt.h></command>,
+unless
+<command>SUBGETOPTNOSHORT</command>
+is defined.
+</refsection>
+<refsection><title>Version</title>
+getopt version 1.9, 931129.
+</refsection>
+<refsection><title>Author</title>
+Placed into the public domain by Daniel J. Bernstein.
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

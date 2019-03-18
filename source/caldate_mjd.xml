@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="caldate_mjd">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>caldate_mjd</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">library functions</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>caldate_mjd</refname>
+<refpurpose>manipulate calendar dates</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<funcsynopsis language="C++">
+<funcsynopsisinfo>
+#include &lt;caldate.h&gt;
+</funcsynopsisinfo>
+<funcprototype>
+	<funcdef>void <function>caldate_frommjd</function></funcdef>
+	<paramdef>struct caldate *<parameter>cd</parameter></paramdef>
+	<paramdef>long <parameter>day</parameter></paramdef>
+	<paramdef>int *<parameter>weekday</parameter></paramdef>
+	<paramdef>int *<parameter>yearday</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+<funcsynopsis language="C++">
+<funcprototype>
+	<funcdef>long <function>caldate_mjd</function></funcdef>
+	<paramdef>struct caldate *<parameter>cd</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+<funcsynopsis language="C++">
+<funcprototype>
+	<funcdef>void <function>caldate_normalize</function></funcdef>
+	<paramdef>struct caldate *<parameter>cd</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+<funcsynopsis language="C++">
+<funcprototype>
+	<funcdef>void <function>caldate_easter</function></funcdef>
+	<paramdef>struct caldate *<parameter>cd</parameter></paramdef>
+</funcprototype>
+</funcsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Basic conversions</title>
+<para>
+Every calendar date has a <replaceable>modified Julian day number</replaceable>.
+The day number increases by 1 every day.
+Day number 0 is 17 November 1858.
+Day number 51604 is 1 March 2000.
+</para>
+
+<para>
+<function>caldate_frommjd</function> puts into <replaceable>cd</replaceable> the date corresponding to the modified Julian day number <replaceable>day</replaceable>.
+</para>
+
+<para>
+<function>caldate_frommjd</function> also computes the day of the week (0 through 6) and the day of the year (0 through 365).
+It stores the day of the week in <parameter>*weekday</parameter> if <replaceable>weekday</replaceable> is nonzero.
+It stores the day of the year in <parameter>*yearday</parameter> if <replaceable>yearday</replaceable> is nonzero.
+</para>
+
+<para>
+<function>caldate_mjd</function> returns the modified Julian day number corresponding to the date in <replaceable>cd</replaceable>.
+</para>
+
+<para>
+<function>caldate_mjd</function> accepts days outside the range 1 to 31, referring to days before the beginning or after the end of the month.
+It also accepts months outside the range 1 to 12, referring to months before the beginning or after the end of the year.
+</para>
+
+<para>
+<function>caldate_normalize</function> calls <function>caldate_frommjd</function> with the result of <function>caldate_mjd</function>.
+This means that it accepts out-of-range months and out-of-range days in <replaceable>cd</replaceable>, and puts a valid calendar date back into <replaceable>cd</replaceable>.
+</para>
+</refsection>
+
+<refsection><title>Other functions</title>
+<para>
+<function>caldate_easter</function> reads the year from <replaceable>cd</replaceable> and then changes <replaceable>cd</replaceable> to the date of Easter in the same year.
+</para>
+</refsection>
+
+<refsection><title>Limitations</title>
+<para>
+The <function>caldate</function> routines currently support the Gregorian calendar, which was defined in 1582 and adopted at different times in different countries.
+For earlier dates the <function>caldate</function> routines work with <quote>virtual Gregorian</quote> (also known as Proleptic Gregorian), defined mathematically by the 400-year Gregorian cycle for years before 1582.
+The Julian calendar is not supported.
+</para>
+
+<para>
+The Gregorian calendar will be replaced by a new calendar within a few thousand years.
+The <function>caldate_frommjd</function> and <function>caldate_mjd</function> routines will be upgraded accordingly.
+The current <function>caldate_frommjd</function> and <function>caldate_mjd</function> routines are not useful for dates far in the future.
+</para>
+
+<para>
+Day numbers will overflow a 32-bit <code>long</code> sometime after the year 5000000; all systems should upgrade to 64-bit <code>long</code>s before then.
+<function>caldate_mjd</function> does not check for overflow.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

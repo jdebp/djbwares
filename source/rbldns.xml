@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="rbldns">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -45,7 +52,8 @@ It does not handle DNS/TCP.
 </para>
 
 <para>
-<command>rbldns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>rbldns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+ANY queries are answered with a single synthesized HINFO resource record set.
+<command>rbldns</command> otherwise answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>rbldns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The reverse lookup domain names take the form <filename>d.c.b.a.<replaceable>base</replaceable></filename>, where <filename>a.b.c.d</filename> is the IP address being looked up and <replaceable>base</replaceable> is a domain name apex given by the value of the <envar>BASE</envar> environment variable.
 A queries are answered with the IP address given in the file.
 TXT queries are answered with the message given in the file; replacing a final <code>$</code> in the message, if one is present, with the IP address being asked about.
@@ -56,15 +64,15 @@ TXT queries are answered with the message given in the file; replacing a final <
 <refsection>
 <title>History</title>
 <para>
-<command>rbldns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+<command>rbldns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="tinydns-edit">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -136,7 +143,7 @@ This is 1 day for all records, except for <code>ns</code> and <code>childns</cod
 <refsection>
 <title>History</title>
 <para>
-<command>tinydns-edit</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+<command>tinydns-edit</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
 This manual page was written on 2001-04-06, and revised in 2001-04-26, and again in 2017.
 </para>
 </refsection>
@@ -144,8 +151,8 @@ This manual page was written on 2001-04-06, and revised in 2001-04-26, and again
 <refsection>
 <title>Author</title>
 <para>
-Original code by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

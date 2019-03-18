@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="walldns">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -45,7 +52,8 @@ It does not handle DNS/TCP.
 </para>
 
 <para>
-<command>walldns</command> answers queries in a fixed form.
+ANY queries are answered with a single synthesized HINFO resource record set.
+<command>walldns</command> otherwise answers queries in a fixed form.
 The reverse lookup domain names take the form <filename>d.c.b.a.in-addr.arpa</filename>, where <filename>a.b.c.d</filename> is the IP address being looked up.
 It publishes PTR responses mapping the IP address <filename>a.b.c.d</filename> back to the name <filename>d.c.b.a.in-addr.arpa</filename>.
 It publishes A responses mapping the name <filename>d.c.b.a.in-addr.arpa</filename> to the IP address <filename>a.b.c.d</filename>.
@@ -58,15 +66,15 @@ This creates a bidirectional mapping that maps IP addresses to domain names that
 <refsection>
 <title>History</title>
 <para>
-<command>walldns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+<command>walldns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

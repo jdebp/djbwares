@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="dnscache">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -70,6 +77,7 @@ When the answer section is truncated by UDP length limits, it is eliminated enti
 <para>
 <command>dnscache</command> tries to prevent local users from snooping on other local users. 
 It discards non-recursive queries; it discards inverse queries; and it discards zone-transfer requests. 
+It responds to ANY queryes with a single synthesized HINFO resource record set.
 If the <envar>HIDETTL</envar> environment variable is set, <command>dnscache</command> always uses a TTL of 0 in its responses.
 Normally, it preserves the (current remaining) TTL, so that other proxies can use it as an upstream server.
 </para>
@@ -260,18 +268,15 @@ If a server sends <command>dnscache</command> a repeated IP address, <command>dn
 The server's behavior violates RFC 2181, section 5.5, but there are reasonable uses of repeated IP addresses for load balancing, so <command>dnscache</command> does not go out of its way to remove repetitions when they occur.
 A previously widespread server bug used to unintentionally produce repeated IP addresses. 
 Here is an example (since fixed):
-<literallayout><userinput>
-% dnsq a ns-ext.vix.com ns-ext.vix.com
-</userinput><computeroutput>
-1 ns-ext.vix.com:
+<informalexample><literallayout><userinput>% dnsq a ns-ext.vix.com ns-ext.vix.com</userinput>
+<computeroutput>1 ns-ext.vix.com:
 117 bytes, 1+1+2+2 records, response, authoritative, noerror
 query: 1 ns-ext.vix.com
 answer: ns-ext.vix.com 3600 A 204.152.184.64
 authority: vix.com 3600 NS ns-ext.vix.com
 authority: vix.com 3600 NS ns1.gnac.com
 additional: ns-ext.vix.com 3600 A 204.152.184.64
-additional: ns1.gnac.com 130768 A 209.182.195.77
-</computeroutput></literallayout>
+additional: ns1.gnac.com 130768 A 209.182.195.77</computeroutput></literallayout></informalexample>
 </para>
 
 <para>
@@ -285,15 +290,15 @@ This bug is the most common reason for users to see repeated IP addresses from <
 <refsection>
 <title>History</title>
 <para>
-<command>dnscache</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+<command>dnscache</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

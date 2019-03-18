@@ -19,54 +19,40 @@
 	echo hasshsgr.h 
 	echo haswaitp.h 
 	echo direntry.h
-	echo leapsecs.dat
 	redo-ifchange ../package/headers
 	cat ../package/headers |
 	while read i
 	do 
 		echo "$i.h" 
 	done
+) | xargs redo-ifchange --verbose --
+(
+	echo leapsecs.dat
 	redo-ifchange ../package/libraries
 	cat ../package/libraries |
 	while read i
 	do 
 		echo "$i.a" 
 	done
-	redo-ifchange ../package/commands1 
-	cat ../package/commands1 | 
-	while read i
-	do 
-		echo "$i" 
-		echo "$i.1" 
-		echo "$i.html"
-	done 
-	redo-ifchange ../package/commands8 
-	cat ../package/commands8 | 
-	while read i
-	do 
-		echo "$i" 
-		echo "$i.8" 
-		echo "$i.html"
-	done
-	redo-ifchange ../package/extra-manpages1 
-	cat ../package/extra-manpages1 |
-	while read i
-	do 
-		echo "$i.1" 
-		echo "$i.html"
-	done
-	redo-ifchange ../package/extra-manpages3 
-	cat ../package/extra-manpages3 |
-	while read i
-	do 
-		echo "$i.3" 
-		echo "$i.html"
-	done
-	redo-ifchange ../package/extra-manpages8
-	cat ../package/extra-manpages8 |
-	while read i
-	do 
-		echo "$i.8" 
-		echo "$i.html"
+	for section in 1 3 5 8
+	do
+		redo-ifchange ../package/commands${section} 
+		cat ../package/commands${section} | 
+		while read i
+		do 
+			echo "$i" 
+			echo "$i.${section}" 
+			echo "$i.html"
+			echo "$i.xml"
+		done 
+		redo-ifchange ../package/extra-manpages${section} 
+		cat ../package/extra-manpages${section} |
+		while read i
+		do 
+			test _"$i" != _leapsecs || test _"${section}" != _3 || continue
+			echo "$i.${section}" 
+			echo "$i.html"
+			echo "$i.xml"
+		done
 	done
 ) | xargs redo-ifchange --

@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="mconnect">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -24,7 +31,7 @@
 <title>Description</title>
 
 <para>
-<command>mconnect</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port <replaceable>port</replaceable> on <replaceable>host</replaceable>, and the runs <citerefentry><refentrytitle>mconnect-io</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<command>mconnect</command> uses <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> to connect to TCP port <replaceable>port</replaceable> on <replaceable>host</replaceable>, and then runs <citerefentry><refentrytitle>mconnect-io</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 
 <para>
@@ -48,15 +55,15 @@ If <replaceable>host</replaceable> is not supplied, the default is the local hos
 <refsection>
 <title>History</title>
 <para>
-<command>mconnect</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
+<command>mconnect</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s ucspi-tcp toolset in 1999.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

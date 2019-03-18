@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="host">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -38,7 +45,11 @@ It prints the results in the same human-readable format as employed by <citerefe
 <para>
 If <replaceable>t</replaceable> is supplied, that is the type of resource record that it looks up.
 <replaceable>t</replaceable> can be numeric or symbolic, just as for <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
 The <arg choice='plain'>-a</arg> option is equivalent to <arg choice='plain'>-t any</arg>.
+Note that "any" is not "all", and this is generally not useful.
 </para>
 
 <orderedlist>
@@ -94,14 +105,14 @@ It only employs one query type for any given invocation.
 <refsection>
 <title>History</title>
 <para>
-<command>host</command> was an addition to <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+<command>host</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername>  <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

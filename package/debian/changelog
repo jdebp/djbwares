@@ -1,3 +1,14 @@
+djbwares (8) unstable; urgency=medium
+
+  * various minor doco corrections
+  * TXT and HINFO records are now printed in a more human-accessible form.
+  * httpd now uses the text/xml content type for the .xml filename extension.
+  * httpd now uses the application/xhtml+xml content type for the .xhtml filename extension.
+  * All manuals are now DocBook XML and the missing tcp-environ manual is now present.
+  * All DNS servers now synthesise HINFO non-responses to ANY queries.
+
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Mon, 18 Mar 2019 07:52:30 +0000
+
 djbwares (7) unstable; urgency=medium
 
   * A bug in tcpserver triggered when standard input is already closed, noted by Jorge Almeida, has been fixed.

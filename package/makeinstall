@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# See http://skarnet.org./software/compile.html
+# See http://jdebp.eu./FGA/slashpackage.html
 if [ \! -d package -o \! -d source ]
 then
 	echo "You are not in the right directory." 1>&2
@@ -9,7 +9,7 @@ fi
 # Atomically update the release directories ./command, ./library, ./include, and so forth.
 # The build and release directories need not be on the same disc volume.
 # And the files released must not be potentially overwritable and truncatable by the compiler/linker during subsequent builds.
-install -d -- command manual config doc header library
+install -d -- command manual config doc header library doc/commands
 
 # ##############################################################################
 # Build all of the ...{new} files in ./command, ./config, and ./manual.
@@ -22,41 +22,31 @@ do
 		 strip command/"$i"{new}
 	fi
 done
-# All of the commands that have their own manual pages
-cat package/commands1 package/extra-manpages1 | 
-while read i
+# All of the commands that have their own manual and guide pages
+for section in 1 3 5 8
 do
-	rm -f -- manual/"$i".1{new}
-	install -p -m 0644 -- build/"$i".1 manual/"$i".1{new}
-	rm -f -- doc/"$i".html{new}
-	install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
-done
-cat package/extra-manpages3 | 
-while read i
-do
-	rm -f -- manual/"$i".3{new}
-	install -p -m 0644 -- build/"$i".3 manual/"$i".3{new}
-	case "$i" in
-	leapsecs)	;;
-	*)
+	cat package/commands${section} package/extra-manpages${section} | 
+	while read i
+	do
+		test _"${section}" != _3 || test _"${i}" != _leapsecs || continue
+		rm -f -- manual/"$i".${section}{new}
+		install -p -m 0644 -- build/"$i".${section} manual/"$i".${section}{new}
 		rm -f -- doc/"$i".html{new}
 		install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
-		;;
-	esac
+		rm -f -- doc/"$i".xml{new}
+		install -p -m 0644 -- build/"$i".xml doc/commands/"$i".xml{new}
+	done
 done
-cat package/aliases3 | 
-while read c a
+# Aliased manual and guide pages
+for section in 3
 do
-	ln -f -- manual/"$c".3{new} manual/"$a".3{new}
-	ln -f -- doc/"$c".html{new} doc/"$a".html{new}
-done
-cat package/commands8 package/extra-manpages8 | 
-while read i
-do
-	rm -f -- manual/"$i".8{new}
-	install -p -m 0644 -- build/"$i".8 manual/"$i".8{new}
-	rm -f -- doc/"$i".html{new}
-	install -p -m 0644 -- build/"$i".html doc/"$i".html{new}
+	cat package/aliases${section} | 
+	while read c a
+	do
+		ln -f -- manual/"$c".${section}{new} manual/"$a".${section}{new}
+		ln -f -- doc/"$c".html{new} doc/"$a".html{new}
+		ln -f -- doc/commands/"$c".xml{new} doc/commands/"$a".xml{new}
+	done
 done
 # Headers and libraries
 cat package/headers | 
@@ -77,6 +67,11 @@ do
 	rm -f -- doc/"$i"{new}
 	install -p -m 0644 -- build/"$i" doc/"$i"{new}
 done
+for i in docbook-xml.css
+do
+	rm -f -- doc/commands/"$i"{new}
+	install -p -m 0644 -- build/"$i" doc/commands/"$i"{new}
+done
 for i in dnsroots.global leapsecs.dat
 do
 	install -p -m 0644 -- build/"$i" config/"$i"{new}
@@ -88,33 +83,28 @@ cat package/commands1 package/commands8 | while read i
 do
 	mv -f -- command/"$i"{new} command/"$i"
 done
-# All of the commands that have their own manual pages
-cat package/commands1 package/extra-manpages1 | 
-while read i
+# All of the commands that have their own manual and guide pages
+for section in 1 3 5 8
 do
-	mv -f -- manual/"$i".1{new} manual/"$i".1
-	mv -f -- doc/"$i".html{new} doc/"$i".html
+	cat package/commands${section} package/extra-manpages${section} | 
+	while read i
+	do
+		test _"${section}" != _3 || test _"${i}" != _leapsecs || continue
+		mv -f -- manual/"$i".${section}{new} manual/"$i".${section}
+		mv -f -- doc/"$i".html{new} doc/"$i".html
+		mv -f -- doc/commands/"$i".xml{new} doc/commands/"$i".xml
+	done
 done
-cat package/extra-manpages3 | 
-while read i
+# Aliased manual and guide pages
+for section in 3
 do
-	mv -f -- manual/"$i".3{new} manual/"$i".3
-	case "$i" in
-	leapsecs)	;;
-	*)		mv -f -- doc/"$i".html{new} doc/"$i".html ;;
-	esac
-done
-cat package/commands8 package/extra-manpages8 | 
-while read i
-do
-	mv -f -- manual/"$i".8{new} manual/"$i".8
-	mv -f -- doc/"$i".html{new} doc/"$i".html
-done
-cat package/aliases3 | 
-while read c a
-do
-	mv -f -- manual/"$a".3{new} manual/"$a".3
-	mv -f -- doc/"$a".html{new} doc/"$a".html
+	cat package/aliases${section} | 
+	while read c a
+	do
+		mv -f -- manual/"$a".${section}{new} manual/"$a".${section}
+		mv -f -- doc/"$a".html{new} doc/"$a".html
+		mv -f -- doc/commands/"$a".xml{new} doc/commands/"$a".xml
+	done
 done
 # Headers and libraries
 cat package/headers | 
@@ -131,6 +121,10 @@ done
 for i in COPYING
 do
 	mv -f -- doc/"$i"{new} doc/"$i"
+done
+for i in docbook-xml.css
+do
+	mv -f -- doc/commands/"$i"{new} doc/commands/"$i"
 done
 for i in dnsroots.global leapsecs.dat
 do

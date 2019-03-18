@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="softlimit">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>softlimit</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>softlimit</refname>
+<refpurpose>runs another program with new resource limits.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>softlimit</command>
+<arg choice='opt'><replaceable>opts</replaceable></arg>
+<arg choice='req'><replaceable>child</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>opts</replaceable> is a series of getopt-style options.
+<replaceable>child</replaceable> consists of one or more arguments. 
+</para>
+
+<para>
+<command>softlimit</command> sets soft resource limits as specified by <replaceable>opts</replaceable>.
+It then runs <replaceable>child</replaceable>.
+</para>
+</refsection>
+
+<refsection><title>Options</title>
+<para>
+In each of the following <replaceable>opts</replaceable>, <replaceable>n</replaceable> may be <code>=</code>, indicating that the soft limit should be set equal to the hard limit. 
+</para>
+
+<refsection><title><replaceable>opts</replaceable> controlling memory use:</title>
+
+<variablelist>
+<varlistentry>
+<term><arg>-m <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Same as <arg>-d <replaceable>n</replaceable></arg> <arg>-s <replaceable>n</replaceable></arg> <arg>-l <replaceable>n</replaceable></arg> <arg>-a <replaceable>n</replaceable></arg>.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-d <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the data segment per process to <replaceable>n</replaceable> bytes.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-s <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the stack segment per process to <replaceable>n</replaceable> bytes.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-l <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the locked physical pages per process to <replaceable>n</replaceable> bytes.
+This option has no effect on some operating systems.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-a <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the total of all segments per process to <replaceable>n</replaceable> bytes.
+This option has no effect on some operating systems. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-o <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the number of open file descriptors per process to <replaceable>n</replaceable>.
+This option has no effect on some operating systems. 
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-p <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the number of processes per uid to <replaceable>n</replaceable>.
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+
+<refsection><title><replaceable>opts</replaceable> controlling file sizes:</title>
+
+<variablelist>
+<varlistentry>
+<term><arg>-f <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit output file sizes to <replaceable>n</replaceable> bytes.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-c <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit core file sizes to <replaceable>n</replaceable> bytes.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+</refsection>
+
+<refsection><title>Efficiency <replaceable>opts</replaceable>:</title>
+
+<variablelist>
+<varlistentry>
+<term><arg>-r <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the resident set size to <replaceable>n</replaceable> bytes.
+This limit is not enforced unless physical memory is full.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><arg>-t <replaceable>n</replaceable></arg></term>
+<listitem><para>
+Limit the CPU time to <replaceable>n</replaceable> seconds.
+This limit is not enforced except that the process receives a SIGXCPU signal after <replaceable>n</replaceable> seconds. 
+</para></listitem>
+</varlistentry>
+</variablelist>
+</refsection>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

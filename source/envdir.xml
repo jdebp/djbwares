@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="envdir">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>envdir</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>envdir</refname>
+<refpurpose>runs another program with environment modified according to files in a specified directory.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>envdir</command>
+<arg choice='req'><replaceable>d</replaceable></arg>
+<arg choice='req'><replaceable>child</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<replaceable>d</replaceable> is a single argument.
+<replaceable>child</replaceable> consists of one or more arguments. 
+</para>
+
+<para>
+<command>envdir</command> sets various environment variables as specified by files in the directory named <filename><replaceable>d</replaceable></filename>.
+It then runs <replaceable>child</replaceable>.
+</para>
+
+<para>
+If <filename><replaceable>d</replaceable></filename> contains a file named <filename><replaceable>s</replaceable></filename> whose first line is <replaceable>t</replaceable>, <command>envdir</command> removes an environment variable named <envar><replaceable>s</replaceable></envar> if one exists, and then adds an environment variable named <envar><replaceable>s</replaceable></envar> with value <replaceable>t</replaceable>.
+The name <envar><replaceable>s</replaceable></envar> must not contain <code>=</code>.
+Spaces and tabs at the end of <replaceable>t</replaceable> are removed.
+Nulls in <replaceable>t</replaceable> are changed to newlines in the environment variable. 
+</para>
+
+<para>
+If the file <filename><replaceable>s</replaceable></filename> is completely empty (0 bytes long), <command>envdir</command> removes an environment variable named <envar><replaceable>s</replaceable></envar> if one exists, without adding a new variable.
+</para>
+</refsection>
+
+<refsection><title>Exit codes</title>
+<para>
+<command>envdir</command> exits 111 if it has trouble reading <replaceable>d</replaceable>, if it runs out of memory for environment variables, or if it cannot run <replaceable>child</replaceable>.
+Otherwise its exit code is the same as that of <replaceable>child</replaceable>.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

@@ -6,7 +6,7 @@
 
 # Target this in order to make the package contents.
 build:
-	package/compile
+	MAKEFLAGS= package/compile
 
 # Target this in order to clean the build areas.
 clean:

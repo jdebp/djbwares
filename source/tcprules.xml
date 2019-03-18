@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tcprules">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tcprules</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tcprules</refname>
+<refpurpose>compiles rules for <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>tcprules</command>
+<arg choice='req'><replaceable>cdb</replaceable></arg>
+<arg choice='req'><replaceable>tmp</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+optionally follows rules to decide whether a TCP connection is acceptable.
+<informalexample>
+For example, the rule <programlisting>18.23.0.32:deny</programlisting> prohibits connections from IP address 18.23.0.32. 
+</informalexample>
+</para>
+
+<para>
+<command>tcprules</command> reads rules from its standard input and writes them into <filename><replaceable>cdb</replaceable></filename> in a binary format suited for quick access by <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>tcprules</command> can be used while <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> is running.
+It ensures that <filename><replaceable>cdb</replaceable></filename> is updated atomically.
+It does this by first writing the rules to <filename><replaceable>tmp</replaceable></filename> and then moving <filename><replaceable>tmp</replaceable></filename> on top of <filename><replaceable>cdb</replaceable></filename>.
+If <filename><replaceable>tmp</replaceable></filename> already exists, it is destroyed.
+The directories containing <filename><replaceable>cdb</replaceable></filename> and <filename><replaceable>tmp</replaceable></filename> must be writable to <command>tcprules</command>; they must also be on the same filesystem. 
+</para>
+
+<para>
+If there is a problem with the input or with <filename><replaceable>tmp</replaceable></filename>, <command>tcprules</command> complains and leaves <filename><replaceable>cdb</replaceable></filename> alone. 
+</para>
+
+<para>
+The binary <filename><replaceable>cdb</replaceable></filename> format is portable across machines.
+</para>
+
+</refsection>
+<refsection><title>Rule format</title>
+<para>
+A rule is one line. A file containing rules may also contain comments: lines beginning with # are ignored. 
+</para>
+
+<para>
+Each rule contains an address, a colon, and a list of instructions, with no extra spaces.
+When <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> receives a connection from that address, it follows the instructions.
+</para>
+
+<refsection><title>Addresses</title>
+<para>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> looks for rules with various addresses: 
+<itemizedlist>
+<listitem><para>
+<envar>TCPREMOTEINFO</envar>@<envar>TCPREMOTEIP</envar>, if <envar>TCPREMOTEINFO</envar> is set; 
+</para></listitem>
+<listitem><para>
+<envar>TCPREMOTEINFO</envar>@=<envar>TCPREMOTEHOST</envar>, if <envar>TCPREMOTEINFO</envar> is set and <envar>TCPREMOTEHOST</envar> is set;
+</para></listitem>
+<listitem><para>
+<envar>TCPREMOTEIP</envar>; 
+</para></listitem>
+<listitem><para>
+=<envar>TCPREMOTEHOST</envar>, if <envar>TCPREMOTEHOST</envar> is set; 
+</para></listitem>
+<listitem><para>
+shorter and shorter prefixes of <envar>TCPREMOTEIP</envar> ending with a dot; 
+</para></listitem>
+<listitem><para>
+shorter and shorter suffixes of <envar>TCPREMOTEHOST</envar> starting with a dot, preceded by =, if <envar>TCPREMOTEHOST</envar> is set; 
+</para></listitem>
+<listitem><para>
+=, if <envar>TCPREMOTEHOST</envar> is set; and finally 
+</para></listitem>
+<listitem><para>
+the empty string. 
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> uses the first rule it finds. You should use the <arg>-p</arg> option to <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> if you rely on <envar>TCPREMOTEHOST</envar> here. 
+</para>
+
+<informalexample>
+For example, here are some rules: 
+<programlisting>joe@127.0.0.1:first
+18.23.0.32:second
+:third
+127.:fourth
+</programlisting>
+
+<para>
+If <envar>TCPREMOTEIP</envar> is 10.119.75.38, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the third instructions. 
+</para>
+
+<para>
+If <envar>TCPREMOTEIP</envar> is 18.23.0.32, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the second instructions. 
+</para>
+
+<para>
+If <envar>TCPREMOTEIP</envar> is 127.0.0.1 and <envar>TCPREMOTEINFO</envar> is bill, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the fourth instructions. 
+</para>
+
+<para>
+If <envar>TCPREMOTEIP</envar> is 127.0.0.1 and <envar>TCPREMOTEINFO</envar> is joe, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the first instructions. 
+</para>
+</informalexample>
+
+<para>
+You can use <citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry> to see how tcpserver will interpret rules in <replaceable>cdb</replaceable>.
+</para>
+</refsection>
+
+<refsection><title>Address ranges</title>
+<para>
+<command>tcprules</command> treats <code>1.2.3.37-53:ins</code> as an abbreviation for the rules <code>1.2.3.37:ins</code>, <code>1.2.3.38:ins</code>, and so on up through <code>1.2.3.53:ins</code>.
+Similarly, <code>10.2-3.:ins</code> is an abbreviation for <code>10.2.:ins</code> and <code>10.3.:ins</code>.
+</para>
+</refsection>
+
+<refsection><title>Instructions</title>
+<para>
+The instructions in a rule must begin with either <code>allow</code> or <code>deny</code>.
+<code>deny</code> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop the connection without running anything.
+<informalexample>
+For example, the rule <programlisting>:deny</programlisting> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop all connections that aren't handled by more specific rules. 
+</informalexample>
+</para>
+
+<para>
+The instructions may continue with some environment variables, in the form <code>var="x"</code>.
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> adds an environment variable <envar>var</envar> with value <replaceable>x</replaceable>.
+<informalexample>
+For example, <programlisting>10.0.:allow,RELAYCLIENT="@fix.me"</programlisting> adds an environment variable <envar>RELAYCLIENT</envar> with value <code>@fix.me</code>.
+The quotes may be replaced by any repeated character: <programlisting>10.0.:allow,RELAYCLIENT=/@fix.me/</programlisting>
+Any number of variables may be listed: <programlisting>127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"</programlisting>
+</informalexample>
+</para>
+</refsection>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

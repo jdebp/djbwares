@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="rbldns-conf">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>rbldns-conf</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>rbldns-conf</refname>
+<refpurpose>obsolete program for creating service definitions</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>rbldns-conf</command>
+<arg choice='req' rep='repeat'><replaceable>year</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+rbldns-conf sets up an IP-address-listing DNS service.
+
+Interface
+     rbldns-conf acct logacct D ip base
+rbldns-conf creates a service directory D that runs rbldns. The name D must start with a slash and must not contain any special characters. Normally D is /etc/rbldns.
+
+You can run the service under svscan by creating a symbolic link in the svscan directory:
+
+     ln -s D /service
+The service will start within five seconds, and will be restarted upon reboot. You can use svc to control the service.
+rbldns-conf arranges for rbldns to chroot to D/root and to run under the uid and gid of acct. The name acct must not contain any special characters.
+
+rbldns-conf creates D/root/Makefile to run rbldns-data upon request.
+
+rbldns-conf arranges for rbldns to listen for UDP packets on port 53 of ip, and to send outgoing packets from ip.
+
+rbldns-conf arranges for rbldns to answer queries under the base domain. The name base must not contain any special characters.
+
+rbldns-conf creates an automatically rotated log directory in D/log/main. The logs are owned by logacct. The corresponding multilog processes run under the uid and gid of logacct. The name logacct must not contain any special characters.
+</para>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>rbldns-conf</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

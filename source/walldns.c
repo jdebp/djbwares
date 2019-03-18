@@ -22,7 +22,7 @@ int respond(char *q,char qtype[2])
   flaga = byte_equal(qtype,2,DNS_T_A);
   flagaaaa = byte_equal(qtype,2,DNS_T_AAAA);
   flagptr = byte_equal(qtype,2,DNS_T_PTR);
-  if (byte_equal(qtype,2,DNS_T_ANY)) flaga = flagptr = 1;
+  if (byte_equal(qtype,2,DNS_T_ANY)) goto NO_ANY;
 
   if (flaga || flagptr) {
     if (dd(q,"",ip) == 4) {
@@ -51,7 +51,13 @@ int respond(char *q,char qtype[2])
       return 1;
     }
   }
+  goto REFUSE;
 
+NO_ANY:
+  if (!response_noany(q)) return 0;
+  return 1;
+
+  REFUSE:
   response[2] &= ~4;
   response[3] &= ~15;
   response[3] |= 5;

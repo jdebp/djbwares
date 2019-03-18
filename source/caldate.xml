@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="caldate">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>caldate</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>caldate</refname>
+<refpurpose>calendar dates</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting>
+#include &lt;caldate.h&gt;
+
+unsigned int \fBcaldate_fmt\fP(\fIs\fR,&amp;\fIcd\fR);
+
+unsigned int \fBcaldate_scan\fP(\fIs\fR,&amp;\fIcd\fR);
+
+struct caldate \fIcd\fR;
+
+char *\fIs\fR;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+A
+<command>struct</command> caldate
+value is a calendar date.
+It has three components:
+<command>year</command>,
+<command>month</command>
+(1...12),
+and
+<command>day</command>
+(1...31).
+
+<command>caldate_fmt</command>
+prints
+<replaceable>cd</replaceable>
+in ISO style (yyyy-mm-dd)
+into the character buffer
+<replaceable>s</replaceable>,
+without a terminating NUL.
+It returns the number of characters printed.
+<replaceable>s</replaceable>
+may be zero;
+then
+<command>caldate_fmt</command>
+returns the number of characters that would have been printed.
+
+<command>caldate_scan</command>
+reads a calendar date in ISO style
+from the beginning of the character buffer
+<replaceable>s</replaceable>
+and puts it into
+<replaceable>cd</replaceable>.
+It returns the number of characters read.
+If
+<replaceable>s</replaceable>
+does not start with an ISO-style date,
+<command>caldate_scan</command>
+returns 0.
+</refsection>
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>caldate_mjd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>caltime</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

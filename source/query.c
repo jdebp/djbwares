@@ -70,7 +70,7 @@ static void save_finish(const char type[2],const char *d,uint32 ttl)
 
 static int typematch(const char rtype[2],const char qtype[2])
 {
-  return byte_equal(qtype,2,rtype) || byte_equal(qtype,2,DNS_T_ANY);
+  return byte_equal(qtype,2,rtype);
 }
 
 static uint32 ttlget(char buf[4])
@@ -254,6 +254,9 @@ static int doit(struct query *z,int state)
       goto LOWERLEVEL;
     }
     if (!rqa(z)) goto DIE;
+    if (typematch(DNS_T_ANY,dtype)) {
+      if (!response_noany(d)) goto DIE;
+    }
     if (typematch(DNS_T_A,dtype)) {
       if (!response_rstart(d,DNS_T_A,655360)) goto DIE;
       if (!response_addbytes("\177\0\0\1",4)) goto DIE;
@@ -270,6 +273,9 @@ static int doit(struct query *z,int state)
   if (dns_domain_equal(d,"\0011\0010\0010\003127\7in-addr\4arpa\0")) {
     if (z->level) goto LOWERLEVEL;
     if (!rqa(z)) goto DIE;
+    if (typematch(DNS_T_ANY,dtype)) {
+      if (!response_noany(d)) goto DIE;
+    }
     if (typematch(DNS_T_PTR,dtype)) {
       if (!response_rstart(d,DNS_T_PTR,655360)) goto DIE;
       if (!response_addname("\011localhost\0")) goto DIE;
@@ -282,6 +288,9 @@ static int doit(struct query *z,int state)
   if (dns_domain_equal(d,"\0011\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\3ip6\4arpa\0")) {
     if (z->level) goto LOWERLEVEL;
     if (!rqa(z)) goto DIE;
+    if (typematch(DNS_T_ANY,dtype)) {
+      if (!response_noany(d)) goto DIE;
+    }
     if (typematch(DNS_T_PTR,dtype)) {
       if (!response_rstart(d,DNS_T_PTR,655360)) goto DIE;
       if (!response_addname("\011localhost\0")) goto DIE;
@@ -323,10 +332,18 @@ static int doit(struct query *z,int state)
       goto NEWNAME;
     }
 
+    /* Synthesized responses to ANY must not override NXDOMAIN or CNAME. */
+    if (typematch(DNS_T_ANY,dtype)) {
+      if (!rqa(z)) goto DIE;
+      if (!response_noany(d)) goto DIE;
+      cleanup(z);
+      return 1;
+    }
+
     if (typematch(DNS_T_SOA,dtype)) {
       byte_copy(key,2,DNS_T_SOA);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_SOA);
 	if (!rqa(z)) goto DIE;
 	pos = 0;
@@ -349,7 +366,7 @@ static int doit(struct query *z,int state)
     if (typematch(DNS_T_NS,dtype)) {
       byte_copy(key,2,DNS_T_NS);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_NS);
 	if (!rqa(z)) goto DIE;
 	pos = 0;
@@ -366,7 +383,7 @@ static int doit(struct query *z,int state)
     if (typematch(DNS_T_PTR,dtype)) {
       byte_copy(key,2,DNS_T_PTR);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_PTR);
 	if (!rqa(z)) goto DIE;
 	pos = 0;
@@ -383,7 +400,7 @@ static int doit(struct query *z,int state)
     if (typematch(DNS_T_MX,dtype)) {
       byte_copy(key,2,DNS_T_MX);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_MX);
 	if (!rqa(z)) goto DIE;
 	pos = 0;
@@ -403,7 +420,7 @@ static int doit(struct query *z,int state)
     if (typematch(DNS_T_A,dtype)) {
       byte_copy(key,2,DNS_T_A);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_A);
 	if (z->level) {
 	  while (cachedlen >= 4) {
@@ -434,7 +451,7 @@ static int doit(struct query *z,int state)
     if (typematch(DNS_T_AAAA,dtype)) {
       byte_copy(key,2,DNS_T_AAAA);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,DNS_T_AAAA);
 	if (z->level) {
 	  while (cachedlen >= 16) {
@@ -465,7 +482,7 @@ static int doit(struct query *z,int state)
     if (!typematch(DNS_T_ANY,dtype) && !typematch(DNS_T_AXFR,dtype) && !typematch(DNS_T_SOA,dtype) && !typematch(DNS_T_NS,dtype) && !typematch(DNS_T_PTR,dtype) && !typematch(DNS_T_A,dtype) && !typematch(DNS_T_AAAA,dtype) && !typematch(DNS_T_MX,dtype)) {
       byte_copy(key,2,dtype);
       cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
-      if (cached && (cachedlen || byte_diff(dtype,2,DNS_T_ANY))) {
+      if (cached) {
 	log_cachedanswer(d,dtype);
 	if (!rqa(z)) goto DIE;
 	while (cachedlen >= 2) {

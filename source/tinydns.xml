@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="tinydns">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -80,6 +87,11 @@ It will always answer with a delegation response for domain names at or below a 
 If there are more than 8 records, it returns a random set of 8.
 </para>
 
+<para>
+ANY queries do not return any data other than CNAMEs from the data file.
+If the domain name exists and has no CNAMEs, they are answered with a single synthesized HINFO record.
+</para>
+
 </refsection>
 
 <refsection>
@@ -125,15 +137,15 @@ Notice that the wildcard does not apply to <filename>pink.floyd.u.heaven.af.mil<
 <refsection>
 <title>History</title>
 <para>
-<command>tinydns</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+<command>tinydns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code and documentation by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation modernizations by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

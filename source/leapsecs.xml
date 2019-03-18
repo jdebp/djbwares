@@ -1,3 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
 <refentry id="leapsecs">
 
 <refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -28,7 +35,7 @@ It reads the source text file on its standard input, and writes the compiled dat
 </para>
 
 <para>
-The source file is <ulink url="http://cr.yp.to/libtai/leapsecs.txt">published by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname></ulink>, amongst many others.
+The source file is <ulink url="http://cr.yp.to/libtai/leapsecs.txt">published by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname></ulink>, amongst many others.
 The only lines that <command>leapsecs</command> cares about begin with a <code>+</code> in the first column, followed by a date in ISO 8604 form.
 The leap second written to the table is an (assumed) positive leap second on the last second of that date.
 </para>
@@ -81,15 +88,15 @@ This is where the database file shipped in the leapsecs package is placed on Lin
 <refsection>
 <title>History</title>
 <para>
-<command>leapsecs</command> was originally part of <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>'s libtai toolset in 1999.
+<command>leapsecs</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s libtai toolset in 1999.
 </para>
 </refsection>
 
 <refsection>
 <title>Author</title>
 <para>
-Original code by <personname><firstname>Daniel</firstname><othername>J.</othername><surname>Bernstein</surname></personname>.
-Documentation by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+Original code by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

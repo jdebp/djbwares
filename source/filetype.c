@@ -25,6 +25,8 @@ void filetype(const char *fn,stralloc *contenttype)
   else {
     result = "text/plain";
     if (str_equal(x,".html")) result = "text/html";
+    else if (str_equal(x,".xml")) result = "text/xml";
+    else if (str_equal(x,".xhtml")) result = "application/xhtml+xml";
     else if (str_equal(x,".gz")) result = "application/x-gzip";
     else if (str_equal(x,".dvi")) result = "application/x-dvi";
     else if (str_equal(x,".ps")) result = "application/postscript";

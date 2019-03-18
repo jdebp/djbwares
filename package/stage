@@ -1,5 +1,5 @@
 #!/bin/sh -e
-# See http://skarnet.org./software/compile.html
+# See http://jdebp.eu./FGA/slashpackage.html
 if [ \! -d package ] || [ \! -d source ] 
 then
 	echo "You are not in the right directory." 1>&2 
@@ -18,37 +18,76 @@ absdest="`readlink -f "${dest}"`/"
 # binaries and doco
 for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host
 do
-	if test -s package/"$i".commands1 || test -s package/"$i".aliases1 ;
+	install -d -m 0755 "${dest}"/"$i"/
+
+	if test -s package/"$i".extra-manpages5
+	then
+		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man5 
+		while read j ;
+		do
+			ln -f -- "${src}"/man/man5/"$j".5 "${dest}"/"$i"/usr/local/man/man5/ 
+		done < package/"$i".extra-manpages5 ;
+	fi
+
+	if test -s package/"$i".commands1 || test -s package/"$i".aliases1
 	then
 		install -d -m 0755 "${dest}"/"$i"/usr/local/bin 
-		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man1 
+	fi
+	if test -s package/"$i".commands1
+	then
 		while read j ;
 		do
 			ln -f -- "${src}"/bin/"$j" "${dest}"/"$i"/usr/local/bin/ 
-			ln -f -- "${src}"/man/man1/"$j".1 "${dest}"/"$i"/usr/local/man/man1/ 
 		done < package/"$i".commands1 ;
+	fi
+	if test -s package/"$i".aliases1
+	then
 		while read c a ;
 		do
 			ln -f -s "$c" "${dest}"/"$i"/usr/local/bin/"$a" 
-			ln -f -s "$c".1 "${dest}"/"$i"/usr/local/man/man1/"$a".1 
 		done < package/"$i".aliases1 ;
 	fi
 
-	if test -s package/"$i".commands8 || test -s package/"$i".aliases8 ;
+	if test -s package/"$i".commands8 || test -s package/"$i".aliases8
 	then
 		install -d -m 0755 "${dest}"/"$i"/usr/local/sbin 
-		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man8 
+	fi
+	if test -s package/"$i".commands8
+	then
 		while read j ;
 		do
 			ln -f -- "${src}"/sbin/"$j" "${dest}"/"$i"/usr/local/sbin/ 
-			ln -f -- "${src}"/man/man8/"$j".8 "${dest}"/"$i"/usr/local/man/man8/ 
 		done < package/"$i".commands8 ;
+	fi
+	if test -s package/"$i".aliases8
+	then
 		while read c a ;
 		do
 			ln -f -s "$c" "${dest}"/"$i"/usr/local/sbin/"$a" 
-			ln -f -s "$c".8 "${dest}"/"$i"/usr/local/man/man8/"$a".8 
 		done < package/"$i".aliases8 ;
 	fi
+
+	for section in 1 3 4 5 7 8
+	do
+		if test -s package/"$i".commands${section} || test -s package/"$i".aliases${section}
+		then
+			install -d -m 0755 "${dest}"/"$i"/usr/local/man/man${section} 
+		fi
+		if test -s package/"$i".commands${section}
+		then
+			while read j ;
+			do
+				ln -f -- "${src}"/man/man${section}/"$j".${section} "${dest}"/"$i"/usr/local/man/man${section}/ 
+			done < package/"$i".commands${section} ;
+		fi
+		if test -s package/"$i".aliases${section}
+		then
+			while read c a ;
+			do
+				ln -f -s "$c".${section} "${dest}"/"$i"/usr/local/man/man${section}/"$a".${section} 
+			done < package/"$i".aliases${section} ;
+		fi
+	done
 
 	if test -s package/"$i".functions3 ;
 	then

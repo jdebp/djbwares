@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="sgetopt">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>sgetopt</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>sgetopt</refname>
+<refpurpose>get option character from command line</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<programlisting>
+#include &lt;sgetopt.h&gt;
+</programlisting>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+The
+.B sgetopt
+library is just like the
+.B getopt
+library,
+except that it prints errors using
+.B substdio
+rather than
+.BR stdio .
+
+See
+.B getopt(3)
+for interface details.
+
+.SH VERSION
+sgetopt version 1.9, 931201.
+
+.SH "SEE ALSO"
+getopt(3),
+subgetopt(3),
+subfd(3),
+substdio(3)
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>, who placed it into the public domain.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

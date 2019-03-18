@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="tai">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>tai</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>tai</refname>
+<refpurpose>manipulate times with 1-second precision</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<programlisting>
+#include &lt;tai.h&gt;
+
+double \fBtai_approx\fP(&amp;\fIt\fR);
+
+int \fBtai_less\fP(&amp;\fIa\fR,&amp;\fIb\fR);
+
+void \fBtai_add\fP(&amp;\fIt\fR,&amp;\fIa\fR,&amp;\fIb\fR);
+
+void \fBtai_sub\fP(&amp;\fIt\fR,&amp;\fIa\fR,&amp;\fIb\fR);
+
+struct tai \fIt\fR;
+
+struct tai \fIa\fR;
+
+struct tai \fIb\fR;
+</programlisting>
+</refsynopsisdiv>
+<refsection><title>Description</title>
+A
+<command>struct</command> tai
+stores an integer between 0 inclusive and 2^64 exclusive.
+The format of
+<command>struct</command> tai
+is designed to speed up common operations;
+applications should not look inside
+<command>struct</command> tai\fR.
+
+A
+<command>struct</command> tai
+variable is commonly used to store
+a TAI64 label.
+Each TAI64 label refers to one second of real time.
+TAI64 labels span a period of
+hundreds of billions of years.
+See
+<command>http://pobox.com/~djb/proto/tai64.txt</command>
+for more information.
+
+A
+<command>struct</command> tai
+variable may also be used to store
+the numerical difference between two TAI64 labels.
+</refsection>
+<refsection><title>Arithmetic</title>
+<command>tai_approx</command>
+returns a double-precision approximation to
+<replaceable>t</replaceable>.
+The result of
+<command>tai_approx</command>
+is always nonnegative.
+
+<command>tai_less</command>
+returns 1 if
+<replaceable>a</replaceable>
+is smaller than
+<replaceable>b</replaceable>,
+0 otherwise.
+
+<command>tai_add</command>
+adds
+<replaceable>a</replaceable>
+and
+<replaceable>b</replaceable>
+modulo 2^64
+and puts the result into
+<replaceable>t</replaceable>.
+The inputs and outputs may overlap.
+
+<command>tai_sub</command>
+subtracts
+<replaceable>b</replaceable>
+from
+<replaceable>a</replaceable>
+modulo 2^64
+and puts the result into
+<replaceable>t</replaceable>.
+The inputs and outputs may overlap.
+</refsection>
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>tai_now</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai_pack</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>utc</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

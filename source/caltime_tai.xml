@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="caltime">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>caltime</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>caltime_tai</refname>
+<refpurpose>convert calendar dates and times</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<programlisting>
+#include &lt;caltime.h&gt;
+
+#include &lt;tai.h&gt;
+
+void \fBcaltime_tai\fP(&amp;\fIct\fR,&amp;\fIt\fR);
+
+void \fBcaltime_utc\fP(&amp;\fIct\fR,&amp;\fIt\fR,&amp;\fIweekday\fR,&amp;\fIyearday\fR);
+
+struct caltime \fIct\fR;
+
+struct tai \fIt\fR;
+
+int *\fIweekday\fR;
+
+int *\fIyearday\fR;
+</programlisting>
+</refsynopsisdiv>
+<refsection><title>Description</title>
+<command>caltime_tai</command>
+reads a date, time, and UTC offset from
+<replaceable>ct</replaceable>.
+It puts the corresponding TAI64 label into
+<replaceable>t</replaceable>.
+
+<command>caltime_utc</command>
+reads a TAI64 label from
+<replaceable>t</replaceable>.
+It puts the corresponding date and time into
+<replaceable>ct</replaceable>,
+with UTC offset 0.
+
+<command>caltime_utc</command>
+fills in
+<replaceable>weekday</replaceable>
+and
+<replaceable>yearday</replaceable>
+the same way as
+<command>caldate_frommjd</command>.
+</refsection>
+<refsection><title>Limitations</title>
+The sequence of TAI64 labels has been determined
+for the next few hundred billion years.
+The same is not true, however, for
+calendar dates and times.
+New leap seconds are added every year or two,
+as discussed in
+<citerefentry><refentrytitle>leapsecs</refentrytitle><manvolnum>3</manvolnum></citerefentry>;
+and the Gregorian calendar will change in a few thousand years,
+as discussed in
+<citerefentry><refentrytitle>caldate_mjd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+This means that
+<command>caltime_tai</command>
+and
+<command>caltime_utc</command>
+are not useful for dates far in the future.
+</refsection>
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>caldate_mjd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>caltime</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>leapsecs</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="supervise">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>supervise</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>supervise</refname>
+<refpurpose>starts and monitors a service.</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>supervise</command>
+<replaceable>s</replaceable>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection><title>Description</title>
+<para>
+<command>supervise</command> switches to the directory named <filename><replaceable>s</replaceable></filename> and starts <filename>./run</filename>.
+It restarts <filename>./run</filename> if <filename>./run</filename> exits.
+It pauses for a second after starting <filename>./run</filename>, so that it does not loop too quickly if <filename>./run</filename> exits immediately. 
+</para>
+
+<para>
+If the file <filename><replaceable>s</replaceable>/down</filename> exists, <command>supervise</command> does not start <filename>./run</filename> immediately.
+You can use <citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry> to start <filename>./run</filename> and to give other commands to <command>supervise</command>.
+</para>
+
+<para>
+<command>supervise</command> maintains status information in a binary format inside the directory <filename><replaceable>s</replaceable>/supervise</filename>, which must be writable to <command>supervise</command>.
+The status information can be read by <citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<command>supervise</command> may exit immediately after startup if it cannot find the files it needs in <filename><replaceable>s</replaceable></filename> or if another copy of <command>supervise</command> is already running in <filename><replaceable>s</replaceable></filename>.
+Once <command>supervise</command> is successfully running, it will not exit unless it is killed or specifically asked to exit.
+You can use <citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry> to check whether <command>supervise</command> is successfully running.
+You can use <citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry> to reliably start a collection of <command>supervise</command> processes. 
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
+<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

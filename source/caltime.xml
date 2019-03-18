@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="caltime">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>caltime</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>caltime</refname>
+<refpurpose>calendar dates and times</refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+<programlisting>
+#include &lt;caltime.h&gt;
+
+unsigned int \fBcaltime_fmt\fP(\fIs\fR,&amp;\fIct\fR);
+
+unsigned int \fBcaltime_scan\fP(\fIs\fR,&amp;\fIct\fR);
+
+struct caltime \fIct\fR;
+
+char *\fIs\fR;
+</programlisting>
+</refsynopsisdiv>
+<refsection><title>Description</title>
+A
+<command>struct</command> caltime
+value is a calendar date and time with an offset in minutes from UTC.
+It has five components:
+<command>date</command>
+(a
+<command>struct</command> caldate\fR),
+<command>hour</command>
+(0...23),
+<command>minute</command>
+(0...59),
+<command>second</command>
+(0...60),
+and
+<command>offset</command>
+(-5999...5999).
+
+For example,
+a leap second occurred
+on 30 June 1997 at 23:59:60 UTC.
+The local time in New York was
+30 June 1997 19:59:60 -0400.
+This local time is represented inside a
+<command>struct</command> caltime
+with
+<command>date</command>
+containing 1997, 6, 30;
+<command>hour</command>
+19;
+<command>minute</command>
+59;
+<command>second</command>
+60;
+and
+<command>offset</command>
+-240
+(4 hours).
+</refsection>
+<refsection><title>Formatting</title>
+<command>caltime_fmt</command>
+prints
+<replaceable>ct</replaceable>
+in ISO style (yyyy-mm-dd hh:mm:ss +oooo)
+into the character buffer
+<replaceable>s</replaceable>,
+without a terminating NUL.
+It returns the number of characters printed.
+<replaceable>s</replaceable>
+may be zero;
+then
+<command>caltime_fmt</command>
+returns the number of characters that would have been printed.
+
+<command>caltime_scan</command>
+reads a calendar date, time, and offset in ISO style
+from the beginning of the character buffer
+<replaceable>s</replaceable>
+and puts them into
+<replaceable>ct</replaceable>.
+It returns the number of characters read.
+If
+<replaceable>s</replaceable>
+does not start with an ISO-style date and time (including offset),
+<command>caltime_scan</command>
+returns 0.
+</refsection>
+<refsection><title>See also</title>
+<citerefentry><refentrytitle>caltime_tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+</refentry>

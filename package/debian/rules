@@ -3,7 +3,7 @@
 .PHONY: build binary install clean stage control
 
 build:
-	package/compile
+	MAKEFLAGS= package/compile
 
 binary: stage control
 	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
