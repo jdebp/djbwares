@@ -7,7 +7,7 @@
 
 #define FATAL "fghack: fatal: "
 
-int pid;
+static int pid;
 
 int main(int argc,const char * const *argv,const char * const *envp)
 {

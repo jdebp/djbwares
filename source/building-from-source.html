@@ -1,0 +1,63 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Building the toolset from source</title>
+<h1 class="Ruled">Building the toolset from source</h1>
+
+<p>
+The <a href="index.html">djbwares toolset</a> is known to build, run, and work on FreeBSD 10, PC-BSD 10, NetBSD 10, Debian Linux version 12, and OpenBSD version 5.9.
+It <em>should</em> similarly build, run, and work on any modern BSD and on any modern Linux flavour.
+</p>
+
+<p>
+The source is structured as a <a href="https://jdebp.uk/FGA/slashpackage.html">slashpackage-style package</a>.
+</p>
+
+<p>
+It requires <a href="https://jdebp.uk/Softwares/redo/">redo</a> to build, and builds with the gcc and clang compilers.
+The build system attempts to autodetect the available compiler, as well as various operating-system-dependant features.
+The way that it does this was in some of Daniel J. Bernstein's original softwares: a short test program that references the desired features, and a header that defines a preprocessor macro according to whether the build system can successfully compile and link the test program.
+</p>
+
+<link rel="Section" href="#Build" title="Building the toolset itself">
+<h2 class="Ruled" id="Build">Building the toolset itself</h2>
+
+<p> To just build the toolset from source, without packaging the binaries: </p>
+<blockquote><code>package/compile</code></blockquote>
+
+<p>This gives you:</p>
+<ul>
+<li> binaries in <code>command/</code>, which you can just add to your <code>PATH</code> environment variable or symbolically link to;
+<li> manual pages in <code>manual/</code>, which you can just add to your <code>MANPATH</code> environment variable or symbolically link to;
+<li> C language headers in <code>header/</code>;
+<li> link libraries in <code>library/</code>; and
+<li> the Guide in <code>guide/</code>.
+</ul>
+
+<p> 
+The build process updates files in these directories atomically.
+It doesn't create part-written executables or other files at their final names.
+So you can run things straight out of these directories whilst rebuilding.
+</p>
+
+<link rel="Section" href="#Clean" title="Cleaning the build area">
+<h2 class="Ruled" id="Clean">Cleaning the build area</h2>
+
+<p>To clean the build run</p>
+<blockquote><code>package/clean</code></blockquote> <p> or just <code>rm -r build/</code></p>
+
+<p>To clean the build, packaging, and built files run</p>
+<blockquote><code>package/distclean</code></blockquote> <p> or just <code>rm -r build/ command/ manual/ header/ library/ guide/</code></p>
+
+<link rel="Section" href="#Binary" title="Packaging the binaries">
+<h2 class="Ruled" id="Binary">Packaging the binaries</h2>
+
+<p>To build installable binary packages on FreeBSD, TrueOS, NetBSD, or OpenBSD run</p>
+<blockquote><pre>package/bsd/prepare &amp;&amp; bsd/rules clean build binary</pre></blockquote>
+
+<p>
+On FreeBSD and TrueOS this requires pkg version 1.2 or later in order to avoid segmentation faults and other bugs.
+So ensure that pkg is up to that version in your ports tree.
+</p>
+
+<p>To build the binary packages on Debian Linux run</p>
+<blockquote><pre>package/debian/prepare &amp;&amp; dpkg-buildpackage -b -uc</pre></blockquote>

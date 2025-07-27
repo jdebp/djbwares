@@ -20,8 +20,8 @@
 #define TTL_NS 259200
 #define TTL_POSITIVE 86400
 
-char *fn;
-char *fnnew;
+static char *fn;
+static char *fnnew;
 
 void die_usage()
 {
@@ -40,29 +40,29 @@ void die_write()
   strerr_die4sys(100,FATAL,"tinydns-edit: fatal: unable to write ",fnnew,": ");
 }
 
-char mode;
+static char mode;
 static char *target;
-char targetip[4];
+static char targetip[4];
 
-int fd;
-buffer b;
-char bspace[1024];
+static int fd;
+static buffer b;
+static char bspace[1024];
 
-int fdnew;
-buffer bnew;
-char bnewspace[1024];
+static int fdnew;
+static buffer bnew;
+static char bnewspace[1024];
 
 static stralloc line;
-int match = 1;
+static int match = 1;
 
 #define NUMFIELDS 10
 static stralloc f[NUMFIELDS];
 
 static char *d1;
 static char *d2;
-char ip[4];
-char ipstr[IP4_FMT];
-char strnum[FMT_ULONG];
+static char ip[4];
+static char ipstr[IP4_FMT];
+static char strnum[FMT_ULONG];
 
 static char *names[26];
 static int used[26];

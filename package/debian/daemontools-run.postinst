@@ -51,14 +51,14 @@ if test -z "$2"; then
   # not upgrading
   if grep '^SV:' /etc/inittab >/dev/null; then
     cat <<-\EOT >&2
-	
+
 	There already is an SV entry in /etc/inittab.  In order to have this
 	package add an entry with the name SV to have daemontools' service
 	supervision started through sysvinit, you need to remove or rename
 	the current SV entry first.
-	
+
 	Installation failed.
-	
+
 	EOT
     exit 1
   fi

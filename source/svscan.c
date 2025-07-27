@@ -26,9 +26,9 @@ struct {
   int pidlog; /* 0 if not running */
   int pi[2]; /* defined if flaglog */
 } x[SERVICES];
-int numx = 0;
+static int numx = 0;
 
-char fnlog[260];
+static char fnlog[260];
 
 void start(char *fn)
 {

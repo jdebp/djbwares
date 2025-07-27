@@ -7,13 +7,13 @@
 #include "taia.h"
 #include "caltime.h"
 
-struct taia now;
-struct tai sec;
-struct caltime ct;
+static struct taia now;
+static struct tai sec;
+static struct caltime ct;
 
-char x[TAIA_FMTFRAC];
+static char x[TAIA_FMTFRAC];
 
-main()
+int main()
 {
   if (leapsecs_init() == -1) {
     fprintf(stderr,"utcnow: fatal: unable to init leapsecs\n");

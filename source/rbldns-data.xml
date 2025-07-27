@@ -62,9 +62,13 @@ Comments are ignored.
 <listitem><para>
 A record DNS queries are to be answered with <replaceable>addr</replaceable>.
 TXT record DNS queries are to be answered with <replaceable>message</replaceable>.
-</para><para>
-For example: <code>:127.0.0.2:See http://rbl.example.com/why/$</code>
-</para></listitem>
+</para><informalexample><para>
+For example:
+</para>
+<programlisting>
+<code>:127.0.0.2:See http://rbl.example.com/why/$</code>
+</programlisting>
+</informalexample></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -80,9 +84,15 @@ The IP address <replaceable>ip</replaceable> is on the RBL blacklist/whitelist.
 All IP addresses that share the first <replaceable>n</replaceable> bits of <replaceable>ip</replaceable> are on the RBL blacklist/whitelist.
 This is CIDR notation.
 <replaceable>n</replaceable> must be at least 8; and all bits of <replaceable>ip</replaceable> past the <replaceable>n</replaceable>th must be 0.
-</para><para>
-For example: <code>1.2.3.0/24</code> means all <code>1.2.3.*</code> addresses.
-</para></listitem>
+</para><informalexample><para>
+For example:
+</para>
+<programlisting>
+<code>203.0.113.0/24</code>
+</programlisting>
+<para>
+means all <code>203.0.113.*</code> addresses.
+</para></informalexample></listitem>
 </varlistentry>
 
 </variablelist>

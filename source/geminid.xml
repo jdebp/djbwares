@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="geminid">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>geminid</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>geminid</refname>
+<refpurpose>UCSPI-TCP GEMINI server for static content</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>geminid</command>
+<arg choice='req'><replaceable>root</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+geminid prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
+</para>
+
+<para>
+<command>geminid</command> accepts a request on standard input, and responds on standard output, printing the requested file and exiting.
+</para>
+
+<para>
+If the file is unopenable or if <command>geminid</command> does not like the request, <command>geminid</command> prints an error message and exits.
+If <command>geminid</command> runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
+</para>
+
+<para>
+<command>geminid</command> also prints local log information on standard error.
+</para>
+
+<para>
+Normally <command>geminid</command> is run under a UCSPI-SSL server program to handle GEMINI connections from hosts around the Internet.
+</para>
+<warning>
+There is no unencrypted version of the GEMINI protocol, and <command>geminid</command> is not supposed to be the direct server on the GEMINI port.
+<command>geminid</command> is a UCSPI tool for composing a GEMINI server, not an entire server.
+</warning>
+
+<para>
+As an extension, the <code>gemini:</code> schema prefix can be omitted from requests.
+Because of this, <command>geminid</command> can be used under a UCSPI-TCP server program to provide static FINGER and NICNAME/WHOIS service (of a kind) that does not consult the system account database or user home directories.
+</para>
+<note>
+Both FINGER and NICNAME are pretty much free-form queries that (de facto) have taken many forms over the years, so a schema-less <code>//<replaceable>host</replaceable>/<replaceable>path</replaceable></code> request is a valid FINGER or NICNAME lookup.
+</note>
+
+<refsection>
+<title>File handling</title>
+
+<para>
+A request for <code>gemini://<replaceable>v</replaceable>/<replaceable>f</replaceable></code>, where <replaceable>f</replaceable> does not end with a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
+A request for <code>gemini://<replaceable>v</replaceable>/<replaceable>f</replaceable>/</code>, ending in a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable>/index.gemini</filename>.
+<command>geminid</command> always converts the host name <code><replaceable>v</replaceable></code> to lowercase.
+</para>
+
+<para>
+If it successfully opens the file, <command>geminid</command> uses the file name to select a file type.
+</para>
+</refsection>
+
+<refsection>
+<title>Unsupported features</title>
+
+<para>
+<command>geminid</command> does not generate its own directory listings, even if <filename>index.gemini</filename> does not exist. 
+<command>geminid</command> rejects requests for directory names without terminating slashes; it does not redirect the requests.
+</para>
+
+<para>
+<command>geminid</command> is purely a static content server.
+It provides no protocol translation from GOPHER or anything else, and only supports the <code>gemini:</code> schema.
+It does not act as a proxy.
+</para>
+
+<para>
+<command>geminid</command> is purely an anonymous content server.
+It has no access controls, and everything that it can publish should be considered public.
+</para>
+
+</refsection>
+
+</refsection>
+<refsection>
+<title>Security</title>
+
+<para>
+<command>geminid</command> chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
+<command>geminid</command> does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
+</para>
+<note>
+<command>geminid</command> reads the <filename>/etc/leapsecs.dat</filename> file before the chroot, and does not require it to be copied under <arg choice='plain'><replaceable>root</replaceable></arg>.
+</note>
+
+<para>
+<command>geminid</command> will refuse to read a file if the file
+</para>
+
+<itemizedlist>
+<listitem><para>
+is unreadable to user;
+</para></listitem>
+<listitem><para>
+is unreadable to group;
+</para></listitem>
+<listitem><para>
+is unreadable to world;
+</para></listitem>
+<listitem><para>
+is world-executable without being user-executable; or
+</para></listitem>
+<listitem><para>
+is anything other than a regular file: a directory, socket, device, etc.
+</para></listitem>
+</itemizedlist>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>geminid</command> was added to djbwares in 2025.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Derived from original code by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

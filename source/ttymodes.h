@@ -9,14 +9,14 @@ struct ttymodes {
   struct winsize ws;
 } ;
 
-extern int ttymodes_gett();
-extern int ttymodes_getw();
-extern int ttymodes_get();
-extern int ttymodes_sett();
-extern int ttymodes_setw();
-extern int ttymodes_set();
+extern int ttymodes_gett(struct ttymodes *,int);
+extern int ttymodes_getw(struct ttymodes *,int);
+extern int ttymodes_get(struct ttymodes *,int);
+extern int ttymodes_sett(const struct ttymodes *,int);
+extern int ttymodes_setw(const struct ttymodes *,int);
+extern int ttymodes_set(const struct ttymodes *,int);
 
-extern void ttymodes_makeraw();
-extern void ttymodes_sane();
+extern void ttymodes_makeraw(struct ttymodes *);
+extern void ttymodes_sane(struct ttymodes *);
 
 #endif

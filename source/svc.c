@@ -11,13 +11,13 @@
 #define FATAL "svc: fatal: "
 #define WARNING "svc: warning: "
 
-int datalen = 0;
-char data[20];
+static int datalen = 0;
+static char data[20];
 
-buffer b;
-char bspace[1];
+static buffer b;
+static char bspace[1];
 
-int fdorigdir;
+static int fdorigdir;
 
 int main(int argc,const char *const *argv)
 {

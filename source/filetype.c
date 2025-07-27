@@ -9,7 +9,7 @@ void filetype(const char *fn,stralloc *contenttype)
   int i;
   char ch;
 
-  if (!stralloc_copys(contenttype,"Content-Type: ")) _exit(21);
+  if (!stralloc_copys(contenttype,"")) _exit(21);
 
   x = fn + str_rchr(fn,'.');
   if (x[str_chr(x,'=')])
@@ -26,6 +26,8 @@ void filetype(const char *fn,stralloc *contenttype)
     result = "text/plain";
     if (str_equal(x,".html")) result = "text/html";
     else if (str_equal(x,".xml")) result = "text/xml";
+    else if (str_equal(x,".gopher")) result = "text/gopher";
+    else if (str_equal(x,".gemini")) result = "text/gemini";
     else if (str_equal(x,".xhtml")) result = "application/xhtml+xml";
     else if (str_equal(x,".gz")) result = "application/x-gzip";
     else if (str_equal(x,".dvi")) result = "application/x-dvi";
@@ -39,6 +41,4 @@ void filetype(const char *fn,stralloc *contenttype)
 
     if (!stralloc_cats(contenttype,result)) _exit(21);
   }
-
-  if (!stralloc_cats(contenttype,"\r\n")) _exit(21);
 }

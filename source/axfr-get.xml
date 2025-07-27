@@ -37,17 +37,31 @@
 It sends a "zone transfer" request over the network to the server, reads the results back, and saves them in a database source file, the input that is compiled by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 It expects to be run via a program such as <citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry> which makes the network connection to the server and sets up UCSPI environment variables.
 </para>
+<caution>
+The "zone transfer" mechanism is incapable of carrying all of the information that can be contained in a database source file; not all databases comprising "zones" in the first place.
+Do not use it to replicate from one <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry>/<citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> server to another.
+Use an ordinary remote file copying program such as <citerefentry><refentrytitle>rsync</refentrytitle><manvolnum>1</manvolnum></citerefentry>; which in addition to copying <emphasis>all</emphasis> of the database records, can moreover do compressed transfers, and more reliable skips of updates based upon file modification timestamps, sizes, and hashes.
+</caution>
 
 <para>
-<command>axfr-get</command> performs a zone transfer for domain <replaceable>apex</replaceable> and updates <replaceable>data</replaceable> atomically. 
+<command>axfr-get</command> performs a "zone transfer" for domain <replaceable>apex</replaceable> and updates <replaceable>data</replaceable> atomically. 
 It writes the results to <replaceable>tmp</replaceable> and renames that replacement into place as <replaceable>data</replaceable> when it has completed the "zone transfer", completely and successfully built the data file, and written it to disc.
 <replaceable>tmp</replaceable> and <replaceable>data</replaceable> thus must be on the same filesystem. 
 </para>
 
 <para>
 <command>axfr-get</command> writes the zone serial number as a comment at the top of the data file.
-It skips the zone transfer, leaving <replaceable>data</replaceable> alone, if <replaceable>data</replaceable> already exists, <replaceable>data</replaceable> has a serial number matching the zone serial number, and both serial numbers are nonzero. 
+It skips the "zone transfer", leaving <replaceable>data</replaceable> alone, if <replaceable>data</replaceable> already exists, <replaceable>data</replaceable> has a serial number matching the zone serial number, and both serial numbers are nonzero. 
 </para>
+<note>
+If the content DNS server only updates the serial number at most once per second, this will cause skipped transfers if multiple (non-batched) modifications are made within a single second.
+This is not usually possible at human speeds.
+</note>
+<warning>
+If the content DNS server has the same serial numbers across all "zones" (as <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> has, for one) this will erroneously skip the transfer if <replaceable>apex</replaceable> is changed.
+For better results, use a different <replaceable>data</replaceable> for each <replaceable>apex</replaceable>.
+For best results, see earlier.
+</warning>
 
 <para>
 Zone transfers often include duplicate records. 
@@ -56,8 +70,8 @@ To eliminate them, you should feed the <command>axfr-get</command> results throu
 
 <para>
 <command>axfr-get</command> discards all records not at or beneath the domain <replaceable>apex</replaceable>. 
-It accepts records for domain names in child zones, i.e. for domain names beneath delegation points, but since those delegation points are there <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> will not report those records except as glue. 
-If you plan to merge the <command>axfr-get</command> results for a domain and a child of the same domain, creating a single database source file encompassing both zones, make sure to eliminate records in the first output that are within the child zone. 
+It accepts records for domain names in child zones, i.e. for domain names beneath delegation points, but since those delegation points are there <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> will not report those records except as glue.
+If you plan to merge the <command>axfr-get</command> results for a domain and a child of the same domain, creating a single database source file encompassing both zones, make sure to eliminate records in the first output that are within the child zone.
 </para>
 
 <para>
@@ -80,8 +94,8 @@ There are some side effects of the behaviour of <citerefentry><refentrytitle>tin
 <listitem>
 <para>
 BIND's handling of wildcards such as <filename>*.example</filename> is not precisely simulated. 
-Under BIND, records for <filename>*.example</filename> do not apply to <filename>y.example</filename> or <filename>anything.y.example</filename> if there is a normal record for <filename>x.y.example</filename>. 
-With <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, the wildcard records apply to <filename>y.example</filename> and <filename>anything.y.example</filename> except <filename>x.y.example</filename>. 
+Under BIND, records for <filename>*.example</filename> do not apply to <filename>y.example</filename> or <filename><replaceable>anything</replaceable>.y.example</filename> if there is a normal record for <filename>x.y.example</filename>. 
+With <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, the wildcard records apply to <filename>y.example</filename> and <filename><replaceable>anything</replaceable>.y.example</filename> except <filename>x.y.example</filename> specifically. 
 </para>
 </listitem>
 <listitem>
@@ -90,12 +104,6 @@ BIND's handling of multiple IP addresses for a single name are not precisely sim
 </para>
 </listitem>
 </itemizedlist>
-
-<para>
-The "zone transfer" mechanism is incapable of carrying all of the information that can be contained in a database source file.
-Do not use it to replicate from one <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> server to another.
-Use an ordinary remote file copying program such as <citerefentry><refentrytitle>rsync</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-</para>
 
 </refsection>
 

@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include "caldate.h"
 
-char *dayname[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } ;
+static const char *dayname[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } ;
 
-char out[101];
+static char out[101];
 
 int main(int argc, char** argv)
 {

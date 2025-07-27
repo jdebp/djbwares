@@ -1,13 +1,13 @@
 #!/bin/sh -e
-# See http://jdebp.eu./FGA/slashpackage.html
-if [ \! -d package ] || [ \! -d source ] 
+# See http://jdebp.uk./FGA/slashpackage.html
+if [ \! -d package ] || [ \! -d source ]
 then
-	echo "You are not in the right directory." 1>&2 
+	echo "You are not in the right directory." 1>&2
 	exit 100
 fi
 if ! test $# -ge 2
 then
-	echo "Two arguments are required." 1>&2 
+	echo "Two arguments are required." 1>&2
 	exit 100
 fi
 
@@ -15,116 +15,144 @@ src="${1}"
 dest="${2}"
 absdest="`readlink -f "${dest}"`/"
 
+##########################################################
+# distributor patchable stuff
+
+# These are the parents of the relevant directory trees.
+# Uniformly, packages go under /usr/local on FreeBSD, mixed in with actually local stuff.
+# Eventually, we will switch to the NetBSD convention of /usr/pkg .
+usrprefix="/usr/local"
+
+##########################################################
+# derived from distributor patchable stuff or from the operating system
+
+binprefix="${usrprefix}"
+etcprefix="${usrprefix}"
+libprefix="${usrprefix}"
+manprefix="${usrprefix}"
+incprefix="${usrprefix}"
+shrprefix="${usrprefix}"
+docprefix="${shrprefix}/share"
+
 # binaries and doco
 for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host
 do
 	install -d -m 0755 "${dest}"/"$i"/
 
-	if test -s package/"$i".extra-manpages5
+	if test -s package/export-manifests/"$i".extra-manpages5
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man5 
+		install -d -m 0755 "${dest}"/"$i"/"${manprefix}"/man/man5 "${dest}"/"$i"/"${manprefix}"/man/docbook5
 		while read j ;
 		do
-			ln -f -- "${src}"/man/man5/"$j".5 "${dest}"/"$i"/usr/local/man/man5/ 
-		done < package/"$i".extra-manpages5 ;
+			ln -f -- "${src}"/manual/man5/"$j".5 "${dest}"/"$i"/"${manprefix}"/man/man5/
+			ln -f -- "${src}"/manual/docbook5/"$j".xml "${dest}"/"$i"/"${manprefix}"/man/docbook5/
+		done < package/export-manifests/"$i".extra-manpages5 ;
 	fi
 
-	if test -s package/"$i".commands1 || test -s package/"$i".aliases1
+	if test -s package/export-manifests/"$i".commands1 || test -s package/export-manifests/"$i".aliases1
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/bin 
+		install -d -m 0755 "${dest}"/"$i"/"${binprefix}"/bin
 	fi
-	if test -s package/"$i".commands1
+	if test -s package/export-manifests/"$i".commands1
 	then
 		while read j ;
 		do
-			ln -f -- "${src}"/bin/"$j" "${dest}"/"$i"/usr/local/bin/ 
-		done < package/"$i".commands1 ;
+			ln -f -- "${src}"/command/"$j" "${dest}"/"$i"/"${binprefix}"/bin/
+		done < package/export-manifests/"$i".commands1 ;
 	fi
-	if test -s package/"$i".aliases1
+	if test -s package/export-manifests/"$i".aliases1
 	then
 		while read c a ;
 		do
-			ln -f -s "$c" "${dest}"/"$i"/usr/local/bin/"$a" 
-		done < package/"$i".aliases1 ;
+			ln -f -s "$c" "${dest}"/"$i"/"${binprefix}"/bin/"$a"
+		done < package/export-manifests/"$i".aliases1 ;
 	fi
 
-	if test -s package/"$i".commands8 || test -s package/"$i".aliases8
+	if test -s package/export-manifests/"$i".commands8 || test -s package/export-manifests/"$i".aliases8
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/sbin 
+		install -d -m 0755 "${dest}"/"$i"/"${binprefix}"/sbin
 	fi
-	if test -s package/"$i".commands8
+	if test -s package/export-manifests/"$i".commands8
 	then
 		while read j ;
 		do
-			ln -f -- "${src}"/sbin/"$j" "${dest}"/"$i"/usr/local/sbin/ 
-		done < package/"$i".commands8 ;
+			ln -f -- "${src}"/command/"$j" "${dest}"/"$i"/"${binprefix}"/sbin/
+		done < package/export-manifests/"$i".commands8 ;
 	fi
-	if test -s package/"$i".aliases8
+	if test -s package/export-manifests/"$i".aliases8
 	then
 		while read c a ;
 		do
-			ln -f -s "$c" "${dest}"/"$i"/usr/local/sbin/"$a" 
-		done < package/"$i".aliases8 ;
+			ln -f -s "$c" "${dest}"/"$i"/"${binprefix}"/sbin/"$a"
+		done < package/export-manifests/"$i".aliases8 ;
 	fi
 
 	for section in 1 3 4 5 7 8
 	do
-		if test -s package/"$i".commands${section} || test -s package/"$i".aliases${section}
+		if test -s package/export-manifests/"$i".commands${section} || test -s package/export-manifests/"$i".aliases${section}
 		then
-			install -d -m 0755 "${dest}"/"$i"/usr/local/man/man${section} 
+			install -d -m 0755 "${dest}"/"$i"/"${manprefix}"/man/man${section} "${dest}"/"$i"/"${manprefix}"/man/docbook${section}
 		fi
-		if test -s package/"$i".commands${section}
+		if test -s package/export-manifests/"$i".commands${section}
 		then
 			while read j ;
 			do
-				ln -f -- "${src}"/man/man${section}/"$j".${section} "${dest}"/"$i"/usr/local/man/man${section}/ 
-			done < package/"$i".commands${section} ;
+				ln -f -- "${src}"/manual/man${section}/"$j".${section} "${dest}"/"$i"/"${manprefix}"/man/man${section}/
+				ln -f -- "${src}"/manual/docbook${section}/"$j".xml "${dest}"/"$i"/"${manprefix}"/man/docbook${section}/
+			done < package/export-manifests/"$i".commands${section} ;
 		fi
-		if test -s package/"$i".aliases${section}
+		if test -s package/export-manifests/"$i".aliases${section}
 		then
 			while read c a ;
 			do
-				ln -f -s "$c".${section} "${dest}"/"$i"/usr/local/man/man${section}/"$a".${section} 
-			done < package/"$i".aliases${section} ;
+				ln -f -s "$c".${section} "${dest}"/"$i"/"${manprefix}"/man/man${section}/"$a".${section}
+				ln -f -s "$c".xml "${dest}"/"$i"/"${manprefix}"/man/docbook${section}/"$a".xml
+			done < package/export-manifests/"$i".aliases${section} ;
 		fi
 	done
 
-	if test -s package/"$i".functions3 ;
+	if test -s package/export-manifests/"$i".functions3 ;
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/man/man3 
+		install -d -m 0755 "${dest}"/"$i"/"${manprefix}"/man/man3 "${dest}"/"$i"/"${manprefix}"/man/docbook3
 		while read j ;
 		do
-			ln -f -- "${src}"/man/man3/"$j".3 "${dest}"/"$i"/usr/local/man/man3/ 
-		done < package/"$i".functions3 ;
+			ln -f -- "${src}"/manual/man3/"$j".3 "${dest}"/"$i"/"${manprefix}"/man/man3/
+			ln -f -- "${src}"/manual/docbook3/"$j".xml "${dest}"/"$i"/"${manprefix}"/man/docbook3/
+		done < package/export-manifests/"$i".functions3 ;
 		while read c a ;
 		do
-			ln -f -- "${dest}"/"$i"/usr/local/man/man3/"$c".3 "${dest}"/"$i"/usr/local/man/man3/"$a".3 
-		done < package/"$i".aliases3 ;
+			ln -f -- "${dest}"/"$i"/"${manprefix}"/man/man3/"$c".3 "${dest}"/"$i"/"${manprefix}"/man/man3/"$a".3
+			ln -f -- "${dest}"/"$i"/"${manprefix}"/man/docbook3/"$c".xml "${dest}"/"$i"/"${manprefix}"/man/docbook3/"$a".xml
+		done < package/export-manifests/"$i".aliases3 ;
 	fi
 
-	if test -s package/"$i".headers ;
+	if test -s package/export-manifests/"$i".headers ;
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/include
+		install -d -m 0755 "${dest}"/"$i"/"${incprefix}"/include
 		while read j ;
 		do
-			ln -f -- "${src}"/include/"$j".h "${dest}"/"$i"/usr/local/include/ 
-		done < package/"$i".headers ;
+			ln -f -- "${src}"/header/"$j".h "${dest}"/"$i"/"${incprefix}"/include/
+		done < package/export-manifests/"$i".headers ;
 	fi
 
-	if test -s package/"$i".libraries ;
+	if test -s package/export-manifests/"$i".libraries ;
 	then
-		install -d -m 0755 "${dest}"/"$i"/usr/local/lib
+		install -d -m 0755 "${dest}"/"$i"/"${libprefix}"/lib
 		while read j ;
 		do
-			ln -f -- "${src}"/lib/"$j".a "${dest}"/"$i"/usr/local/lib/ 
-		done < package/"$i".libraries ;
+			ln -f -- "${src}"/library/"$j".a "${dest}"/"$i"/"${libprefix}"/lib/
+		done < package/export-manifests/"$i".libraries ;
 	fi
 
 done
 
-case "`uname`" in
-Linux)	prefix="usr" ;;
-*BSD)	prefix="usr/local" ;;
-esac
-install -d -m 0755 "${dest}/leapsecs/${prefix}/share/libtai/" 
-ln -f -- "${src}"/etc/leapsecs.dat "${dest}/leapsecs/${prefix}/share/libtai/"
+##########################################################
+# more doco
+for i in guide ;
+do
+	install -d -m 0755 -- "${dest}"/djbwares-"${i}"/"${docprefix}"/doc/djbwares
+	( cd "${src}"/guide && pax -r -w -l -- * "${absdest}"/djbwares-"${i}"/"${docprefix}"/doc/djbwares/ )
+done
+
+install -d -m 0755 "${dest}/leapsecs/${shrprefix}/share/libtai/"
+ln -f -- "${src}"/config/leapsecs.dat "${dest}/leapsecs/${shrprefix}/share/libtai/"

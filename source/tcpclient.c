@@ -6,6 +6,7 @@
 #include "exit.h"
 #include "sgetopt.h"
 #include "uint16.h"
+#include "uint16.h"
 #include "fmt.h"
 #include "scan.h"
 #include "str.h"
@@ -41,30 +42,30 @@ void usage(void)
 host port program");
 }
 
-int verbosity = 1;
-int flagdelay = 1;
-int flagremoteinfo = 1;
-int flagremotehost = 1;
-unsigned long itimeout = 26;
-unsigned long ctimeout[2] = { 2, 58 };
+static int verbosity = 1;
+static int flagdelay = 1;
+static int flagremoteinfo = 1;
+static int flagremotehost = 1;
+static unsigned long itimeout = 26;
+static unsigned long ctimeout[2] = { 2, 58 };
 
-char iplocal[4] = { 0,0,0,0 };
-uint16 portlocal = 0;
-char *forcelocal = 0;
+static char iplocal[4] = { 0,0,0,0 };
+static uint16 portlocal = 0;
+static const char *forcelocal = 0;
 
-char ipremote[4];
-uint16 portremote;
+static char ipremote[4];
+static uint16 portremote;
 
-char *hostname;
+static const char *hostname;
 static stralloc addresses;
 static stralloc moreaddresses;
 
 static stralloc tmp;
 static stralloc fqdn;
-char strnum[FMT_ULONG];
-char ipstr[IP4_FMT];
+static char strnum[FMT_ULONG];
+static char ipstr[IP4_FMT];
 
-char seed[128];
+static char seed[128];
 
 static
 void
@@ -81,7 +82,7 @@ main(int argc,char **argv)
 {
   unsigned long u;
   int opt;
-  char *x;
+  const char *x;
   int j;
   int s;
   int cloop;
@@ -139,7 +140,7 @@ main(int argc,char **argv)
     se = getservbyname(x,"tcp");
     if (!se)
       strerr_die3x(111,FATAL,"unable to figure out port number for ",x);
-    portremote = ntohs(se->s_port);
+    uint16_unpack_big(se->s_port, &portremote);
     /* i continue to be amazed at the stupidity of the s_port interface */
   }
 
@@ -159,7 +160,7 @@ main(int argc,char **argv)
   for (cloop = 0;cloop < 2;++cloop) {
     if (!stralloc_copys(&moreaddresses,"")) nomem();
     for (j = 0;j + 4 <= addresses.len;j += 4) {
-      s = socket_tcp();
+      s = socket_tcp4();
       if (s == -1)
         strerr_die2sys(111,FATAL,"unable to create socket: ");
       if (socket_bind4(s,iplocal,portlocal) == -1)

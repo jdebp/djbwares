@@ -49,7 +49,7 @@ If <replaceable>t</replaceable> is supplied, that is the type of resource record
 
 <para>
 The <arg choice='plain'>-a</arg> option is equivalent to <arg choice='plain'>-t any</arg>.
-Note that "any" is not "all", and this is generally not useful.
+Note that "any" is not "all", and this is generally not useful (even before RFC8482).
 </para>
 
 <orderedlist>

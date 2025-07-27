@@ -2,6 +2,7 @@
 #include "exit.h"
 #include "scan.h"
 #include "prot.h"
+#include "leapsecs.h"
 #include <unistd.h>
 
 extern void doit(void);
@@ -11,6 +12,9 @@ int main(int argc,char **argv)
   (void)argc;	/* Silence a compiler warning. */
   char *x;
   unsigned long id;
+
+  // This saves having to have the leapsecs.dat file in every chroot environment.
+  leapsecs_init();
 
   x = argv[1];
   if (x) {

@@ -135,7 +135,7 @@ static int rqa(struct query *z)
 
 static int globalip(char *d,char ip[4])
 {
-  if (dd(d,"",ip) == 4) return 1;
+  if (dd4(d,"",ip) == 4) return 1;
   return 0;
 }
 

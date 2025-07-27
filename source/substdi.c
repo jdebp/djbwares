@@ -2,11 +2,7 @@
 #include "byte.h"
 #include "error.h"
 
-static int oneread(op,fd,buf,len)
-register long (*op)();
-register int fd;
-register char *buf;
-register int len;
+static int oneread(register long (*op)(),register int fd,register char *buf,register int len)
 {
   register int r;
 
@@ -17,10 +13,7 @@ register int len;
   }
 }
 
-static int getthis(s,buf,len)
-register substdio *s;
-register char *buf;
-register int len;
+static int getthis(register substdio *s,register char *buf,register int len)
 {
   register int r;
   register int q;
@@ -33,8 +26,7 @@ register int len;
   return r;
 }
 
-int substdio_feed(s)
-register substdio *s;
+int substdio_feed(register substdio *s)
 {
   register int r;
   register int q;
@@ -50,10 +42,7 @@ register substdio *s;
   return r;
 }
 
-int substdio_bget(s,buf,len)
-register substdio *s;
-register char *buf;
-register int len;
+int substdio_bget(register substdio *s,register char *buf,register int len)
 {
   register int r;
  
@@ -63,10 +52,7 @@ register int len;
   return getthis(s,buf,len);
 }
 
-int substdio_get(s,buf,len)
-register substdio *s;
-register char *buf;
-register int len;
+int substdio_get(register substdio *s,register char *buf,register int len)
 {
   register int r;
  
@@ -76,15 +62,12 @@ register int len;
   return getthis(s,buf,len);
 }
 
-char *substdio_peek(s)
-register substdio *s;
+char *substdio_peek(register const substdio *s)
 {
   return s->x + s->n;
 }
 
-void substdio_seek(s,len)
-register substdio *s;
-register int len;
+void substdio_seek(register substdio *s,register int len)
 {
   s->n += len;
   s->p -= len;

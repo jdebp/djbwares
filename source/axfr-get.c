@@ -52,9 +52,9 @@ unsigned int x_skipname(char *buf,unsigned int len,unsigned int pos)
 }
 
 static char *zone;
-unsigned int zonelen;
-char *fn;
-char *fntmp;
+static unsigned int zonelen;
+static char *fn;
+static char *fntmp;
 
 void die_netread(void)
 {
@@ -88,10 +88,10 @@ int safewrite(int fd,char *buf,unsigned int len)
   if (r <= 0) die_netwrite();
   return r;
 }
-char netreadspace[1024];
-buffer netread = BUFFER_INIT(saferead,6,netreadspace,sizeof netreadspace);
-char netwritespace[1024];
-buffer netwrite = BUFFER_INIT(safewrite,7,netwritespace,sizeof netwritespace);
+static char netreadspace[1024];	// Responses over this size will be read unbuffered.
+static buffer netread = BUFFER_INIT(saferead,6,netreadspace,sizeof netreadspace);
+static char netwritespace[1024];
+static buffer netwrite = BUFFER_INIT(safewrite,7,netwritespace,sizeof netwritespace);
 
 void netget(char *buf,unsigned int len)
 {
@@ -103,9 +103,9 @@ void netget(char *buf,unsigned int len)
   }
 }
 
-int fd;
-buffer b;
-char bspace[1024];
+static int fd;
+static buffer b;
+static char bspace[1024];
 
 void put(char *buf,unsigned int len)
 {
@@ -126,10 +126,10 @@ static char *d1;
 static char *d2;
 static char *d3;
 
-stralloc line;
-int match;
+static stralloc line;
+static int match;
 
-int numsoa;
+static int numsoa;
 
 unsigned int doit(char *buf,unsigned int len,unsigned int pos)
 {
@@ -279,7 +279,7 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
   return len;
 }
 
-stralloc packet;
+static stralloc packet;
 
 int main(int argc,char **argv)
 {

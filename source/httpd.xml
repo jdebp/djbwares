@@ -31,39 +31,48 @@
 <title>Description</title>
 
 <para>
-httpd prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+httpd prints requested public files from the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
 The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
 </para>
 
 <para>
-httpd accepts <command>GET</command> and <command>HEAD</command> requests on standard input in HTTP/0.9, HTTP/1.0, and HTTP/1.1 formats, and responds on standard output:
+<command>httpd</command> accepts <command>GET</command> and <command>HEAD</command> requests on standard input, and responds on standard output according to the HTTP version employed in the request:
 </para>
 
 <itemizedlist>
 <listitem><para>
-HTTP/0.9: httpd prints the requested file and exits.
+HTTP/0.9: <command>httpd</command> prints the requested file and exits.
 </para></listitem>
 <listitem><para>
-HTTP/1.0: httpd prints an HTTP/1.0 header and the requested file. 
+HTTP/1.0: <command>httpd</command> prints an HTTP/1.0 header and the requested file.
 Then it exits.
 </para></listitem>
 <listitem><para>
-HTTP/1.1: httpd prints an HTTP/1.1 header and the requested file in chunked format. 
+HTTP/1.1: <command>httpd</command> prints an HTTP/1.1 header and the requested file in chunked format.
 Then it waits for further requests.
 </para></listitem>
 </itemizedlist>
 
 <para>
-If the file is unopenable or if httpd does not like the request, httpd prints an error message and exits. If httpd runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
-httpd also prints local log information on standard error.
+Unless the <envar>OLDPROTOCOLS</envar> environment variable is set, <command>httpd</command> only accepts the HTTP/1.1 request format, rejecting all others with a 426 error.
 </para>
 
 <para>
-httpd has exact-prefix support for <code>If-Modified-Since:</code> it uses code 304 if the <code>Last-Modified</code> contents are an exact prefix of the <code>If-Modified-Since</code> contents.
+If the file is unopenable or if <command>httpd</command> does not like the request, <command>httpd</command> prints an error message and exits.
+If <command>httpd</command> runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
 </para>
 
 <para>
-Normally httpd is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle HTTP connections from hosts around the Internet.
+<command>httpd</command> also prints local log information on standard error.
+Unless the <envar>LOGUNSUPPORTED</envar> environment variable is set, <command>httpd</command> does not output any log messages for requests with unsupported features.
+</para>
+
+<para>
+<command>httpd</command> has exact-prefix support for <code>If-Modified-Since:</code> it uses code 304 if the <code>Last-Modified</code> contents are an exact prefix of the <code>If-Modified-Since</code> contents.
+</para>
+
+<para>
+Normally <command>httpd</command> is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle HTTP connections from hosts around the Internet.
 It can also be run under a UCSPI-SSL server program.
 </para>
 
@@ -71,14 +80,14 @@ It can also be run under a UCSPI-SSL server program.
 <title>File handling</title>
 
 <para>
-A request for <code>http://<replaceable>v</replaceable>/<replaceable>f</replaceable></code>, where <replaceable>f</replaceable> does not end with a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy. 
+A request for <code>http://<replaceable>v</replaceable>/<replaceable>f</replaceable></code>, where <replaceable>f</replaceable> does not end with a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
 A request for <code>http://<replaceable>v</replaceable>/<replaceable>f</replaceable>/</code>, ending in a slash, refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable>/index.html</filename>.
-httpd always converts the host name <code><replaceable>v</replaceable></code> to lowercase. 
-HTTP/0.9 requests and old HTTP/1.0 requests do not specify a host name; in this case httpd uses the host name <filename>0</filename>.
+<command>httpd</command> always converts the host name <code><replaceable>v</replaceable></code> to lowercase.
+HTTP/0.9 requests and old HTTP/1.0 requests do not specify a host name; in this case <command>httpd</command> uses the host name <filename>0</filename>.
 </para>
 
 <para>
-If it successfully opens the file, httpd uses the file name to select a file type for HTTP/1.0 and HTTP/1.1.
+If it successfully opens the file, <command>httpd</command> uses the file name to select a file type for HTTP/1.0 and HTTP/1.1.
 </para>
 </refsection>
 
@@ -86,17 +95,17 @@ If it successfully opens the file, httpd uses the file name to select a file typ
 <title>Unsupported features</title>
 
 <para>
-httpd does not support file modification requests such as <command>POST</command>.
-httpd does not support SSI or CGI.
+<command>httpd</command> does not support file modification requests such as <command>POST</command>.
+<command>httpd</command> does not support SSI or CGI.
 </para>
 
 <para>
-httpd rejects requests specifying <code>Content-Length</code>, <code>Transfer-Encoding</code>, <code>Expect</code>, <code>If-Match</code>, <code>If-None-Match</code>, or <code>If-Unmodified-Since</code>.
+<command>httpd</command> rejects requests specifying <code>Content-Length</code>, <code>Transfer-Encoding</code>, <code>Expect</code>, <code>If-Match</code>, <code>If-None-Match</code>, or <code>If-Unmodified-Since</code>.
 </para>
 
 <para>
-httpd does not generate its own directory listings, even if <filename>index.html</filename> does not exist. 
-httpd rejects requests for directory names without terminating slashes; it does not redirect the requests.
+<command>httpd</command> does not generate its own directory listings, even if <filename>index.html</filename> does not exist. 
+<command>httpd</command> rejects requests for directory names without terminating slashes; it does not redirect the requests.
 </para>
 </refsection>
 
@@ -105,13 +114,17 @@ httpd rejects requests for directory names without terminating slashes; it does 
 <title>Security</title>
 
 <para>
-httpd chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+<command>httpd</command> chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
 It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
-httpd does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
+<command>httpd</command> does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
 </para>
+<note>
+Earlier versions of <command>httpd</command> required the <filename>/etc/leapsecs.dat</filename> to be copied under <arg choice='plain'><replaceable>root</replaceable></arg>.
+This file is now read before the chroot.
+</note>
 
 <para>
-httpd will refuse to read a file if the file
+<command>httpd</command> will refuse to read a file if the file
 </para>
 
 <itemizedlist>
@@ -132,12 +145,27 @@ is anything other than a regular file: a directory, socket, device, etc.
 </para></listitem>
 </itemizedlist>
 
+<para>
+Given that many clients are permissive HTTP/1.1 clients, the possibility that a HTTP/0.9 response could be misinterpreted as including headers, thus opening the possibility for headers to be faked by body content, is now a significant one and is what motivated curl in 2018 making HTTP/0.9 responses errors unless HTTP/0.9 is explicitly opted-in.
+</para>
+
 </refsection>
 
 <refsection>
 <title>History</title>
 <para>
 <command>httpd</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s publicfile toolset in 1999.
+HTTP/1.1 was formalized that same year, having been proposed in 1997.
+</para>
+<para>
+The default mode of only supporting HTTP/1.1 was introduced in 2025.
+</para>
+<para>
+By that point: legitimate HTTP/0.9 and HTTP/1.0 traffic had been widely observed as having markedly dropped off since 2010, with even the (good-actor) robots having switched to HTTP/1.1; wget had switched to HTTP/1.1 by default in 2010; libcurl had supported HTTP/1.1 since 2001, had switched to it as the default in 2013, and had dropped HTTP/0.9 for security reasons, unless explicitly opted in, in 2018; libfetch had defaulted to HTTP/1.1; and Dominic Lovell had reported in the 2021 Web Almanac by the HTTP Archive essentially 0% use of HTTP/0.9 and HTTP/1.0.
+Moreover, old clients that could not use HTTP/1.1 were cut off from the modern WWW <emphasis>anyway</emphasis> for other reasons (the push for widespread use of HTTPS-only, and the deprecation of old encryption standards known by old clients) and would have to be behind HTTP/1.1-speaking proxies.
+</para>
+<para>
+Over a quarter of a century since HTTP/1.1 was invented, permissively allowing earlier protocol versions by default is no longer a practical necessity and is now rather a weakness to be targetted.
 </para>
 </refsection>
 

@@ -19,7 +19,7 @@ static char seed[128];
 static stralloc fqdn;
 static char *q;
 static stralloc out;
-char strnum[FMT_ULONG];
+static char strnum[FMT_ULONG];
 
 int main(int argc,char **argv)
 {

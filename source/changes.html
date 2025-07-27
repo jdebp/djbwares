@@ -1,0 +1,136 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Changes from the original Bernstein softwares</title>
+<h1 class="Ruled">Changes from the original Bernstein softwares</h1>
+
+<p>
+The <a href="index.html">djbwares toolset</a> has been changed over the years from the original Bernstein softwares in the following ways.
+</p>
+
+<ul>
+
+<li><p>
+It comprises <em>only</em> the tools and their doco.
+</p>
+<ul>
+<li><p>
+The various "install", "setup", "check" helpers that create and test directory hierarchies under <code>/usr/local</code>, longhand, in C code, are omitted.
+The source package is capable of <a href="building-from-source.html">building</a> Debian, FreeBSD/TrueOS, NetBSD, and OpenBSD binary packages.
+Package management deals with installing files into hierarchies with ownerships and permissions; this is package management's bread and butter.
+</p></li>
+<li><p>
+<a href="https://jdebp.uk/FGA/inittab-is-history.html#svscanboot"><code>svscanboot</code> is a thing of the past</a>.
+Plumbing this in as one's service management mechanism, or under one's own system and service management mechanisms, is well beyond the scope here.
+</p></li>
+<li><p>
+The helpers for creating djbdns and publicfile service bundles are omitted.
+The <a href="https://jdebp.uk/Softwares/nosh/">nosh toolset</a> (for starters) comes with service bundles for these; and the same goes for some other toolsets, all of which have different needs (not satisfied by the Bernstein helper programs) anyway.
+</p></li>
+</ul>
+
+<li><p>
+Most of the manual pages are now in Docbook XML, from which the build system compiles roff and HTML manual pages.
+</p></li>
+
+<li><p>
+The build system is redo; like the original <a href="https://jdebp.uk/Softwares/djbwares/bernstein-ptyget.html">Bernstein-published ptyget package</a> had, but finished and extended to everything.
+</p></li>
+
+<li><p>
+The duplicated libraries have been consolidated.
+In some cases, in particular in some of the very oldest code, this has meant switching from (say) the "substdio" library to the "buffer" library.
+Some code, such as the old "sig" APIs for catching/ignoring signals, has been retained alongside its newer replacements from later iterations of the library, for the benefit of not updating older code that uses that API.
+</p></li>
+
+<li><p>
+There are some patches.
+</p>
+<ul>
+<li><p>
+<a href="https://jdebp.uk/Softwares/djbwares/djbdns-patches.html">My original djbdns patches</a> are included, which mainly add minor functionality (like additional querying tools) or fix outright errors (like just blithely continuing on regardless even when input is malformed).
+</p></li>
+<li><p>
+<a href="https://jdebp.uk/Softwares/djbwares/ucspi-tcp-patches.html">My original ucspi-tcp patches</a> are included, which just fix outright errors (no error checking in argument parsing).
+</p></li>
+</ul>
+</li>
+
+<li><p>
+Some new tools have been added
+</p>
+<ul>
+<li><p>
+<a href="commands/gopherd.xml"><code>gopherd</code></a> and <a href="commands/geminid.xml"><code>geminid</code></a> have been added, which use the same back-end data as the other publicfile tools.
+</p>
+<p>
+<a href="commands/geminid.xml"><code>geminid</code></a> requires UCSPI-SSL tooling that Bernstein's UCSPI-TCP does not cover, and the toolset is not capable of a full GEMINI server without third-party help.
+However, it can also be used, since the protocol is largely compatible, as a UCSPI-TCP server for FINGER and NICNAME/WHOIS services.
+This allows one to serve up FINGER and NICNAME without revealing any information from the system account database, as all served content is entirely in the publicfile subdirectory tree.
+</p></li>
+<li><p>
+A simple standalone <a href="commands/host.xml"><code>host</code></a> tool has been added, eliminating the need for the ISC implementation of that tool, and all of the ISC-specific additional packages that it pulls in.
+</p></li>
+</ul>
+
+<li><p>
+Some IPv6 support has been added and general DNS support has been modernized.
+</p>
+<ul>
+<li><p>
+All DNS servers now synthesize <code>HINFO</code> responses to <code>ANY</code> queries, in line with RFC 8482.
+Likewise, the <code>ANY</code> query <em>class</em> (rather than type) is no longer supported.
+</p></li>
+<li><p>
+The easy-syntax <code>SRV</code> resource record support has been added to <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> (as well as comcomitation changes to <a href="commands/tinydns-get.xml"><code>tinydns-get</code></a> and <a href="commands/dnsq.xml"><code>dnsq</code></a>).
+</p></li>
+<li><p>
+Easy-syntax <code>AAAA</code> resource record support has been added.
+</p></li>
+<li><p>
+The original TAICLOCK server that only worked over IPv4 is now named <a href="commands/taiclock4d.xml"><code>taiclock4d</code></a>, and <a href="commands/taiclockd.xml"><code>taiclockd</code></a> is now an IPv6 tool that can operate IPv6 only or use a combined IPv6 and IPv4 stack.
+</p></li>
+</ul>
+
+<li><p>
+Several tools are now more easily used with UCSPI-TCP maning their sockets for them.
+The content DNS and TAICLOCK servers have been changed to enable them to inherit already-open sockets, using the systemd <code>LISTEN_FDS</code> mechanism.
+So has <code>dnscache</code>, which requires <em>two</em> already-open sockets, of the right kinds.
+</p></li>
+
+<li><p>
+<a href="commands/rblsmtpd.xml"><code>rblsmtpd</code></a> no longer defaults to a blacklist that has been defunct for over a decade.
+</p></li>
+
+<li><p>
+<a href="commands/ftpd.xml"><code>ftpd</code></a> now copes with <a href="https://jdebp.uk/FGA/web-browser-ftp-hall-of-shame.html">various poor and standards-violating practices in modern WWW browsers</a> whose support for FTP is no longer as good as it was when publicfile was originally written.
+</p></li>
+
+<li><p>
+The basic bugs are fixed.
+</p>
+<ul>
+<li><p>
+<code>errno</code> is declared by including the right standard C library header.
+</p></li>
+<li><p>
+Various missing function declarations that C1999 requires are added.
+</p></li>
+<li><p>
+Const correctness bugs are fixed in various places.
+</p></li>
+<li><p>
+Incorrect declarations of <code>main()</code> are fixed.
+</p></li>
+<li><p>
+Reliance upon implicit function declarations, non-conformant to C1999, is fixed by including quite a lot of missing headers.
+</p></li>
+<li><p>
+The obsolete <code>TIOCREMOTE</code> mechanism is disabled outwith OpenBSD.
+</p></li>
+<li><p>
+K&amp;R function declarations have been turned into standard C1989 function declarations, as C2023 is finally dispensing with K&amp;R.
+</p></li>
+</ul>
+</li>
+
+</ul>

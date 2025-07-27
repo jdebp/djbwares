@@ -111,6 +111,10 @@ It then sets its group id and user id to the numbers given in environment variab
 ftpd does not allow dots immediately after slashes in file names. 
 It converts any such dots to colons before attempting to open the file.
 </para>
+<note>
+Earlier versions of <command>ftpd</command> required the <filename>/etc/leapsecs.dat</filename> to be copied under <arg choice='plain'><replaceable>root</replaceable></arg>.
+This file is now read before the chroot.
+</note>
 
 <para>
 ftpd will refuse to read a file if the file

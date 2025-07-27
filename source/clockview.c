@@ -7,16 +7,16 @@
 #include "exit.h"
 #include "fmt.h"
 
-char outbuf[256];
-substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
+static char outbuf[256];
+static substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
 
 #define FATAL "clockview: fatal: "
 
-time_t when;
-unsigned long nano;
-unsigned long atto;
+static time_t when;
+static unsigned long nano;
+static unsigned long atto;
 
-void print()
+void print(void)
 {
   struct tm *tm;
   char strnum[FMT_ULONG];
@@ -40,10 +40,10 @@ void print()
   substdio_flush(&ssout);
 }
 
-unsigned char buf[16];
-struct timeval tv;
+static unsigned char buf[16];
+static struct timeval tv;
 
-int main()
+int main(void)
 {
   unsigned long u;
 

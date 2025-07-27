@@ -11,16 +11,16 @@
 #define FATAL "svstat: fatal: "
 #define WARNING "svstat: warning: "
 
-char bspace[1024];
-buffer b = BUFFER_INIT(buffer_unixwrite,1,bspace,sizeof bspace);
+static char bspace[1024];
+static buffer b = BUFFER_INIT(buffer_unixwrite,1,bspace,sizeof bspace);
 
-char status[18];
-char strnum[FMT_ULONG];
+static char status[18];
+static char strnum[FMT_ULONG];
 
-unsigned long pid;
-unsigned char normallyup;
-unsigned char want;
-unsigned char paused;
+static unsigned long pid;
+static unsigned char normallyup;
+static unsigned char want;
+static unsigned char paused;
 
 void doit(char *dir)
 {

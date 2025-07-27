@@ -48,12 +48,12 @@ void ip_init(void)
   }
 }
 
-unsigned long timeout = 60;
-int flagrblbounce = 0;
-int flagfailclosed = 0;
-int flagmustnotbounce = 0;
+static unsigned long timeout = 60;
+static int flagrblbounce = 0;
+static int flagfailclosed = 0;
+static int flagmustnotbounce = 0;
 
-int decision = 0; /* 0 undecided, 1 accept, 2 reject, 3 bounce */
+static int decision = 0; /* 0 undecided, 1 accept, 2 reject, 3 bounce */
 static stralloc text; /* defined if decision is 2 or 3 */
 
 static stralloc tmp;
@@ -94,11 +94,13 @@ void antirbl(const char *base)
     decision = 1;
 }
 
-char strnum[FMT_ULONG];
+static char strnum[FMT_ULONG];
 static stralloc message;
 
-char inspace[64]; buffer in = BUFFER_INIT(buffer_unixread,0,inspace,sizeof inspace);
-char outspace[1]; buffer out = BUFFER_INIT(buffer_unixwrite,1,outspace,sizeof outspace);
+static char inspace[64];
+static buffer in = BUFFER_INIT(buffer_unixread,0,inspace,sizeof inspace);
+static char outspace[1];
+static buffer out = BUFFER_INIT(buffer_unixwrite,1,outspace,sizeof outspace);
 
 void reject() { buffer_putflush(&out,message.s,message.len); }
 void accept() { buffer_putsflush(&out,"250 rblsmtpd.local\r\n"); }

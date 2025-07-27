@@ -1,1 +1,2 @@
-Bernstein leapsecs.dat, from libtai
+ This contains only the compiled leap seconds database.
+ The database compiler tool is in the libtai package.

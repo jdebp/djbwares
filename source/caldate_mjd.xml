@@ -112,8 +112,9 @@ Day numbers will overflow a 32-bit <code>long</code> sometime after the year 500
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

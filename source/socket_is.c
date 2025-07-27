@@ -46,10 +46,22 @@ int socket_is_udp4(int fd) {
   return socket_is(fd, AF_INET, SOCK_DGRAM);
 }
 
+int socket_is_udp6(int fd) {
+  return socket_is(fd, AF_INET6, SOCK_DGRAM);
+}
+
 int socket_is_tcp(int fd) {
   if (socket_is(fd, AF_INET, SOCK_STREAM))
     return 1;
   if (socket_is(fd, AF_INET6, SOCK_STREAM))
     return 1;
   return 0;
+}
+
+int socket_is_tcp4(int fd) {
+  return socket_is(fd, AF_INET, SOCK_STREAM);
+}
+
+int socket_is_tcp6(int fd) {
+  return socket_is(fd, AF_INET6, SOCK_STREAM);
 }

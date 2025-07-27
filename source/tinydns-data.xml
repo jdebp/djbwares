@@ -31,12 +31,20 @@
 
 <para>
 <command>tinydns-data</command> compiles a database in source form, in the file <filename>data</filename>, into a compiled form, in the file <filename>data.cdb</filename>, that is used by <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-The compiled database in <filename>data.cdb</filename> is a Bernstein Constant Database file.
+The compiled database in <filename>data.cdb</filename> is a Bernstein Constant Database file, a write-once read-many binary file that provides much faster lookups than repeatedly parsing text files at runtime.
 </para>
+<caution>
+The compiled database will change in a non-backwards-compatible way when <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>axfrdns</refentrytitle><manvolnum>1</manvolnum></citerefentry> support IPv6 client locations in a future release.
+</caution>
 
 <para>
 <command>tinydns-data</command> updates <filename>data.cdb</filename> atomically, building a replacement in <filename>data.cdb.tmp</filename> and atomically renaming that replacement into place when it has completely and successfully built it it and written it to disc.
 So you can use it safely while <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> is running.
+</para>
+
+<para>
+The expected workflow is to run <command>tinydns-data</command> every time that a change is made to <filename>data</filename>, tracking this with a utility such as <citerefentry><refentrytitle>make</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+For similar mechanisms elsewhere, compare <citerefentry><refentrytitle>pwd_mkdb</refentrytitle><manvolnum>1</manvolnum></citerefentry> for compiling the <citerefentry><refentrytitle>master.passwd</refentrytitle><manvolnum>5</manvolnum></citerefentry> file into a Berkeley DB file, and <citerefentry><refentrytitle>cap_mkdb</refentrytitle><manvolnum>1</manvolnum></citerefentry> for compiling various files such as <citerefentry><refentrytitle>login.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
 </para>
 
 </refsection>
@@ -47,6 +55,10 @@ So you can use it safely while <citerefentry><refentrytitle>tinydns</refentrytit
 <para>
 The DNS information in <filename>data</filename> is a series of lines.
 It is very easy for programs to edit; and can be mainpulated with with UNIX tools such as <citerefentry><refentrytitle>awk</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>sed</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+There is also a <citerefentry><refentrytitle>tinydns-edit</refentrytitle><manvolnum>1</manvolnum></citerefentry> tool for performing several common modifications, which handles updating the source <filename>data</filename> file itself atomically (something that otherwise needs to be done explicitly with the general-purpose text processing tools).
+</para>
+
+<para>
 There are several types of lines, as shown below. 
 </para>
 
@@ -89,10 +101,16 @@ You may include a timestamp on each line.
 If <replaceable>ttl</replaceable> is nonzero (or omitted), the timestamp is a starting time for the information in the line; the line will be ignored before that time.
 If <replaceable>ttl</replaceable> is zero, the timestamp is an ending time ("time to die") for the information in the line; <command>tinydns</command> dynamically adjusts <replaceable>ttl</replaceable> so that the line's DNS records are not cached for more than a few seconds past the ending time.
 A timestamp is an external TAI64 timestamp, printed as 16 lowercase hexadecimal characters.
-For example, the lines 
-<literallayout><programlisting>+www.heaven.af.mil:192.0.2.234:0:4000000038af1379
-+www.heaven.af.mil:192.0.2.235::4000000038af1379</programlisting></literallayout> specify that <filename>www.heaven.af.mil</filename> will have address 192.0.2.234 until time 4000000038af1379 (2000-02-19 22:04:31 UTC) and will then switch to IP address 192.0.2.235. 
 </para>
+<informalexample>
+<para>
+For example, the lines 
+<programlisting>+www.heaven.af.example:192.0.2.234:0:4000000038af1379
++www.heaven.af.example:192.0.2.235::4000000038af1379
+</programlisting>
+specify that <filename>www.heaven.af.example</filename> will have address 192.0.2.234 until time 4000000038af1379 (2000-02-19 22:04:31 UTC) and will then switch to IP address 192.0.2.235. 
+</para>
+</informalexample>
 
 </refsection>
 
@@ -103,15 +121,25 @@ For example, the lines
 You may include a client location <replaceable>lo</replaceable> on each line. 
 The line is ignored for clients outside that location. 
 Client locations are specified by % lines: 
-<literallayout><programlisting> %<replaceable>lo</replaceable>:<replaceable>ipprefix</replaceable></programlisting></literallayout> means that IP addresses starting with <replaceable>ipprefix</replaceable> are in location <replaceable>lo</replaceable>. 
+</para>
+<para>
+<programlisting> %<replaceable>lo</replaceable>:<replaceable>ipprefix</replaceable>
+</programlisting>
+means that IP addresses starting with <replaceable>ipprefix</replaceable> are in location <replaceable>lo</replaceable>. 
 <replaceable>lo</replaceable> is a sequence of one or two ASCII letters. 
 A client is in only one location; longer prefixes override shorter prefixes. 
-For example, 
-<literallayout><programlisting>%in:192.168
-%ex
-+jupiter.heaven.af.mil:192.168.1.2:::in
-+jupiter.heaven.af.mil:192.0.2.234:::ex</programlisting></literallayout> specifies that <filename>jupiter.heaven.af.mil</filename> has address 192.168.1.2 for clients in the 192.168.* network and address 192.0.2.234 for everyone else.
 </para>
+<informalexample>
+<para>
+For example, 
+<programlisting>%in:192.168
+%ex
++jupiter.heaven.af.example:192.168.1.2:::in
++jupiter.heaven.af.example:192.0.2.234:::ex
+</programlisting>
+specifies that <filename>jupiter.heaven.af.example</filename> has address 192.168.1.2 for clients in the 192.168.* network and address 192.0.2.234 for everyone else.
+</para>
+</informalexample>
 
 </refsection>
 
@@ -163,15 +191,27 @@ You should omit <replaceable>ip</replaceable> if <replaceable>x</replaceable> ha
 <para>
 Examples: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>.panic.mil:1.8.7.55:a</programlisting></literallayout> creates an NS record showing <filename>a.ns.panic.mil</filename> as a name server for <filename>panic.mil</filename>, an A record showing 1.8.7.55 as the IP address of <filename>a.ns.panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+<programlisting>.panic.example:203.0.113.55:a
+</programlisting>
+creates an NS record showing <filename>a.ns.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.55 as the IP address of <filename>a.ns.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
+</informalexample>
+<informalexample>
 <para>
-<literallayout><programlisting>.panic.mil:1.8.7.56:dns2.panic.mil</programlisting></literallayout> creates an NS record showing <filename>dns2.panic.mil</filename> as a name server for <filename>panic.mil</filename>, an A record showing 1.8.7.56 as the IP address of <filename>dns2.panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+<programlisting>.panic.example:203.0.113.56:dns2.panic.example
+</programlisting>
+creates an NS record showing <filename>dns2.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.56 as the IP address of <filename>dns2.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
+</informalexample>
+<informalexample>
 <para>
-<literallayout><programlisting>.panic.mil::a.ns.heaven.af.mil</programlisting></literallayout> creates an NS record showing <filename>a.ns.heaven.af.mil</filename> as a name server for <filename>panic.mil</filename>, and an SOA record for <filename>panic.mil</filename>. 
+<programlisting>.panic.example::a.ns.heaven.af.example
+</programlisting>
+creates an NS record showing <filename>a.ns.heaven.af.example</filename> as a name server for <filename>panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -202,12 +242,20 @@ If <replaceable>x</replaceable> contains a dot then it is treated specially; as 
 <para>
 Examples: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>&#x26;serious.panic.mil:1.8.248.6:a</programlisting></literallayout> creates an NS record showing <filename>a.ns.serious.panic.mil</filename> as a name server for <filename>serious.panic.mil</filename>, and an A record showing 1.8.248.6 as the IP address of <filename>a.ns.serious.panic.mil</filename>. 
+<programlisting>&#x26;serious.panic.example:203.0.113.6:a
+</programlisting>
+creates an NS record showing <filename>a.ns.serious.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, and an A record showing 203.0.113.6 as the IP address of <filename>a.ns.serious.panic.example</filename>. 
 </para>
+</informalexample>
+<informalexample>
 <para>
-<literallayout><programlisting>&#x26;serious.panic.mil:1.8.248.7:ns7.panic.mil</programlisting></literallayout> creates an NS record showing <filename>ns7.panic.mil</filename> as a name server for <filename>serious.panic.mil</filename>, and an A record showing 1.8.248.7 as the IP address of <filename>ns7.panic.mil</filename>. 
+<programlisting>&#x26;serious.panic.example:203.0.113.7:ns7.panic.example
+</programlisting>
+creates an NS record showing <filename>ns7.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, and an A record showing 203.0.113.7 as the IP address of <filename>ns7.panic.example</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -236,9 +284,13 @@ Similarly, remember to specify name servers for some suffix of d.c.b.a.in-addr.a
 <para>
 Example: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>=button.panic.mil:1.8.7.108</programlisting></literallayout> creates an A record showing 1.8.7.108 as the IP address of <filename>button.panic.mil</filename>, and a PTR record showing <filename>button.panic.mil</filename> as the name of <filename>108.7.8.1.in-addr.arpa</filename>. 
+<programlisting>=button.panic.example:203.0.113.108
+</programlisting>
+creates an A record showing 203.0.113.108 as the IP address of <filename>button.panic.example</filename>, and a PTR record showing <filename>button.panic.example</filename> as the name of <filename>108.113.0.203.in-addr.arpa</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -254,9 +306,13 @@ This is just like =<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>
 <para>
 Example: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>+button.panic.mil:1.8.7.109</programlisting></literallayout> creates an A record showing 1.8.7.109 as another IP address for <filename>button.panic.mil</filename>. 
+<programlisting>+button.panic.example:203.0.113.109
+</programlisting>
+creates an A record showing 203.0.113.109 as another IP address for <filename>button.panic.example</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -297,9 +353,13 @@ You may create several SRV records for <replaceable>fqdn</replaceable>, with a d
 <para>
 Example: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>S_sip._udp.panic.mil:1.8.7.88:sip.panic.mil:5060:10:20</programlisting></literallayout> creates a SRV record showing port 5060 of <filename>sip.panic.mil</filename> as a SIP/UDP service for <filename>panic.mil</filename> with priority 10 and wt 20, and an A record showing 1.8.7.88 as the IP address of <filename>sip.panic.mil</filename>. 
+<programlisting>S_sip._udp.panic.example:203.0.113.88:sip.panic.example:5060:10:20
+</programlisting>
+creates a SRV record showing port 5060 of <filename>sip.panic.example</filename> as a SIP/UDP service for <filename>panic.example</filename> with priority 10 and wt 20, and an A record showing 203.0.113.88 as the IP address of <filename>sip.panic.example</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -329,9 +389,13 @@ Make sure to arrange for the SMTP server on each IP address to accept mail for <
 <para>
 Example: 
 </para>
+<informalexample>
 <para>
-<literallayout><programlisting>@panic.mil:1.8.7.88:mail.panic.mil</programlisting></literallayout> creates an MX record showing <filename>mail.panic.mil</filename> as a mail exchanger for <filename>panic.mil</filename> at distance 0, and an A record showing 1.8.7.88 as the IP address of <filename>mail.panic.mil</filename>. 
+<programlisting>@panic.example:203.0.113.88:mail.panic.example
+</programlisting>
+creates an MX record showing <filename>mail.panic.example</filename> as a mail exchanger for <filename>panic.example</filename> at distance 0, and an A record showing 203.0.113.88 as the IP address of <filename>mail.panic.example</filename>. 
 </para>
+</informalexample>
 </listitem>
 </varlistentry>
 
@@ -445,23 +509,25 @@ You may use octal \nnn codes to include arbitrary bytes inside <replaceable>rdat
 <refsection>
 <title>Example</title>
 
+<informalexample>
 <para>
 A typical data file:
-<literallayout><programlisting>=lion.heaven.af.mil:1.2.3.4
-@heaven.af.mil:1.2.3.4
-@3.2.1.in-addr.arpa:1.2.3.4
+<programlisting>=lion.heaven.af.example:203.0.113.4
+@heaven.af.example:203.0.113.4
+@113.0.203.in-addr.arpa:203.0.113.4
 
-=tiger.heaven.af.mil:1.2.3.5
-.heaven.af.mil:1.2.3.5:a
-.3.2.1.in-addr.arpa:1.2.3.5:a
+=tiger.heaven.af.example:203.0.113.5
+.heaven.af.example:203.0.113.5:a
+.113.0.203.in-addr.arpa:203.0.113.5:a
 
-=bear.heaven.af.mil:1.2.3.6
-.heaven.af.mil:1.2.3.6:b
-.3.2.1.in-addr.arpa:1.2.3.6:b
+=bear.heaven.af.example:203.0.113.6
+.heaven.af.example:203.0.113.6:b
+.113.0.203.in-addr.arpa:203.0.113.6:b
 
-=cheetah.heaven.af.mil:1.2.3.248
-=panther.heaven.af.mil:1.2.3.249 </programlisting></literallayout>
+=cheetah.heaven.af.example:203.0.113.248
+=panther.heaven.af.example:203.0.113.249 </programlisting>
 </para>
+</informalexample>
 
 </refsection>
 

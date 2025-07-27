@@ -20,6 +20,10 @@
 #include "hasptc.h"
 #include "conf-secure.h"
 
+#ifndef O_NONBLOCK
+#define O_NONBLOCK O_NDELAY
+#endif
+
 
 #ifdef HAS_POSIX_PTMX
 #ifndef PTYGET_OK
@@ -35,7 +39,7 @@ char *pty45()
   int fd;
   char * fnslave;
 
-  fd = posix_openpt(O_RDWR | O_NDELAY);
+  fd = posix_openpt(O_RDWR | O_NONBLOCK);
   if (fd == -1) return 0;
   if (fd_move(4,fd) == -1) return 0;
 
@@ -78,7 +82,7 @@ char *pty45()
   int fd;
   char *s;
 
-  fd = open("/dev/ptmx",O_RDWR | O_NDELAY);
+  fd = open("/dev/ptmx",O_RDWR | O_NONBLOCK);
   if (fd == -1) return 0;
   if (fd_move(4,fd) == -1) return 0;
 
@@ -129,14 +133,14 @@ char *pty45()
 
 #include <sys/sysmacros.h>
 
-char fnslave[10 + FMT_ULONG]; /* 10 for /dev/pts/ */
+static char fnslave[10 + FMT_ULONG]; /* 10 for /dev/pts/ */
 
 char *pty45()
 {
   struct stat st;
   int fd;
 
-  fd = open("/dev/ptc",O_RDWR | O_NDELAY);
+  fd = open("/dev/ptc",O_RDWR | O_NONBLOCK);
   if (fd == -1) return 0;
   if (fd_move(4,fd) == -1) return 0;
 
@@ -159,12 +163,12 @@ char *pty45()
 
 #ifndef PTYGET_OK
 
-char fnmaster[] = "/dev/pty??";
-char fnslave[] = "/dev/tty??";
+static char fnmaster[] = "/dev/pty??";
+static char fnslave[] = "/dev/tty??";
 
 /* Do not change the sizes of pty1 and pty2! */
-char pty1[16] = "pqrstuvwxyzPQRST";
-char pty2[16] = "0123456789abcdef";
+static char pty1[16] = "pqrstuvwxyzPQRST";
+static char pty2[16] = "0123456789abcdef";
 
 char *pty45()
 {
@@ -186,7 +190,7 @@ char *pty45()
     if (fnmaster[8] == '-') continue;
     if (stat(fnmaster,&st) == -1) { pty1[15 & pos] = '-'; continue; }
 
-    fd = open(fnmaster,O_RDWR | O_NDELAY);
+    fd = open(fnmaster,O_RDWR | O_NONBLOCK);
     if (fd != -1) {
       if (fd_move(4,fd) == -1) return 0;
 

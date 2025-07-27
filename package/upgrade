@@ -1,8 +1,8 @@
 #!/bin/sh -e
-# See http://jdebp.eu./FGA/slashpackage.html
-if [ \! -d package ] || [ \! -d source ] 
+# See http://jdebp.uk./FGA/slashpackage.html
+if [ \! -d package ] || [ \! -d source ]
 then
-	echo "You are not in the right directory." 1>&2 
+	echo "You are not in the right directory." 1>&2
 	exit 100
 fi
 case "`uname`" in

@@ -9,16 +9,43 @@ then
 	echo "usage: $0 name staging-dir" 1>&2
 	exit 100
 fi
-new_pkg() {
-	name="$1"
-	dir="$2"
+gen_pkgng() {
+	local name="$1"
+	local dir="$2"
+	for j in pre- post-
+	do
+		for k in install deinstall upgrade
+		do
+			s="$j$k"
+			if test -r bsd/"${name}"."$s"
+			then
+				cp -p bsd/"${name}"."$s" "${dir}"/"$s"
+			elif test -r bsd/"${name}".p && test -r bsd/"$s".funcs
+			then
+				install -m 0755 /dev/null "${dir}"/"$s"
+				(
+					printf "%s\n" "#!/bin/sh -"
+					if >/dev/null expr "${name}" : "-run-"
+					then
+						printf "%s\n" "run_package=YES"
+					fi
+					cat bsd/"$s".funcs
+					if test -r bsd/"${name}"."$s".extra
+					then
+						cat bsd/"${name}"."$s".extra
+					fi
+					cat bsd/"${name}".p
+				) > "${dir}"/"$s"
+				chmod a-w -- "${dir}"/"$s"
+			fi
+		done
+	done
 	(
-		echo "name: ${name}"
-		echo "prefix: /"
-		echo "origin: local/${name}"
-		echo "comment: ."
-		echo "maintainer: J.deBoynePollard"
-		echo "www: http:/jdebp.info./Softwares/djbwares/"
+		printf 'name: %s\n' "${name}"
+		printf 'prefix: %s\n' '/'
+		printf 'origin: %s/%s\n' 'local' "${name}"
+		printf 'maintainer: %s\n' 'J.deBoynePollard'
+		printf 'www: %s\n' 'http:/JdeBP.info./Softwares/djbwares/'
 		version="`basename \`/bin/pwd\` | sed -e 's/^.*-\([[:digit:]][[:alnum:].]*\)$/\1/'`"
 		if test -r bsd/"${name}".epoch
 		then
@@ -28,158 +55,227 @@ new_pkg() {
 		fi
 		if test -r bsd/"${name}".deps
 		then
-			echo "deps: {"
+			printf '%s: {\n' 'deps'
 			while read k
 			do
 				pkg query "  %n: { version: \"%v\", origin: %o }" "$k" || true
 			done < bsd/"${name}".deps
-			echo "}"
+			printf '}\n'
 		fi
 		if test -r bsd/"${name}".conflicts
 		then
-			echo "# pkg issue #772 opened 2014-04-09"
-			echo -n "conflicts_is_undocumented_and_broken: ["
+			printf "%s\n" "# pkg issue #772 opened 2014-04-09"
+			printf "%s: [\n" "conflicts_is_undocumented_and_broken"
 			comma=""
 			while read k
 			do
-				echo -n "${comma} $k"
+				printf "%s %s" "${comma}" "$k"
 				comma=","
 			done < bsd/"${name}".conflicts
-			echo " ]"
+			printf ' ]\n'
+		fi
+		if test -r bsd/"${name}".comment
+		then
+			printf "%s: <<ENDOFTHETEXT\n" "comment"
+			sed -e 's/^/  /' bsd/"${name}".comment
+			printf "ENDOFTHETEXT\n"
 		fi
 		if test -r bsd/"${name}".desc
 		then
-			echo "desc: <<ENDOFTHETEXT"
+			printf "%s: <<ENDOFTHETEXT\n" "desc"
 			sed -e 's/^/  /' bsd/"${name}".desc
-			echo "ENDOFTHETEXT"
+			printf "ENDOFTHETEXT\n"
 		fi
-		echo "scripts: {"
-		for j in pre- post- ""
+		printf '%s: {\n' 'scripts'
+		for j in pre- post-
 		do
 			for k in install deinstall upgrade
 			do
 				s="$j$k"
-				if test -r bsd/"${name}"."$s"
+				if test -r "${dir}"/"$s"
 				then
-					echo "  $s: <<ENDOFTHETEXT"
-					sed -e 's/^/    /' bsd/"${name}"."$s"
-					echo "ENDOFTHETEXT"
+					printf "  %s: <<ENDOFTHETEXT\n" "$s"
+					sed -e 's/^/    /' "${dir}"/"$s"
+					printf "ENDOFTHETEXT\n"
 				fi
 			done
 		done
-		echo "}"
+		printf '}\n'
 		cd "${dir}"
-		echo "directories: {"
+		printf '%s: {\n' 'directories'
 		for j in *bin usr var etc run
 		do
-			test -d "$j" && find "$j" -type d
+			! test -d "$j" || find "$j" -type d
 		done | while read k
 		do
-			echo "\"/$k\":" "{" "uname:root;" "gname:wheel;" "perm:`stat -f '%Lp' \"$k\"`;" "}"
+			printf '  "/%s": { uname:%s; gname:%s; perm:%s; }\n' "$k" "root" "wheel" "`stat -f '%Lp' \"$k\"`"
 		done
-		echo "}"
-		echo "files: {"
+		printf '}\n'
+		printf '%s: {\n' 'files'
 		for j in *bin usr var etc run
 		do
-			test -d "$j" && find "$j" -type l
+			! test -d "$j" || find "$j" -type l
 		done | while read k
 		do
-			echo "  " "\"/$k\":" "'-'"
+			printf '  "/%s": '-'\n' "$k"
 		done
 		for j in *bin usr var etc run
 		do
-			test -d "$j" && find "$j" -type f
+			! test -d "$j" || find "$j" -type f
 		done | while read k
 		do
-			# The nonsense with sleeps and sync stops the FreeBSD 10 kernel from panicking.
-	#		sleep 0.14
-	#		sync
-			echo -n "  " "\"/$k\":" 
-			echo -n " {" "uname:root;" "gname:wheel;"
-			echo -n " sum:`sha256 -q $k`;"
-			echo -n " perm:`stat -f '%Lp' \"$k\"`;"
-			echo " }"
-	#		sleep 0.14
-	#		sync
+			printf '  "/%s": { uname:%s; gname:%s; sum:%s; perm:%s; }\n' "$k" "root" "wheel" "`sha256 -q $k`" "`stat -f '%Lp' \"$k\"`"
 		done
-		echo "}"
+		printf '}\n'
 	) > ${dir}/+MANIFEST
 }
 old_pkg() {
 	local name="$1"
 	local dir="$2"
 	(
-		echo "@name ${name}"
-#		basename `/bin/pwd` | sed -e 's/^.*-\([[:digit:]][[:alnum:].]*\)$/@version "\1"/'
-#		if test -r bsd/"${name}".deps
-#		then
-#			echo "@deps {"
-#			while read k
-#			do
-#				pkg query "  %n: { version: \"%v\", origin: %o }" "$k" || true
-#			done < bsd/"${name}".deps
-#			echo "}"
-#		fi
-#		if test -r bsd/"${name}".conflicts
-#		then
-#			while read k
-#			do
-#				echo "@conflict $k"
-#			done < bsd/"${name}".conflicts
-#		fi
-#		echo "@scripts {"
-#		for j in pre- post- ""
-#		do
-#			for k in install deinstall upgrade
-#			do
-#				s="$j$k"
-#				if test -r bsd/"${name}"."$s"
-#				then
-#					echo "  $s: <<ENDOFTHETEXT"
-#					sed -e 's/^/    /' bsd/"${name}"."$s"
-#					echo "ENDOFTHETEXT"
-#				fi
-#			done
-#		done
-#		echo "}"
+		printf "@%s %s\n" 'name' "${name}"
 		cd "${dir}"
-		echo "@owner root"
-		echo "@group wheel"
+		printf '@%s %s\n' 'owner' 'root'
+		printf '@%s %s\n' 'group' 'wheel'
 		for j in *bin usr var etc run
 		do
-			test -d "$j" && find "$j" -type d
+			test -d "$j" && find "$j" -type d -o -type f -o -type l
 		done | while read k
 		do
-			echo "@mode `stat -f '%Lp' \"$k\"`"
-			echo "@dir $k"
+			printf '@%s %s\n' 'mode' "`stat -f '%Lp' \"$k\"`"
+			if test -d "$k"
+			then
+				printf '@%s %s\n' 'dir' "$k"
+			else
+				printf '@%s %s\n' 'file' "$k"
+			fi
 		done
+	) > ${dir}/+MANIFEST
+	ln -f bsd/"${name}".comment ${dir}/+COMMENT
+	ln -f bsd/"${name}".desc ${dir}/+DESC
+}
+gen_pkgsrc() {
+	local name="$1"
+	local dir="$2"
+	for k in install deinstall
+	do
+		m=+"`echo $k|tr '[:lower:]' '[:upper:]'`"
+		install -m 0755 /dev/null "${dir}"/"$m"
+		(
+			printf "#!/bin/sh -e\n# %s maintenance script for %s\n\n" "$k" "${name}"
+
+			# per-action lists of worker functions
+			for j in pre- post-
+			do
+				s="$j$k"
+				printf '%s_funcs() {\n' "$s"
+				if	test -r bsd/"$s".funcs &&
+					test -s bsd/"$s".funcs
+				then
+					sed -e 's/^/	/' bsd/"$s".funcs
+				else
+					printf '\t:\n'
+				fi
+				printf "}\n"
+				printf '%s_extra() {\n' "$s"
+				if	test -r bsd/"${name}"."$s".extra &&
+					test -s bsd/"${name}"."$s".extra
+				then
+					sed -e 's/^/	/' bsd/"${name}"."$s".extra
+				else
+					printf '\t:\n'
+				fi
+				printf "}\n"
+			done
+
+			# common service/user list of worker function invocations
+			printf "common() {\n"
+			if	test -r bsd/"${name}".p &&
+				test -s bsd/"${name}".p
+			then
+				sed -e 's/^/	/' bsd/"${name}".p
+			else
+				printf '\t:\n'
+			fi
+			printf "}\n\n"
+
+			# common main driver
+			if >/dev/null expr "${name}" : "-run-"
+			then
+				printf "%s\n" "run_package=YES"
+			fi
+			cat bsd/"$k".common
+		) > "${dir}"/"$m"
+		chmod a-w -- "${dir}"/"$m"
+	done
+	(
+		printf "@%s %s\n" 'name' "${name}"
+		if test -r bsd/"${name}".deps
+		then
+			while read k
+			do
+				printf '@%s %s\n' 'pkgdep' "$k"
+			done < bsd/"${name}".deps
+		fi
+		if test -r bsd/"${name}".conflicts
+		then
+			while read k
+			do
+				printf '@%s %s\n' 'pkgcfl' "$k"
+			done < bsd/"${name}".conflicts
+		fi
+		cd "${dir}"
+		printf '@%s %s\n' 'owner' 'root'
+		printf '@%s %s\n' 'group' 'wheel'
 		for j in *bin usr var etc run
 		do
-			test -d "$j" && find "$j" -type l
+			test -d "$j" && find "$j" -type d -o -type f -o -type l
 		done | while read k
 		do
-			echo "@file $k"
-		done
-		echo "@owner root"
-		echo "@group wheel"
-		for j in *bin usr var etc run
-		do
-			test -d "$j" && find "$j" -type f
-		done | while read k
-		do
-			echo "@mode `stat -f '%Lp' \"$k\"`"
-			echo "@file $k"
+			! test -d "$k" || continue
+			printf '@%s %s\n' 'mode' "`stat -f '%Lp' \"$k\"`"
+			printf '%s\n' "$k"
 		done
 	) > ${dir}/+MANIFEST
 	(
-		if test -r bsd/"${name}".desc
+		printf "%s=%s\n" 'OPSYS' "`uname -s`"
+		printf "%s=%s\n" 'MACHINE_ARCH' "`uname -p`"
+		printf "%s=%s\n" 'OS_VERSION' "`uname -r`"
+		if test -r build/cc
 		then
-			sed -e 's/^/  /' bsd/"${name}".desc
+			read -r cc < build/cc
+			printf "%s=%s\n" 'CC_VERSION' "`"${cc}" --version|head -n 1`"
 		fi
-	) > ${dir}/+DESC
+		if test -r build/ccflags
+		then
+			printf "%s=%s\n" 'CC_FLAGS' "`head -n 1 build/ccflags`"
+		fi
+		if test -r build/cxx
+		then
+			read -r cxx < build/cxx
+			printf "%s=%s\n" 'CXX_VERSION' "`"${cxx}" --version|head -n 1`"
+		fi
+		if test -r build/cxxflags
+		then
+			printf "%s=%s\n" 'CXX_FLAGS' "`head -n 1 build/cxxflags`"
+		fi
+		if test -r build/cppflags
+		then
+			printf "%s=%s\n" 'CPP_FLAGS' "`head -n 1 build/cppflags`"
+		fi
+		if test -r build/ldflags
+		then
+			printf "%s=%s\n" 'LD_FLAGS' "`head -n 1 build/ldflags`"
+		fi
+	) > ${dir}/+BUILD_INFO
+	: > ${dir}/+BUILD_VERSION
+	ln -f bsd/"${name}".comment ${dir}/+COMMENT
+	ln -f bsd/"${name}".desc ${dir}/+DESC
 }
 case "`uname`" in
-OpenBSD)	old_pkg "$@" ;;
-*)		new_pkg "$@" ;;
+OpenBSD)	old_pkg "$1" "$2" ;;
+NetBSD)		gen_pkgsrc "$1" "$2" ;;
+FreeBSD)	gen_pkgng "$1" "$2" ;;
+*)		exec false ;;
 esac
 true

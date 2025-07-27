@@ -10,8 +10,8 @@ int mywrite(int fd,char *buf,int len)
   return w;
 }
 
-char outbuf[2048];
-buffer out = BUFFER_INIT(mywrite,1,outbuf,sizeof outbuf);
+static char outbuf[2048];
+static buffer out = BUFFER_INIT(mywrite,1,outbuf,sizeof outbuf);
 
 int myread(int fd,char *buf,int len)
 {
@@ -22,12 +22,12 @@ int myread(int fd,char *buf,int len)
   return r;
 }
 
-char inbuf[1024];
-buffer in = BUFFER_INIT(myread,0,inbuf,sizeof inbuf);
+static char inbuf[1024];
+static buffer in = BUFFER_INIT(myread,0,inbuf,sizeof inbuf);
 
-char stamp[TIMESTAMP + 1];
+static char stamp[TIMESTAMP + 1];
 
-int main()
+int main(void)
 {
   char ch;
 

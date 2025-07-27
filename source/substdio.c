@@ -1,11 +1,6 @@
 #include "substdio.h"
 
-void substdio_fdbuf(s,op,fd,buf,len)
-register substdio *s;
-register long (*op)();
-register int fd;
-register char *buf;
-register int len;
+void substdio_fdbuf(register substdio *s,register long (*op)(),register int fd,register char *buf,register int len)
 {
   s->x = buf;
   s->fd = fd;

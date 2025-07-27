@@ -28,25 +28,25 @@ struct line {
   int flagactive;
   iopause_fd *io;
 } *x;
-struct line tmp;
-unsigned int xmax = 1000;
-unsigned int xnum = 0;
-unsigned int numactive = 0;
-unsigned int maxactive = 10;
+static struct line tmp;
+static unsigned int xmax = 1000;
+static unsigned int xnum = 0;
+static unsigned int numactive = 0;
+static unsigned int maxactive = 10;
 
 static stralloc partial;
 
-char inbuf[1024];
+static char inbuf[1024];
 static unsigned int inbuflen = 0;
-iopause_fd *inio;
-int flag0 = 1;
+static iopause_fd *inio;
+static int flag0 = 1;
 
-iopause_fd *io;
-int iolen;
+static iopause_fd *io;
+static int iolen;
 
-char servers[64];
-char ip[4];
-char name[DNS_NAME4_DOMAIN];
+static char servers[64];
+static char ip[4];
+static char name[DNS_NAME4_DOMAIN];
 
 void errout(int i)
 {

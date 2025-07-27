@@ -3,7 +3,7 @@
 #include "haswaitp.h"
 #include "error.h"
 
-int wait_stop(wstat) int *wstat;
+int wait_stop(int *wstat)
 {
  int r;
 

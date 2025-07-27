@@ -2,8 +2,7 @@
 
 #include "caldate.h"
 
-void caldate_easter(cd)
-struct caldate *cd;
+void caldate_easter(struct caldate *cd)
 {
   long c;
   long t;

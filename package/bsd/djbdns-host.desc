@@ -1,1 +1,3 @@
-host shim that invokes djbdns tools
+ This is a cut-down host utility, similar to the ones supplied with BIND, KnotDNS, and FreeBSD.
+ .
+ It has no dependence upon special DNS library packages, and it uses the conventional djbdns mechanisms for name qualification and suchlike.

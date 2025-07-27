@@ -1,0 +1,14 @@
+# Maintainer script main for pkgsrc on NetBSD et al.
+case "$1" in
+	PRE-INSTALL)
+		pre-install_funcs
+		pre-install_extra "$@"
+		common
+		;;
+	POST-INSTALL)
+		post-install_funcs
+		post-install_extra "$@"
+		common
+		;;
+esac
+

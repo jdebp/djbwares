@@ -48,18 +48,40 @@ It does not handle DNS/TCP.
 </para>
 
 <para>
-<command>walldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, PTR, or ANY, and queries for domain names not beneath <filename>in-addr.arpa</filename>.
+<command>walldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, PTR, or ANY, and queries for domain names not beneath <filename>in-addr.arpa</filename> or <filename>ip6.arpa</filename>.
 </para>
 
 <para>
-ANY queries are answered with a single synthesized HINFO resource record set.
+<code>ANY</code> queries are answered with a single synthesized <code>HINFO</code> resource record set.
 <command>walldns</command> otherwise answers queries in a fixed form.
-The reverse lookup domain names take the form <filename>d.c.b.a.in-addr.arpa</filename>, where <filename>a.b.c.d</filename> is the IP address being looked up.
-It publishes PTR responses mapping the IP address <filename>a.b.c.d</filename> back to the name <filename>d.c.b.a.in-addr.arpa</filename>.
-It publishes A responses mapping the name <filename>d.c.b.a.in-addr.arpa</filename> to the IP address <filename>a.b.c.d</filename>.
-This creates a bidirectional mapping that maps IP addresses to domain names that map back to those same IP addresses.
-<command>walldns</command> does not include any NS or SOA resource records in its responses; and uses TTLs of one week.
+It does not include any <code>NS</code> or <code>SOA</code> resource records in its responses; and uses TTLs of one week.
 </para>
+
+<para>
+<command>walldns</command> creates a bidirectional mapping that maps IP addresses to domain names that map back to those same IP addresses.
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+For IP version 4, reverse lookup domain names take the form <filename>d.c.b.a.in-addr.arpa</filename>, where <filename>a.b.c.d</filename> is the IP address being looked up.
+<command>walldns</command> publishes <code>PTR</code> responses mapping the domain name back to itself.
+It publishes <code>A</code> responses mapping the domain name to the IP address <filename>a.b.c.d</filename>.
+</para>
+</listitem>
+<listitem>
+<para>
+For IP version 6, reverse lookup domain names take the form <filename>5.4.3.2.1.0.z.y.x.w.v.u.t.s.r.q.p.o.n.m.l.k.j.i.h.g.f.e.d.c.b.a.ip6.arpa</filename>, where <filename>abcd:efgh:ijkl:mnop:qrst:uvwx:yz01:2345</filename> is the IP address being looked up.
+<command>walldns</command> publishes <code>PTR</code> responses mapping the domain name back to itself.
+It publishes <code>AAAA</code> responses mapping the domain name to the IP address <filename>abcd:efgh:ijkl:mnop:qrst:uvwx:yz01:2345</filename>.
+</para>
+</listitem>
+<listitem>
+<para>
+It <emphasis>does not</emphasis> publish <code>A</code> responses for any IP version 6 lookups, nor <code>AAAA</code> responses for any IP version 4 addresses, even for IP version 4 "mapped" IP version 6 addresses.
+</para>
+</listitem>
+</itemizedlist>
 
 </refsection>
 
@@ -67,6 +89,9 @@ This creates a bidirectional mapping that maps IP addresses to domain names that
 <title>History</title>
 <para>
 <command>walldns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+<para>
+<command>walldns</command> gained IP version 6 support in 2019.
 </para>
 </refsection>
 

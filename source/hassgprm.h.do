@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange trysgprm.c compile link
 if ( ./compile trysgprm.o trysgprm.c trysgprm.d && ./link trysgprm trysgprm.o ) >/dev/null 2>&1 
 then

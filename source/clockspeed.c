@@ -15,12 +15,10 @@
 #include "auto_home.h"
 #include "timing.h"
 
-#ifndef HASRDTSC
-#ifndef HASGETHRTIME
+#if !defined(HASRDTSC) && !defined(HASARMCNT) && !defined(HASGETHRTIME)
 
 #error  "Error! Need an unadjusted hardware clock."
 
-#endif
 #endif
 
 struct point {
@@ -30,8 +28,7 @@ struct point {
   int flagknown;
 } ;
 
-void now(p)
-struct point * p;
+void now(struct point * p)
 {
   timing_now(&p->lowlevel);
   timing_basic_now(&p->ostime);
@@ -39,8 +36,7 @@ struct point * p;
   p->flagknown = 0;
 }
 
-double nano(buf)
-unsigned char buf[16];
+double nano(unsigned char buf[16])
 {
   unsigned long u;
   double result;
@@ -71,13 +67,13 @@ unsigned char buf[16];
   return result;
 }
 
-struct point first;
-struct point current;
-unsigned char buf[16];
+static struct point first;
+static struct point current;
+static unsigned char buf[16];
 
-double deriv = 0; /* 0 for unknown */
+static double deriv = 0; /* 0 for unknown */
 
-void savederiv()
+void savederiv(void)
 {
   int fd;
   double z;
@@ -125,7 +121,7 @@ void savederiv()
   rename("etc/atto.tmp","etc/atto"); /* if it fails, bummer */
 }
 
-int main()
+int main(void)
 {
   struct timeval tvselect;
   fd_set rfds;

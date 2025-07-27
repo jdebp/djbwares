@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange trygethr.c compile link
 if ( ./compile trygethr.o trygethr.c trygethr.d && ./link trygethr trygethr.o ) >/dev/null 2>&1
 then

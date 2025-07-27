@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdio.h>
 #include "direntry.h"
 #include "alloc.h"
 #include "buffer.h"
@@ -36,9 +37,9 @@ void pause5(const char *s1,const char *s2,const char *s3,const char *s4,const ch
   deepsleep(5);
 }
 
-int fdstartdir;
+static int fdstartdir;
 
-int *f;
+static int *f;
 
 void f_init(char **script)
 {
@@ -82,9 +83,9 @@ struct cyclog {
   int fdlock;
   int flagselected;
 } *c;
-int cnum;
+static int cnum;
 
-char fn[40];
+static char fn[40];
 
 int filesfit(struct cyclog *d)
 {
@@ -431,9 +432,9 @@ void c_quit(void)
   }
 }
 
-int flagexitasap = 0;
-int flagforcerotate = 0;
-int flagnewline = 1;
+static int flagexitasap = 0;
+static int flagforcerotate = 0;
+static int flagnewline = 1;
 
 void exitasap(void)
 {
@@ -477,11 +478,11 @@ int flushread(int fd,char *buf,int len)
   return len;
 }
 
-char inbuf[1024];
-buffer ssin = BUFFER_INIT(flushread,0,inbuf,sizeof inbuf);
+static char inbuf[1024];
+static buffer ssin = BUFFER_INIT(flushread,0,inbuf,sizeof inbuf);
 
-char line[1001];
-int linelen; /* 0 <= linelen <= 1000 */
+static char line[1001];
+static int linelen; /* 0 <= linelen <= 1000 */
 
 void doit(char **script)
 {

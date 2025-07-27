@@ -17,7 +17,7 @@ int fd;
 }
 
 int ttymodes_sett(tm,fd)
-struct ttymodes *tm;
+const struct ttymodes *tm;
 int fd;
 {
   int r;
@@ -39,7 +39,7 @@ int fd;
 }
 
 int ttymodes_setw(tm,fd)
-struct ttymodes *tm;
+const struct ttymodes *tm;
 int fd;
 {
   int r;
@@ -58,7 +58,7 @@ int fd;
 }
 
 int ttymodes_set(tm,fd)
-struct ttymodes *tm;
+const struct ttymodes *tm;
 int fd;
 {
   if (ttymodes_sett(tm,fd) == -1) return -1;

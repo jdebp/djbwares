@@ -6,8 +6,8 @@
 
 #define FATAL "setuidgid: fatal: "
 
-const char *account;
-struct passwd *pw;
+static const char *account;
+static struct passwd *pw;
 
 int main(int argc,const char *const *argv,const char *const *envp)
 {

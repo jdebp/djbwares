@@ -4,7 +4,7 @@
 #include "buffer.h"
 #include "strerr.h"
 
-void strerr_warn(const char *x1,const char *x2,const char *x3,const char *x4,const char *x5,const char *x6,const struct strerr *se)
+void strerr_warn(const char *x1,const char *x2,const char *x3,const char *x4,const char *x5,const char *x6,const char *x7,const struct strerr *se)
 {
   strerr_sysinit();
  
@@ -14,6 +14,7 @@ void strerr_warn(const char *x1,const char *x2,const char *x3,const char *x4,con
   if (x4) buffer_puts(buffer_2,x4);
   if (x5) buffer_puts(buffer_2,x5);
   if (x6) buffer_puts(buffer_2,x6);
+  if (x7) buffer_puts(buffer_2,x7);
  
   while(se) {
     if (se->x) buffer_puts(buffer_2,se->x);
@@ -26,8 +27,8 @@ void strerr_warn(const char *x1,const char *x2,const char *x3,const char *x4,con
   buffer_flush(buffer_2);
 }
 
-void strerr_die(int e,const char *x1,const char *x2,const char *x3,const char *x4,const char *x5,const char *x6,const struct strerr *se)
+void strerr_die(int e,const char *x1,const char *x2,const char *x3,const char *x4,const char *x5,const char *x6,const char *x7,const struct strerr *se)
 {
-  strerr_warn(x1,x2,x3,x4,x5,x6,se);
+  strerr_warn(x1,x2,x3,x4,x5,x6,x7,se);
   _exit(e);
 }

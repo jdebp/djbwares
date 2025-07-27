@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "caldate.h"
 
-char *montab[] = {
+static const char *montab[] = {
   "January"
 , "February"
 , "March"
@@ -19,9 +19,7 @@ char *montab[] = {
 , "December"
 } ;
 
-int main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int year;
   long daystart;

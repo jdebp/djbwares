@@ -3,7 +3,7 @@
 #include "byte.h"
 #include "dns.h"
 
-struct dns_transmit dns_resolve_tx = {0,0,0};
+struct dns_transmit dns_resolve_tx = {};
 
 int dns_resolve_servers(const char *q,const char qtype[2],const char servers[64],int flagrecursive)
 {

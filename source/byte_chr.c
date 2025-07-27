@@ -5,7 +5,7 @@
 unsigned int byte_chr(const char * s,register unsigned int n,int c)
 {
   register char ch;
-  register char *t;
+  register const char *t;
 
   ch = c;
   t = s;

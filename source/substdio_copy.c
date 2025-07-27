@@ -1,8 +1,6 @@
 #include "substdio.h"
 
-int substdio_copy(ssout,ssin)
-register substdio *ssout;
-register substdio *ssin;
+int substdio_copy(register substdio *ssout,register substdio *ssin)
 {
   register int n;
   register char *x;

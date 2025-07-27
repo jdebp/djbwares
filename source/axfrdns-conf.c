@@ -12,12 +12,12 @@ void usage(void)
   strerr_die1x(100,"axfrdns-conf: usage: axfrdns-conf acct logacct /axfrdns /tinydns myip");
 }
 
-char *dir;
-char *user;
-char *loguser;
-struct passwd *pw;
-char *myip;
-char *tinydns;
+static char *dir;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
+static char *myip;
+static char *tinydns;
 
 int main(int argc,char **argv)
 {

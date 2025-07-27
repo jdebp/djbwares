@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="taiclock4d">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>taiclock4d</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>taiclock4d</refname>
+<refpurpose>announce the system's clock through TAICLOCK</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>taiclock4d</command>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>taiclock4d</command> is identical to <citerefentry><refentrytitle>taiclockd</refentrytitle><manvolnum>1</manvolnum></citerefentry> except that it expects a UDP/IPv4 socket or an IPv4 adddress in the <envar>IP</envar> environment variable.
+<citerefentry><refentrytitle>taiclockd</refentrytitle><manvolnum>1</manvolnum></citerefentry> is capable of handling both IPv4 and IPv6 requests on combined-stack systems, and it is not necessary to use <command>taiclock4d</command> on such systems.
+</para>
+
+<title>History</title>
+<para>
+<command>taiclockd</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

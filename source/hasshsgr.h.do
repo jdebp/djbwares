@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange chkshsgr warn-shsgr
 if ./chkshsgr ; then : ; else cat warn-shsgr ; exit 1 ; fi
 redo-ifchange tryshsgr.c compile link

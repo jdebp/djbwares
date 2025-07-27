@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 cppflags="-I . ${kqueue}"
 ldflags="-g -pthread"
 if type >/dev/null clang++

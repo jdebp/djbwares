@@ -102,33 +102,45 @@ If the domain name exists and has no CNAMEs, they are answered with a single syn
 Information for <filename>*.<replaceable>fqdn</replaceable></filename> is provided for every domain name ending with <filename>.<replaceable>fqdn</replaceable></filename>, except names that have their own records and names that are covered by more specific wildcards. 
 </para>
 
+<informalexample>
 <para>
-For example, the lines (as written in the original database source file) <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
-+*.u.heaven.af.mil:1.2.3.200</programlisting></literallayout> have the same effect as <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
-+joe.u.heaven.af.mil:1.2.3.200
-+bill.u.heaven.af.mil:1.2.3.200
-+floyd.u.heaven.af.mil:1.2.3.200
-+ishtar.u.heaven.af.mil:1.2.3.200
-+joe.bob.u.heaven.af.mil:1.2.3.200
-+sally.floyd.u.heaven.af.mil:1.2.3.200
-+post.pink.floyd.u.heaven.af.mil:1.2.3.200</programlisting></literallayout> and so on. 
+For example, the lines (as written in the original database source file)
+<programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
++*.u.heaven.af.example:203.0.113.200</programlisting>
+have the same effect as
+<programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
++joe.u.heaven.af.example:203.0.113.200
++bill.u.heaven.af.example:203.0.113.200
++floyd.u.heaven.af.example:203.0.113.200
++ishtar.u.heaven.af.example:203.0.113.200
++joe.bob.u.heaven.af.example:203.0.113.200
++sally.floyd.u.heaven.af.example:203.0.113.200
++post.pink.floyd.u.heaven.af.example:203.0.113.200</programlisting>
+and so on. 
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+As another example, the lines
+<programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
+@*.u.heaven.af.example::mail.heaven.af.example</programlisting>
+have the same effect as
+<programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
+@joe.u.heaven.af.example::mail.heaven.af.example
+@bill.u.heaven.af.example::mail.heaven.af.example
+@floyd.u.heaven.af.example::mail.heaven.af.example
+@ishtar.u.heaven.af.example::mail.heaven.af.example
+@joe.bob.u.heaven.af.example::mail.heaven.af.example
+@sally.floyd.u.heaven.af.example::mail.heaven.af.example
+@post.pink.floyd.u.heaven.af.example::mail.heaven.af.example</programlisting>
+and so on.
 </para>
 
 <para>
-As another example, the lines <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
-@*.u.heaven.af.mil::mail.heaven.af.mil</programlisting></literallayout> have the same effect as <literallayout><programlisting>+pink.floyd.u.heaven.af.mil:1.2.3.4
-@joe.u.heaven.af.mil::mail.heaven.af.mil
-@bill.u.heaven.af.mil::mail.heaven.af.mil
-@floyd.u.heaven.af.mil::mail.heaven.af.mil
-@ishtar.u.heaven.af.mil::mail.heaven.af.mil
-@joe.bob.u.heaven.af.mil::mail.heaven.af.mil
-@sally.floyd.u.heaven.af.mil::mail.heaven.af.mil
-@post.pink.floyd.u.heaven.af.mil::mail.heaven.af.mil</programlisting></literallayout> and so on.
+Notice that the wildcard does not apply to <filename>pink.floyd.u.heaven.af.example</filename>, because that name has its own records.
 </para>
-
-<para>
-Notice that the wildcard does not apply to <filename>pink.floyd.u.heaven.af.mil</filename>, because that name has its own records.
-</para>
+</informalexample>
 
 </refsection>
 

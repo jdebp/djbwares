@@ -65,22 +65,22 @@ If <envar>RBLSMTPD</envar> is set and is empty, <command>rblsmtpd</command> does
 </para>
 
 <para>
-If <envar>RBLSMTPD</envar> is not set, <command>rblsmtpd</command> looks up <envar>TCPREMOTEIP</envar> in the RBL, and blocks mail if <envar>TCPREMOTEIP</envar> is blacklisted.
+If <envar>RBLSMTPD</envar> is not set, <command>rblsmtpd</command> looks up <envar>TCPREMOTEIP</envar> in the RBL, and blocks mail if <envar>TCPREMOTEIP</envar> is deny-listed.
 </para>
 
 <para>
 You may supply any number of <arg choice='plain'>-r</arg> and <arg choice='plain'>-a</arg> options to control RBL lookup.
-<command>rblsmtpd</command> tries each list in turn until it finds one that blacklists or whitelists <envar>TCPREMOTEIP</envar>.
+<command>rblsmtpd</command> tries each list in turn until it finds one that deny-lists or allow-lists <envar>TCPREMOTEIP</envar>.
 </para>
 
 <para>
-Prior versions of <command>rblsmtpd</command> would default to using the RBL source <filename>rbl.maps.vix.com</filename> if you did not supply any blacklists.
+Prior versions of <command>rblsmtpd</command> would default to using the RBL source <filename>rbl.maps.vix.com</filename> if you did not supply any deny-lists.
 <ulink url="http://dnsbl.com/2007/02/status-of-rblmapsvixcom-invalid-domain.html">This list has been defunct for many years and is no longer a built-in default in this program</ulink>.
-Learning from this experience, there is no replacement built-in default; no blacklists supplied means no blacklisting done.
+Learning from this experience, there is no replacement built-in default; no deny-lists supplied means no deny-listing done.
 </para>
 
 <para>
-If you want to run your own RBL blacklist or whitelist for <command>rblsmtpd</command>, you can use <citerefentry><refentrytitle>rbldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+If you want to run your own RBL deny-list or allow-list for <command>rblsmtpd</command>, you can use <citerefentry><refentrytitle>rbldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 
 </refsection>
@@ -115,7 +115,7 @@ Command line options further alter this behaviour.
 <term><arg choice='plain'>-r <replaceable>base</replaceable></arg></term>
 <listitem>
 <para>
-Use <replaceable>base</replaceable> as an RBL source, a blacklist.
+Use <replaceable>base</replaceable> as an RBL source, a deny-list.
 An IP address <filename>a.b.c.d</filename> is listed by that source if the domain name <filename>d.c.b.a.<replaceable>base</replaceable></filename> has a TXT record in the Domain Name System.
 <command>rblsmtpd</command> uses the contents of the TXT record as an error message to send to the client.
 </para>
@@ -125,9 +125,9 @@ An IP address <filename>a.b.c.d</filename> is listed by that source if the domai
 <term><arg choice='plain'>-a <replaceable>base</replaceable></arg></term>
 <listitem>
 <para>
-Use <replaceable>base</replaceable> as an anti-RBL source, a whitelist.
+Use <replaceable>base</replaceable> as an anti-RBL source, an allow-list.
 An IP address <filename>a.b.c.d</filename> is listed by that source if the domain name <filename>d.c.b.a.<replaceable>base</replaceable></filename> has an A record in the Domain Name System.
-<command>rblsmtpd</command> does not block mail for whitelisted IP addresses.
+<command>rblsmtpd</command> does not block mail for allow-listed IP addresses.
 </para>
 </listitem>
 </varlistentry>
@@ -136,7 +136,7 @@ An IP address <filename>a.b.c.d</filename> is listed by that source if the domai
 <listitem>
 <para>
 (Default.)
-Use a 451 error code for IP addresses blacklisted in the RBL.
+Use a 451 error code for IP addresses deny-listed in the RBL.
 </para>
 </listitem>
 </varlistentry>
@@ -144,7 +144,7 @@ Use a 451 error code for IP addresses blacklisted in the RBL.
 <term><arg choice='plain'>-b</arg></term>
 <listitem>
 <para>
-Use a 553 error code for IP addresses blacklisted in the RBL.
+Use a 553 error code for IP addresses deny-listed in the RBL.
 </para>
 </listitem>
 </varlistentry>
@@ -154,7 +154,7 @@ Use a 553 error code for IP addresses blacklisted in the RBL.
 <para>
 (Default.)
 Handle RBL lookups in a "fail-open" mode. 
-If an RBL blacklist lookup fails temporarily, assume that the address is not listed; if an RBL whitelist lookup fails temporarily, assume that the address is listed. 
+If an RBL deny-list lookup fails temporarily, assume that the address is not listed; if an RBL allow-list lookup fails temporarily, assume that the address is listed. 
 Unfortunately, a knowledgeable attacker can force an RBL lookup to fail temporarily, so that his mail is not blocked.
 </para>
 </listitem>
@@ -164,8 +164,8 @@ Unfortunately, a knowledgeable attacker can force an RBL lookup to fail temporar
 <listitem>
 <para>
 Handle RBL lookups in a "fail-closed" mode. 
-If an RBL blacklist lookup fails temporarily, assume that the address is listed (but use a 451 error code even with <arg choice='plain'>-b</arg>). 
-If an RBL whitelist lookup fails temporarily, assume that the address is not listed (but use a 451 error code even if a subsequent RBL blacklist lookup succeeds and <arg choice='plain'>-b</arg> is used). 
+If an RBL deny-list lookup fails temporarily, assume that the address is listed (but use a 451 error code even with <arg choice='plain'>-b</arg>). 
+If an RBL allow-list lookup fails temporarily, assume that the address is not listed (but use a 451 error code even if a subsequent RBL deny-list lookup succeeds and <arg choice='plain'>-b</arg> is used). 
 Unfortunately, this sometimes delays legitimate mail.
 </para>
 </listitem>

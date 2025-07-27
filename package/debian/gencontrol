@@ -10,6 +10,11 @@ then
 	exit 100
 fi
 name="$1"
-dir="$2"
-install -d -- "${dir}"/DEBIAN
-exec dpkg-gencontrol -p"${name}" -P"${dir}"
+dest="$2"
+install -d -m 0755 -- "${dest}"/DEBIAN
+rm -f -- debian/substvars
+if test -d "${dest}"/usr/local/bin || test -d "${dest}"/usr/local/sbin
+then
+	dpkg-shlibdeps "${dest}"/usr/local/*bin/*
+fi
+exec dpkg-gencontrol -p"${name}" -P"${dest}"

@@ -12,8 +12,8 @@
 #include "select.h"
 #include "taia.h"
 
-char outbuf[16];
-substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
+static char outbuf[16];
+static substdio ssout = SUBSTDIO_FDBUF(write,1,outbuf,sizeof outbuf);
 
 #define FATAL "taiclock: fatal: "
 #define WARNING "taiclock: warning: "
@@ -23,33 +23,33 @@ void die_usage()
   strerr_die1x(100,"taiclock: usage: taiclock ip.ad.dr.ess");
 }
 
-char *host;
-struct ip_address ipremote;
-struct sockaddr_in sa;
-int s;
+static const char *host;
+static struct ip_address ipremote;
+static struct sockaddr_in sa;
+static int s;
 
-char initdeltaoffset[] = {0,0,0,0,0,2,163,0,0,0,0,0,0,0,0,0};
-char initdeltamin[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-char initdeltamax[] = {0,0,0,0,0,5,70,0,0,0,0,0,0,0,0,0};
-char initerrmin[] = {255,255,255,255,255,255,255,254,0,0,0,0,0,0,0,0};
-char initerrmax[] = {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0};
-struct taia deltaoffset;
-struct taia deltamin;
-struct taia deltamax;
-struct taia errmin;
-struct taia errmax;
+static char initdeltaoffset[] = {0,0,0,0,0,2,163,0,0,0,0,0,0,0,0,0};
+static char initdeltamin[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static char initdeltamax[] = {0,0,0,0,0,5,70,0,0,0,0,0,0,0,0,0};
+static char initerrmin[] = {255,255,255,255,255,255,255,254,0,0,0,0,0,0,0,0};
+static char initerrmax[] = {0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0};
+static struct taia deltaoffset;
+static struct taia deltamin;
+static struct taia deltamax;
+static struct taia errmin;
+static struct taia errmax;
 
-struct taia ta0;
-struct taia ta1;
+static struct taia ta0;
+static struct taia ta1;
 
-unsigned char query[32];
-unsigned char response[32];
-struct taia taremote;
+static unsigned char query[32];
+static unsigned char response[32];
+static struct taia taremote;
 
-struct taia temp1;
-struct taia temp2;
+static struct taia temp1;
+static struct taia temp2;
 
-unsigned char adj[16];
+static unsigned char adj[16];
 
 int main(int argc,char ** argv)
 {

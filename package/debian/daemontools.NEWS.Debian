@@ -18,13 +18,13 @@ daemontools (1:0.76-1) unstable; urgency=low
     ln -s /etc/service /service
 
   after installing the daemontools-run package.
-  
+
   daemontools-installer is still available, if you don't want to upgrade to
   these new binary packages, you should stop the installation, make sure the
   daemontools-installer package is installed, and put daemontools on hold,
   as described in
 
    http://www.debian.org/doc/FAQ/ch-pkg_basics.en.html#s-puttingonhold
-  
+
  -- Gerrit Pape <pape@smarden.org>  Mon, 25 Feb 2008 20:24:49 +0000
 

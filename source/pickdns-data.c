@@ -98,23 +98,23 @@ GEN_ALLOC_append(address_alloc,struct address,s,len,a,i,n,x,30,address_alloc_rea
 
 static address_alloc x;
 
-int fd;
-buffer b;
-char bspace[1024];
+static int fd;
+static buffer b;
+static char bspace[1024];
 
-int fdcdb;
-struct cdb_make cdb;
+static int fdcdb;
+static struct cdb_make cdb;
 static stralloc key;
 static stralloc result;
 
 static stralloc line;
-int match = 1;
-unsigned long linenum = 0;
+static int match = 1;
+static unsigned long linenum = 0;
 
 #define NUMFIELDS 3
 static stralloc f[NUMFIELDS];
 
-char strnum[FMT_ULONG];
+static char strnum[FMT_ULONG];
 
 void syntaxerror(const char *why)
 {
@@ -126,7 +126,7 @@ void die_datatmp(void)
   strerr_die2sys(111,FATAL,"unable to create data.cdb.tmp: ");
 }
 
-int main()
+int main(void)
 {
   struct address t;
   unsigned int i;

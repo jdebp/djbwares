@@ -1,0 +1,46 @@
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>djbwares Guide</title>
+<h1 class="Ruled">djbwares Guide</h1>
+
+<p>
+This is a guide to the djbwares toolset.
+You can find reference documentation accompanying the tools themselves.
+Each command has a manual page, accessible through the normal <code>man</code> command, and the original DocBook XML form of the same, readable with any XML viewer (including WWW browsers).
+</p>
+
+<ul style="column-width:25em; list-style-position:inside;">
+<li><a href="changes.html">Changes from the original Bernstein softwares</a></li>
+<li><a href="commands.html">Command and tool list</a></li>
+<li><a href="non-commands.html">Non-command documentation list</a></li>
+<li><a href="building-from-source.html">Building the toolset from source</a></li>
+<li><a href="what-is-the-af.html">What is the "af"?</a></li>
+</ul>
+
+<p>
+There are also some tutorials accompanying a few of Bernstein's toolsets:
+</p>
+<ul>
+<li><a href="http://cr.yp.to/daemontools.html">daemontools</a></li>
+<li><a href="http://cr.yp.to/djbdns.html">djbdns</a></li>
+<li><a href="http://cr.yp.to/publicfile.html">publicfile</a> (note in particular the Users Guide and the list of pre-defined file types)</li>
+</ul>
+<p>
+However, some caution should be applied:
+</p>
+<ul>
+<li><p>
+Be aware that some of the instructions are geared towards a universe where one installs things longhand with highly-specific "install", "setup", and "check" tools; whereas the djbwares toolset omits these in favour of letting the people who package the toolset handle installing things into files and directories with general-purpose packaging systems.
+Building the djbwares toolset from source, one can build something self-contained that can be enclosed in a "ports tree" (or &mdash; ironically &mdash; <a href="https://jdebp.uk/FGA/slashpackage.html">slashpackage</a>) system, or optionally directly build actual first-class software packages for pkgsrc on NetBSD, pkg_ng on FreeBSD, pkg on OpenBSD, and dpkg on Debian.
+</p></li>
+<li><p>
+The "how to start daemontools" how-to only covers <code>/etc/rc.local</code> (<a href="https://jdebp.uk/FGA/rc.local-is-history.html">obsolete in System 5 Unix in 1983, in FreeBSD in 1995, and in NetBSD in 2000</a>), van Smoorenburg <code>/etc/inittab</code> for Linux-based operating systems (not, as the page erroneously claims, Unix System 5 in the first place, which latter had even when daemontools was invented already switched to things like the <a href="https://jdebp.uk/FGA/unix-service-access-facility.html">Service Access Facility</a>, the System Resource Controller, and the Service Management Facility way back in the late 1980s and early 1990s), and several flavours of Upstart (discontinued by Canonical in 2015).
+</p><p>
+None of the systems that one will encounter in the real world in the 2020s (Mewburn rc on FreeBSD and NetBSD since 2000, OpenBSD's rc, OpenRC, BusyBox init, systemd, and others) are covered and the Bernstein how-to is long-since defunct.
+<a href="https://jdebp.uk/FGA/inittab-is-history.html">Because <code>inittab</code> is history, a lot of more up-to-date how-tos have been written.</a>
+</p></li>
+<li><p>
+Several of the djbdns how-tos use undocumented <code>add-ns</code> and suchlike programs which the bespoke installation tools in djbdns in fact created on the fly.
+These are in reality simple shell script wrappers around <a href="commands/tinydns-edit.xml"><code>tinydns-edit</code></a> (that hardwire its location into the script) and wherever you see <code>./add-childns</code> (for example) you can substitute <code>tinydns-edit&nbsp;data&nbsp;data.tmp&nbsp;add&nbsp;childns</code>.
+Or write a shell function to do that.
+</p></li>
+</ul>

@@ -12,10 +12,10 @@
 
 #define FATAL "recordio: fatal: "
 
-char pid[FMT_ULONG];
+static char pid[FMT_ULONG];
 
-char recordbuf[512];
-buffer ssrecord = BUFFER_INIT(buffer_unixwrite,2,recordbuf,sizeof recordbuf);
+static char recordbuf[512];
+static buffer ssrecord = BUFFER_INIT(buffer_unixwrite,2,recordbuf,sizeof recordbuf);
 
 void record(char *buf,int len,char *direction) /* 1 <= len <= 256 */
 {
@@ -41,15 +41,15 @@ void record(char *buf,int len,char *direction) /* 1 <= len <= 256 */
   }
 }
 
-int leftstatus = 0;
-char leftbuf[256];
-int leftlen;
-int leftpos;
+static int leftstatus = 0;
+static char leftbuf[256];
+static int leftlen;
+static int leftpos;
 
-int rightstatus = 0;
-char rightbuf[256];
-int rightlen;
-int rightpos;
+static int rightstatus = 0;
+static char rightbuf[256];
+static int rightlen;
+static int rightpos;
 
 void doit(int fdleft,int fdright) /* copy 0 -> fdleft, copy fdright -> 1 */
 {

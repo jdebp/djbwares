@@ -1,10 +1,196 @@
 #!/bin/sh -e
-# See http://jdebp.eu./FGA/slashpackage.html
-if [ \! -d package ] || [ \! -d source ]
+# See http://jdebp.uk./FGA/slashpackage.html
+if test \! -d package || test \! -d source
 then
 	echo "You are not in the right directory." 1>&2
 	exit 100
 fi
-./package/prepare 
-./package/make 
-exec ./package/makeinstall
+
+export CDPATH=
+
+# Create and populate the build directory.
+install -d -m 0755 build
+( cd source && ( 2>/dev/null pax -w -r -l -u -p a -- * ../build/ || true ) )
+
+# Rebuild.
+if ! > /dev/null expr "${MAKEFLAGS}" : "--jobs" &&
+   ! > /dev/null expr "${REDOFLAGS}" : "--jobs"
+then
+	case "`uname`" in
+	Linux) cpus="`fgrep -c processor /proc/cpuinfo`" ;;
+	*BSD) cpus="`sysctl -n hw.ncpu`" ;;
+	esac
+fi
+redo --directory build ${cpus:+--jobs "${cpus}"} -- all
+
+# Atomically update the release directories ./command, ./library, ./include, and so forth.
+# The build and release directories need not be on the same disc volume.
+# And the files released must not be potentially overwritable and truncatable by the compiler/linker during subsequent builds.
+# But released files can be links to other released files, of course.
+install -d -- command manual config guide header library guide/commands guide/commands/html
+
+# ##############################################################################
+# Build all of the ...{new} files in ./command, ./config, and ./manual.
+# Symbolic links in place of subdirectories to fool the man(1) command
+for directory in en_GB.UTF-8 en.UTF-8
+do
+	rm -f -- manual/"${directory}"{new}
+	ln -f -s -- . manual/"${directory}"{new}
+done
+for section in 1 2 3 4 5 6 7 8 9
+do
+	# All of the commands
+	if test 1 = "${section}" || test 8 = "${section}"
+	then
+		test -r package/commands${section} && cat package/commands${section} |
+		while read -r i
+		do
+			rm -f -- command/"$i"{new}
+			if objdump -a command/"$i"{new} >/dev/null 2>&1
+			then
+				install -p -m 0755 -- build/"$i" command/"$i"{new}
+				strip command/"$i"{new}
+				chmod a-w command/"$i"{new}
+			else
+				install -p -m 0555 -- build/"$i" command/"$i"{new}
+			fi
+		done
+	fi
+	# All of the commands that have their own manual and guide pages
+	(
+		test -r package/commands${section} && cat package/commands${section}
+		test -r package/extra-manpages${section} && cat package/extra-manpages${section}
+	) |
+	while read -r i
+	do
+		install -d -m 0755 -- manual/man${section} manual/docbook${section}
+		rm -f -- manual/man${section}/"$i".${section}{new}
+		install -p -m 0644 -- build/"$i".${section} manual/man${section}/"$i".${section}{new}
+		rm -f -- manual/docbook${section}/"$i".${section}{new}
+		install -p -m 0644 -- build/"$i".xml manual/docbook${section}/"$i".xml{new}
+		rm -f -- guide/commands/html/"$i".html{new}
+		install -p -m 0644 -- build/"$i".html guide/commands/html/"$i".html{new}
+		rm -f -- guide/commands/"$i".xml{new}
+		ln -f -- manual/docbook${section}/"$i".xml{new} guide/commands/"$i".xml{new}
+	done
+	# Aliased manual and guide pages
+	test -r package/aliases${section} && cat package/aliases${section} |
+	while read -r command alias
+	do
+		ln -f -- manual/man${section}/"${command}".${section}{new} manual/man${section}/"${alias}".${section}{new}
+		ln -f -- manual/docbook${section}/"${command}".xml{new} manual/docbook${section}/"${alias}".xml{new}
+		ln -f -- guide/commands/html/"${command}".html{new} guide/commands/html/"${alias}".html{new}
+		ln -f -- guide/commands/"${command}".xml{new} guide/commands/"${alias}".xml{new}
+	done
+done
+# Headers and libraries
+cat package/headers |
+while read i
+do
+	rm -f -- header/"$i".h{new}
+	install -p -m 0644 -- build/"$i".h header/"$i".h{new}
+done
+cat package/libraries |
+while read i
+do
+	rm -f -- library/"$i".h{new}
+	install -p -m 0644 -- build/"$i".a library/"$i".a{new}
+done
+# Main guide pages
+cat package/guidepages |
+while read -r i
+do
+	rm -f -- guide/"$i".html{new}
+	install -m 0444 -p -- build/"$i".html guide/"$i".html{new}
+done
+# Other guide pages
+for i in COPYING guide.css
+do
+	rm -f -- guide/"$i"{new}
+	install -p -m 0644 -- build/"$i" guide/"$i"{new}
+done
+for i in docbook-xml.css
+do
+	rm -f -- guide/"$i"{new}
+	install -m 0444 -p -- build/"$i" guide/commands/"$i"{new}
+done
+# Other data files
+for i in dnsroots.global leapsecs.dat
+do
+	install -p -m 0644 -- build/"$i" config/"$i"{new}
+done
+
+# ##############################################################################
+# Rename the ...{new} files in ./command, ./config, and ./manual.
+# Symbolic links in place of subdirectories to fool the man(1) command
+for directory in en_GB.UTF-8 en.UTF-8
+do
+	test -e manual/"${directory}" && mv -f -- manual/"${directory}" manual/"${directory}"{old}
+	mv -f -- manual/"${directory}"{new} manual/"${directory}"
+	rm -f -- manual/"${directory}"{old}
+done
+for section in 1 2 3 4 5 6 7 8 9
+do
+	if test 1 = "${section}" || test 8 = "${section}"
+	then
+		# All of the commands that have executables and all of their aliases
+		(
+			test -r package/commands${section} && cat package/commands${section}
+			test -r package/aliases${section} && awk '{print $2;}' package/aliases${section}
+		) |
+		while read -r i
+		do
+			mv -f -- command/"$i"{new} command/"$i"
+		done
+	fi
+	# All of the commands that have their own manual and guide pages
+	(
+		test -r package/commands${section} && cat package/commands${section}
+		test -r package/extra-manpages${section} && cat package/extra-manpages${section}
+	) |
+	while read -r i
+	do
+		mv -f -- manual/man${section}/"$i".${section}{new} manual/man${section}/"$i".${section}
+		mv -f -- manual/docbook${section}/"$i".xml{new} manual/docbook${section}/"$i".xml
+		mv -f -- guide/commands/html/"$i".html{new} guide/commands/html/"$i".html
+		mv -f -- guide/commands/"$i".xml{new} guide/commands/"$i".xml
+	done
+	# Aliased manual and guide pages
+	test -r package/aliases${section} && cat package/aliases${section} |
+	while read -r command alias
+	do
+		test -r package/commands${section} && grep -q -- "^${alias}\$" package/commands${section} && continue
+		test -r package/extra-manpages${section} && grep -q -- "^${alias}\$" package/extra-manpages${section} && continue
+		mv -f -- manual/man${section}/"${alias}".${section}{new} manual/man${section}/"${alias}".${section}
+		mv -f -- manual/docbook${section}/"${alias}".xml{new} manual/docbook${section}/"${alias}".xml
+		mv -f -- guide/commands/html/"${alias}".html{new} guide/commands/html/"${alias}".html
+		mv -f -- guide/commands/"${alias}".xml{new} guide/commands/"${alias}".xml
+	done
+done
+# Headers and libraries
+cat package/headers |
+while read i
+do
+	mv -f -- header/"$i".h{new} header/"$i".h
+done
+cat package/libraries |
+while read i
+do
+	mv -f -- library/"$i".a{new} library/"$i".a
+done
+# Main guide pages
+cat package/guidepages |
+while read -r i
+do
+	mv -f -- guide/"$i".html{new} guide/"$i".html
+done
+# Other guide pages
+for i in COPYING guide.css commands/docbook-xml.css
+do
+	mv -f -- guide/"$i"{new} guide/"$i"
+done
+# Other data files
+for i in dnsroots.global leapsecs.dat
+do
+	mv -f -- config/"$i"{new} config/"$i"
+done

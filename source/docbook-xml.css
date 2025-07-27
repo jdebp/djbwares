@@ -1,5 +1,7 @@
 refentry, refsection, refsynopsisdiv { display:block; }
-example, informalexample, programlisting, literallayout, screen { display:block; border:1px dashed; padding:0.5em; margin-right:3em; margin-bottom:1em; }
+example, informalexample, programlisting, literallayout, screen { display:block; padding:0.5em; margin-bottom:1em; }
+example, informalexample { border:1px dotted; }
+programlisting, literallayout, screen { border:1px double; }
 screen, literallayout, programlisting, funcsynopsisinfo, classsynopsisinfo { white-space:pre; }
 refmeta { display:block; border-bottom:double; margin-bottom:1em; }
 refmiscinfo[class="manual"] { text-transform:capitalize; font-style:italic; }
@@ -9,10 +11,10 @@ refsynopsisdiv>title, refnamediv>title, refmeta>title, refsection>title { margin
 refentry>refsynopsisdiv>title, refentry>refnamediv>title, refentry>refmeta>title, refentry>refsection>title { font-variant:small-caps; font-size:x-large; }
 title, subtitle { display:block; border-bottom:1px dotted; }
 para, warning, caution, important, note, tip { display:block; margin-bottom:1em; }
-warning, caution, important, note, tip { border:1px dashed; }
+warning, caution, important, note, tip { border:1px dashed; padding:0.5em; }
 warning, caution { font-weight:bolder; foreground-color:Orange; }
-warning:before { content:"Warning: "; font-weight:bolder; }
-caution:before { content:"Caution: "; font-weight:bolder; }
+warning:before { content:"Warning: "; font-weight:bolder; foreground-color:Orange; }
+caution:before { content:"Caution: "; font-weight:bolder; foreground-color:Orange; }
 important:before { content:"Important: "; font-weight:bolder; }
 note:before { content:"Note: "; font-weight:bolder; }
 tip:before { content:"Tip: "; font-weight:bolder; }
@@ -27,7 +29,8 @@ refmiscinfo {}
 refname { margin-left:0em; }
 refname:not(:last-of-type):after { content:", "; }
 refpurpose { margin-left:0em; }
-refpurpose:first-of-type:before { content:" \2014 "; }
+refpurpose:before { content:" \2014 "; }
+refpurpose:after { content:";"; }
 funcsynopsis, funcprototype { font-family:monospace; display:block; margin-bottom:1em; }
 funcsynopsis[language="C++"]>funcprototype>paramdef:first-of-type:before { content:"("; }
 funcsynopsis[language="C++"]>funcprototype>paramdef:last-of-type:after { content:")"; }
@@ -44,6 +47,7 @@ group[rep=repeat]:after, arg[rep=repeat]:after { content:"..."; font-family:norm
 group[rep=repeat][choice=opt]:after, arg[rep=repeat][choice=opt]:after { content:"...]"; font-family:normal; }
 group[rep=repeat][choice=req]:after, arg[rep=repeat][choice=req]:after { content:"...}"; font-family:normal; }
 group>*:not(:last-child):after { content:" | "; font-family:normal; }
+group>arg[choice=req]:not(:last-child):after { content:"} | "; font-family:normal; }
 orderedlist { display:block; list-style-type:decimal; }
 itemizedlist { display:block; list-style-type:disc; }
 variablelist { display:block; }

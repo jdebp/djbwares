@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <stdio.h>
 #include "sig.h"
 #include "strerr.h"
 #include "error.h"
@@ -19,20 +20,20 @@
 #define FATAL "supervise: fatal: "
 #define WARNING "supervise: warning: "
 
-char *dir;
-int selfpipe[2];
-int fdlock;
-int fdcontrolwrite;
-int fdcontrol;
-int fdok;
+static char *dir;
+static int selfpipe[2];
+static int fdlock;
+static int fdcontrolwrite;
+static int fdcontrol;
+static int fdok;
 
-int flagexit = 0;
-int flagwant = 1;
-int flagwantup = 1;
-int pid = 0; /* 0 means down */
-int flagpaused; /* defined if(pid) */
+static int flagexit = 0;
+static int flagwant = 1;
+static int flagwantup = 1;
+static int pid = 0; /* 0 means down */
+static int flagpaused; /* defined if(pid) */
 
-char status[18];
+static char status[18];
 
 void pidchange(void)
 {
@@ -84,7 +85,7 @@ void trigger(void)
   write(selfpipe[1],"",1);
 }
 
-const char *run[2] = { "./run", 0 };
+static const char *run[2] = { "./run", 0 };
 
 void trystart(void)
 {

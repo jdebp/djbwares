@@ -1,30 +1,53 @@
-djbwares (9) UNRELEASED; urgency=medium
+djbwares (10) stable; urgency=low
+ 
+  * dnsqrx no longer requires the Bourne Again shell.
+  * pathexec_run now treats error_notdir as an uninteresting error.
+  * walldns now handles IP version 6 lookups.
+  * httpd no longer supports HTTP/0.9 and HTTP/1.1 by default.
+  * Human-readable IP version 4 addresses no longer permit octet values greater than 255.
+  * UCSPI and publicfile functions are now in two libraries.
+  * axfrdns now logs individual queries just like tinydns making it easier to track cross-transport query patterns.
+  * clockspeed now works (caveats on the manual page) on ARM processors.
+  * DocBook XML manual pages are now installed by the packages.
+  * There is now a geminid command.
+  * httpd, ftpd, geminid, and gopherd all now initialize the leap seconds table before changing root, rather than trying to do it after.
+  * Most K&R function definitions have been updated to the new 1989 style.
+    The 2024 clang compiler warns that K&R is going away in 2023.
+  * The original IP version 4 taiclockd is now taiclock4d.
+    taiclockd is a combined-stack IPv6 tool.
+  * There is now a Guide.
+  * Similar to the treatment of the ANY resource record type, the ANY class for DNS requests is no longer (silently) supported and treated as matching the IN class.
+  * The examples in the documentation no longer use Chinese (at the time of release) IP addresses and U.S.A. military domain names.
+ 
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Sun, 27 Jul 2025 04:31:07 +0100
 
+djbwares (9) stable; urgency=low
+ 
   * Fixed a build problem with the leapsecs_init.3 manual page.
+ 
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Mon, 18 Mar 2019 20:56:42 +0000
 
- -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Mon, 18 Mar 2019 20:06:05 +0000
-
-djbwares (8) unstable; urgency=medium
-
+djbwares (8) stable; urgency=low
+ 
   * various minor doco corrections
   * TXT and HINFO records are now printed in a more human-accessible form.
   * httpd now uses the text/xml content type for the .xml filename extension.
   * httpd now uses the application/xhtml+xml content type for the .xhtml filename extension.
   * All manuals are now DocBook XML and the missing tcp-environ manual is now present.
   * All DNS servers now synthesise HINFO non-responses to ANY queries.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Mon, 18 Mar 2019 07:52:30 +0000
 
-djbwares (7) unstable; urgency=medium
-
+djbwares (7) stable; urgency=low
+ 
   * A bug in tcpserver triggered when standard input is already closed, noted by Jorge Almeida, has been fixed.
   * dnscache now has a FORWARDFIRST mode.
   * Building now works even if one has a CDPATH.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Thu, 15 Feb 2018 17:19:10 +0000
 
-djbwares (6) unstable; urgency=medium
-
+djbwares (6) stable; urgency=low
+ 
   * dnscache now caches SOA resource records.
   * dnscache is now more efficient at caching AAAA resource records, now caching them without explicit data lengths like it does for A resource records.
   * dnscache now returns an AAAA address for localhost.
@@ -38,42 +61,42 @@ djbwares (6) unstable; urgency=medium
   * The tinydns-data manual page now describes S records.
   * There is now a host command.
   * dnscache logging no longer prints A, AAAA, and SRV resource records in raw hexadecimal.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Sun, 06 Aug 2017 13:08:24 +0100
 
-djbwares (5) unstable; urgency=medium
-
+djbwares (5) stable; urgency=low
+ 
   * Added patches to enable using SSLREMOTEIP/SSLREMOTEPORT in server tools instead of TCPREMOTEIP/TCPREMOTEPORT, when PROTO says to do so.
   * Added several DocBook XML manual pages, and added HISTORY sections to manuals.
   * ip6.int has been replaced, very belatedly, by ip6.arpa in tinydns-data and dnscache .
   * Added gopherd.
   * Removed maps.vix.com as the compiled-in default for rblsmtpd.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Thu, 30 Mar 2017 16:40:05 +0100
 
-djbwares (4) unstable; urgency=medium
-
+djbwares (4) stable; urgency=low
+ 
   * Added easter, yearcal, and nowutc commands from the libtai package.
   * Added the remainder of the (PD) libtai library.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Fri, 02 Dec 2016 16:57:38 +0000
 
-djbwares (3) unstable; urgency=medium
-
+djbwares (3) stable; urgency=low
+ 
   * Added Michael Handler's SRV patch.
   * Extended SRV support to tinydns-get and dnsq.
   * Added the tinydns mmap() leak prevention patch.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Wed, 03 Aug 2016 14:57:58 +0100
 
-djbwares (2) unstable; urgency=medium
-
+djbwares (2) stable; urgency=low
+ 
   * First published version.
-
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Wed, 03 Aug 2016 14:57:58 +0100
 
-djbwares (1.05-bis) unstable; urgency=low
-
-  * 
-
+djbwares (1.05-bis) stable; urgency=low
+ 
+  *
+ 
  -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.COM>  Fri, 16 Aug 2013 00:00:00 +0000

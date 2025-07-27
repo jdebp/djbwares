@@ -1,1 +1,2 @@
-Bernstein taiclockd, from clockspeed
+ taiclock and taiclockd form an even simpler alternative to SNTP.
+ They are suitable for precise time synchronization over a local area network, without the hassles and potential security problems of an NTP server.

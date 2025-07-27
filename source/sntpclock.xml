@@ -17,7 +17,7 @@
 
 <refnamediv>
 <refname>sntpclock</refname>
-<refpurpose>check a system's clock through NTP</refpurpose>
+<refpurpose>check a system's clock through SNTP</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -31,9 +31,13 @@
 <title>Description</title>
 
 <para>
-<command>sntpclock</command> connects to an NTP server on <replaceable>host</replaceable>.
-<replaceable>host</replaceable> must be a dotted-decimal IP address.
+<command>sntpclock</command> connects to an NTP server on port 123 of <replaceable>host</replaceable> and acts as a "leaf node" using the SNTP (RFC 2030) subset of NTP (RFC 1305).
+<replaceable>host</replaceable> must be a dotted-decimal IPv4 address, or the value <code>0</code> which is translated to the IP address 127.0.0.1.
 </para>
+
+<note>
+Although <command>sntpclock</command> accepts further arguments, it ignores them, and does not connect to more than 1 server.
+</note>
 
 <para>
 <command>sntpclock</command> prints to its standard output a 16-byte TAI64NA adjustment that, when added to the local UNIX clock, will produce the TAI clock on <replaceable>host</replaceable>.
@@ -45,9 +49,17 @@ This is suitable for input to programs such as <citerefentry><refentrytitle>cloc
 </para>
 
 <para>
-<command>sntpclock</command> does not bind to port 123; this means that it does not need to run as <code>root</code>.
-Note that some firewalls will not permit <command>sntpclock</command> requests.
+<command>sntpclock</command> does not bind to port 123; this means that it does not need to run as the superuser.
+It may, rather, use any non-reserved source port that the operating system selects.
 </para>
+<note>
+Strictly, this is not conformant with RFC 2030, although it matches exactly the way in which RFC 4330 was later to loosen the restrictions of RFC 2030 eight years after <command>sntpclock</command> was written, and conforms with the client/server (non-symmetric) mode specified in RFC 5905 twelve years afterwards.
+</note>
+
+<note>
+Some historical firewalls that strictly enforced RFC 2030 did not permit <command>sntpclock</command> requests; albeit that those firewalls were rendered incorrect by RFC 4330 and RFC 5905.
+(Of course, any firewall can also be explicitly configured by its operator, or come default configured from its manufacturer, to block NTP, client/server or even symmetric.)
+</note>
 
 </refsection>
 
@@ -60,8 +72,21 @@ An NTP timestamp is a count of non-leap seconds.
 For a discussion of the difference between UTC and TAI see <ulink url="http://cr.yp.to/proto/utctai.html">UTC and TAI</ulink>.
 </para>
 
+</refsection>
+
+<refsection>
+<title>Bugs</title>
+
 <para>
-The current NTP time scale will break down in 2036.
+SNTP transactions that cross a leap second will not correctly synchronize a system where the system clock ticks in SI (a.k.a. TAI) seconds.
+This is a problem with the protocol itself, as the UTC timestamp does not uniquely identify 1 TAI second at the point of a positive leap second.
+Avoid using <command>sntpclock</command> across a leap second on such systems.
+</para>
+
+<para>
+The 32-bit NTP time scale of RFC 1305 (and RFC 5905, which does not change the 32-bit on-the-wire seconds counts) will break down in 2036.
+There is a suggested convention in RFC 4330 to extend this to 2104, subject to a window where the protocol breaks down because of an all-zero field, which however was obsoleted by a complex system of assumed "eras" in RFC 5905.
+A better approach is to use a 64-bit on-the-wire protocol that includes leap seconds and ticks SI seconds, such as <ulink url="http://cr.yp.to/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
 </para>
 
 </refsection>
@@ -71,6 +96,20 @@ The current NTP time scale will break down in 2036.
 <para>
 <command>sntpclock</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
 </para>
+</refsection>
+
+<refsection>
+<title>See also</title>
+<variablelist>
+<varlistentry>
+<term><citerefentry><refentrytitle>taiclock</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem><para>a similar program that uses the TAICLOCK protocol</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><citerefentry><refentrytitle>clockspeed</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
+<listitem></listitem>
+</varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

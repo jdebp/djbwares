@@ -15,9 +15,9 @@
 #include <signal.h>
 #include <termios.h> /* for TIOCEXCL on Sun */
 
-int child;
+static int child;
 
-void sigcont()
+void sigcont(void)
 {
   /*XXX: use killpg instead? */
   kill(-child,SIGCONT);
@@ -26,13 +26,11 @@ void sigcont()
 #define FATAL "ptyspawn: fatal: "
 #define WARNING "ptyspawn: warning: "
 
-int flagpreserve2 = 0;
-int flagpreserve3 = 0;
-int flagexcl = 0;
+static int flagpreserve2 = 0;
+static int flagpreserve3 = 0;
+static int flagexcl = 0;
 
-int main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int r;
   int wstat;
@@ -107,6 +105,8 @@ char **argv;
       if (error_temp(errno))
         strerr_die4sys(111,FATAL,"unable to run ",*argv,": ");
       strerr_die4sys(1,FATAL,"unable to run ",*argv,": ");
+    default:
+      break;
   }
 
   sig_catch(SIGCONT,sigcont);

@@ -33,7 +33,7 @@ static int doit(char *q,char qtype[2])
   if (byte_equal(qtype,2,DNS_T_ANY)) goto NO_ANY;
   if (!flaga && !flagtxt) goto REFUSE;
 
-  if (dd(q,base,reverseip) != 4) goto REFUSE;
+  if (dd4(q,base,reverseip) != 4) goto REFUSE;
   uint32_unpack(reverseip,&ipnum);
   uint32_pack_big(ip,ipnum);
 

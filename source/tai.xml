@@ -99,12 +99,14 @@ and puts the result into
 <replaceable>t</replaceable>.
 The inputs and outputs may overlap.
 </refsection>
-<refsection><title>See also</title>
-<citerefentry><refentrytitle>tai_now</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai_pack</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>utc</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tai_now</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai_pack</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>utc</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

@@ -21,19 +21,19 @@ void nomem(void)
   strerr_die2x(111,FATAL,"out of memory");
 }
 
-int fd;
-buffer b;
-char bspace[1024];
+static int fd;
+static buffer b;
+static char bspace[1024];
 
-int fdcdb;
-struct cdb_make cdb;
+static int fdcdb;
+static struct cdb_make cdb;
 static stralloc tmp;
 
 static stralloc line;
-int match = 1;
-unsigned long linenum = 0;
+static int match = 1;
+static unsigned long linenum = 0;
 
-char strnum[FMT_ULONG];
+static char strnum[FMT_ULONG];
 
 void syntaxerror(const char *why)
 {
@@ -45,7 +45,7 @@ void die_datatmp(void)
   strerr_die2sys(111,FATAL,"unable to create data.cdb.tmp: ");
 }
 
-int main()
+int main(void)
 {
   char ip[4];
   unsigned long u;

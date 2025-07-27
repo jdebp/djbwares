@@ -28,40 +28,40 @@
 #include "sig.h"
 #include "dns.h"
 
-int verbosity = 1;
-int flagkillopts = 1;
-int flagdelay = 1;
-const char *banner = "";
-int flagremoteinfo = 1;
-int flagremotehost = 1;
-int flagparanoid = 0;
-unsigned long timeout = 26;
+static int verbosity = 1;
+static int flagkillopts = 1;
+static int flagdelay = 1;
+static const char *banner = "";
+static int flagremoteinfo = 1;
+static int flagremotehost = 1;
+static int flagparanoid = 0;
+static unsigned long timeout = 26;
 
 static stralloc tcpremoteinfo;
 
-uint16 localport;
-char localportstr[FMT_ULONG];
-char localip[4];
-char localipstr[IP4_FMT];
+static uint16 localport;
+static char localportstr[FMT_ULONG];
+static char localip[4];
+static char localipstr[IP4_FMT];
 static stralloc localhostsa;
-const char *localhost = 0;
+static const char *localhost = 0;
 
-uint16 remoteport;
-char remoteportstr[FMT_ULONG];
-char remoteip[4];
-char remoteipstr[IP4_FMT];
+static uint16 remoteport;
+static char remoteportstr[FMT_ULONG];
+static char remoteip[4];
+static char remoteipstr[IP4_FMT];
 static stralloc remotehostsa;
-char *remotehost = 0;
+static char *remotehost = 0;
 
-char strnum[FMT_ULONG];
-char strnum2[FMT_ULONG];
+static char strnum[FMT_ULONG];
+static char strnum2[FMT_ULONG];
 
 static stralloc tmp;
 static stralloc fqdn;
 static stralloc addresses;
 
-char bspace[16];
-buffer b;
+static char bspace[16];
+static buffer b;
 
 
 
@@ -69,9 +69,9 @@ buffer b;
 
 #define DROP "tcpserver: warning: dropping connection, "
 
-int flagdeny = 0;
-int flagallownorules = 0;
-const char *fnrules = 0;
+static int flagdeny = 0;
+static int flagallownorules = 0;
+static const char *fnrules = 0;
 
 void drop_nomem(void)
 {
@@ -253,13 +253,13 @@ host port program",0);
   _exit(100);
 }
 
-unsigned long limit = 40;
-unsigned long numchildren = 0;
+static unsigned long limit = 40;
+static unsigned long numchildren = 0;
 
-int flag1 = 0;
-unsigned long backlog = 20;
-unsigned long uid = 0;
-unsigned long gid = 0;
+static int flag1 = 0;
+static unsigned long backlog = 20;
+static unsigned long uid = 0;
+static unsigned long gid = 0;
 
 void printstatus(void)
 {
@@ -358,7 +358,7 @@ main(int argc,char **argv)
     se = getservbyname(x,"tcp");
     if (!se)
       strerr_die3x(111,FATAL,"unable to figure out port number for ",x);
-    localport = ntohs(se->s_port);
+    uint16_unpack_big(se->s_port, &localport);
   }
 
   if (!*argv) usage();
@@ -376,7 +376,7 @@ main(int argc,char **argv)
     strerr_die3x(111,FATAL,"no IP address for ",hostname);
   byte_copy(localip,4,addresses.s);
 
-  s = socket_tcp();
+  s = socket_tcp4();
   if (s == -1)
     strerr_die2sys(111,FATAL,"unable to create socket: ");
   if (socket_bind4_reuse(s,localip,localport) == -1)

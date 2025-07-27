@@ -1,8 +1,8 @@
 #!/bin/sh -e
-# See http://jdebp.eu./FGA/slashpackage.html
-if [ \! -d package -o \! -d source ] 
+# See http://jdebp.uk./FGA/slashpackage.html
+if [ \! -d package -o \! -d source ]
 then
-	echo "You are not in the right directory." 1>&2 
+	echo "You are not in the right directory." 1>&2
 	exit 100
 fi
 
@@ -10,66 +10,78 @@ root="${1-/usr/local/}"
 user="`id -un`"
 group="`id -gn`"
 
-install -d -m 0755 "${root}"etc "${root}"bin "${root}"sbin "${root}"man "${root}"share "${root}"share/doc "${root}"share/doc/djbwares "${root}"include "${root}"lib 
+install -d -m 0755 "${root}"etc "${root}"bin "${root}"sbin "${root}"man "${root}"share "${root}"share/doc "${root}"share/doc/djbwares "${root}"include "${root}"lib
 
 for section in 1 3 5 8
 do
 	if test -r package/extra-manpages${section}
 	then
 		install -d -m 0755 "${root}"man/man${section}
+		install -d -m 0755 "${root}"man/docbook${section}
 		while read -r i
 		do
 			rm -f "${root}"man/man${section}/"$i.${section}"{new}
-			install -p -m 0644 -o "${user}" -g "${group}" -- manual/"$i.${section}" "${root}"man/man${section}/"$i.${section}"{new}
+			install -p -m 0644 -o "${user}" -g "${group}" -- manual/man${section}/"$i.${section}" "${root}"man/man${section}/"$i.${section}"{new}
 			mv -f -- "${root}"man/man${section}/"$i.${section}"{new} "${root}"man/man${section}/"$i.${section}"
+			rm -f "${root}"man/docbook${section}/"$i.xml"{new}
+			install -p -m 0644 -o "${user}" -g "${group}" -- manual/docbook${section}/"$i.xml" "${root}"man/docbook${section}/"$i.xml"{new}
+			mv -f -- "${root}"man/docbook${section}/"$i.xml"{new} "${root}"man/docbook${section}/"$i.xml"
 		done < package/extra-manpages${section}
 	fi
 	if test -r package/commands${section}
 	then
 		install -d -m 0755 "${root}"man/man${section}
+		install -d -m 0755 "${root}"man/docbook${section}
 		while read -r i
 		do
 			test _${section} != _1 || test _"${i}" != _configure || continue
 			rm -f "${root}"man/man${section}/"$i.${section}"{new}
-			install -p -m 0644 -o "${user}" -g "${group}" -- manual/"$i.${section}" "${root}"man/man${section}/"$i.${section}"{new}
+			install -p -m 0644 -o "${user}" -g "${group}" -- manual/man${section}/"$i.${section}" "${root}"man/man${section}/"$i.${section}"{new}
 			mv -f -- "${root}"man/man${section}/"$i.${section}"{new} "${root}"man/man${section}/"$i.${section}"
+			rm -f "${root}"man/docbook${section}/"$i.xml"{new}
+			install -p -m 0644 -o "${user}" -g "${group}" -- manual/docbook${section}/"$i.xml" "${root}"man/docbook${section}/"$i.xml"{new}
+			mv -f -- "${root}"man/docbook${section}/"$i.xml"{new} "${root}"man/docbook${section}/"$i.xml"
 		done < package/commands${section}
 	fi
 	if test -r package/aliases${section}
 	then
 		install -d -m 0755 "${root}"man/man${section}
+		install -d -m 0755 "${root}"man/docbook${section}
 		while read -r c a
 		do
 			rm -f "${root}"man/man${section}/"$a.${section}"{new}
 			ln -f -- "${root}"man/man${section}/"$c.${section}" "${root}"man/man${section}/"$a.${section}"{new}
 			mv -f -- "${root}"man/man${section}/"$a.${section}"{new} "${root}"man/man${section}/"$a.${section}"
+			rm -f "${root}"man/docbook${section}/"$a.xml"{new}
+			ln -f -- "${root}"man/docbook${section}/"$c.xml" "${root}"man/docbook${section}/"$a.xml"{new}
+			mv -f -- "${root}"man/docbook${section}/"$a.xml"{new} "${root}"man/docbook${section}/"$a.xml"
 		done < package/aliases${section}
 	fi
 done
 
-fgrep -v configure package/commands1 | 
+fgrep -v configure package/commands1 |
 while read -r i
 do
 	rm -f "${root}"bin/"$i"{new}
-	install -p -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"bin/"$i"{new}
+	install -p -m 0555 -o "${user}" -g "${group}" -- command/"$i" "${root}"bin/"$i"{new}
 	mv -f -- "${root}"bin/"$i"{new} "${root}"bin/"$i"
 done
-cat package/commands8 | 
+cat package/commands8 |
 while read -r i
 do
 	rm -f "${root}"sbin/"$i"{new}
-	install -p -m 0755 -o "${user}" -g "${group}" -- command/"$i" "${root}"sbin/"$i"{new}
+	install -p -m 0555 -o "${user}" -g "${group}" -- command/"$i" "${root}"sbin/"$i"{new}
 	mv -f -- "${root}"sbin/"$i"{new} "${root}"sbin/"$i"
 done
 
-cat package/headers | 
+cat package/headers |
 while read -r i
 do
 	rm -f "${root}"include/"$i".h{new}
 	install -p -m 0644 -o "${user}" -g "${group}" -- header/"$i".h "${root}"include/"$i".h{new}
 	mv -f -- "${root}"include/"$i".h{new} "${root}"include/"$i".h
 done
-cat package/libraries | 
+cat package/libraries |
 while read -r i
 do
 	rm -f "${root}"library/"$i".a{new}
@@ -81,7 +93,7 @@ for i in COPYING
 do
 	# Documentation
 	rm -f -- "${root}"share/doc/djbwares/"$i"{new}
-	install -p -m 0644 -o "${user}" -g "${group}" -- doc/"$i" "${root}"share/doc/djbwares/"$i"{new}
+	install -p -m 0644 -o "${user}" -g "${group}" -- guide/"$i" "${root}"share/doc/djbwares/"$i"{new}
 	mv -f -- "${root}"share/doc/djbwares/"$i"{new} "${root}"share/doc/djbwares/"$i"
 done
 

@@ -99,11 +99,13 @@ does not start with an ISO-style date and time (including offset),
 <command>caltime_scan</command>
 returns 0.
 </refsection>
-<refsection><title>See also</title>
-<citerefentry><refentrytitle>caltime_tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>caltime_tai</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>caldate</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

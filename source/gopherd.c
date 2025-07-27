@@ -17,6 +17,8 @@
 #include "getln.h"
 #include "byte.h"
 #include "ucspi.h"
+#include "subfd.h"
+#include "env.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -62,6 +64,7 @@ static char strnum[FMT_ULONG];
 static int level = 0;
 static int protocol = 0;
 static int flagmenu = 0;
+static int flaglogunsupported = 0;
 static stralloc path = stralloc_static_0;
 static stralloc plus = stralloc_static_0;
 static stralloc rqdf = stralloc_static_0;
@@ -69,8 +72,24 @@ static stralloc file = stralloc_static_0;
 
 static char filebuf[1024];
 
+static void log(unsigned code,const char *msg)
+{
+  const char *x;
+
+  x = ucspi_get_remoteip_str("0", "0", "0");
+  substdio_puts(subfderr,x);
+  substdio_puts(subfderr," barf ");
+  substdio_put(subfderr,strnum,fmt_ulong(strnum,code));
+  substdio_puts(subfderr," ");
+  substdio_puts(subfderr,msg);
+  substdio_puts(subfderr,"\n");
+  substdio_flush(subfderr);
+}
+
 void barf(unsigned code, const char * selector, const char *message)
 {
+  if (flaglogunsupported)
+    log(code,message);
   if (protocol > 0) {
     out_puts("-""-2\r\n");
     out_put(strnum,fmt_ulong(strnum,code));
@@ -128,8 +147,9 @@ void headers(stralloc * s, const struct tai * mtime, unsigned long length, const
   if (!stralloc_catb(s,mtimestr.s,mtimestr.len)) _exit(21);
   if (!stralloc_cats(s,"\r\n Content-Length: ")) _exit(21);
   if (!stralloc_catb(s,strnum,fmt_ulong(strnum,length))) _exit(21);
-  if (!stralloc_cats(s,"\r\n ")) _exit(21);
+  if (!stralloc_cats(s,"\r\n Content-Type: ")) _exit(21);
   if (!stralloc_catb(s,contenttype.s,contenttype.len)) _exit(21);
+  if (!stralloc_cats(s,"\r\n")) _exit(21);
 }
 
 static stralloc fn = stralloc_static_0;
@@ -286,7 +306,7 @@ void readline(void)
   if (!readline2(&in,&line)) _exit(0);
 }
 
-void doit()
+void doit(void)
 {
   sig_ignore(sig_pipe);
 
@@ -294,6 +314,8 @@ void doit()
   if (!localhost)
 	  localhost = ucspi_get_localip_str("0", "0", "0");
   localport = ucspi_get_localport_str("70", "70", "70");
+  if (env_get("LOGUNSUPPORTED"))
+    flaglogunsupported = 1;
 
   for (;;) {
     int req_field_num;

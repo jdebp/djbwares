@@ -4,7 +4,7 @@
 
 unsigned int caltime_scan(const char *s, struct caltime *ct)
 {
-  char *t = s;
+  const char *t = s;
   unsigned long z;
   unsigned long c;
   int sign;

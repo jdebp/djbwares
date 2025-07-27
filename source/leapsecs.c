@@ -2,12 +2,13 @@
 #include "tai.h"
 #include "leapsecs.h"
 #include "caldate.h"
+#include "strerr.h"
 
 /* XXX: breaks tai encapsulation */
 
 /* XXX: output here has to be binary; DOS redirection uses ASCII */
 
-char line[100];
+static char line[100];
 
 int main(int argc, char** argv)
 {
@@ -15,6 +16,10 @@ int main(int argc, char** argv)
 	struct tai t;
 	char x[TAI_PACK];
 	long leaps = 0;
+
+	if (argc > 1)
+		strerr_die1x(100,"leapsecs: usage: leapsecs");
+	(void)argv;	/* Silence a compiler warning. */
 	
 	while (fgets(line,sizeof line,stdin)) {
 		if (line[0] == '+') {

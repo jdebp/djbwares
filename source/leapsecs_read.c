@@ -18,7 +18,7 @@ static const char * filenames[4] = {
   "/usr/share/libtai/leapsecs.dat",
 };
 
-int leapsecs_read()
+int leapsecs_read(void)
 {
   int fd;
   struct stat st;

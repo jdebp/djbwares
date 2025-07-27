@@ -5,8 +5,8 @@
 unsigned int byte_rchr(const char * s,register unsigned int n,int c)
 {
   register char ch;
-  register char *t;
-  register char *u;
+  register const char *t;
+  register const char *u;
 
   ch = c;
   t = s;

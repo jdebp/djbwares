@@ -1,1 +1,5 @@
-Bernstein publicfile
+ httpd, ftpd, geminid, nicnamed, and gopherd serve (the same) static content from a local directory to remote users.
+ .
+ geminid requires an SSL server; the others can be used with either straight TCP or SSL.
+ .
+ File dates use Bernstein's date library, and so the Bernstein leap seconds database is a recommended accompaniment.

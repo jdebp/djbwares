@@ -34,21 +34,22 @@
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
-
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

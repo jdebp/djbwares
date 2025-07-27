@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange home warn-auto.sh dnstracesort.sh
 (
 cat warn-auto.sh

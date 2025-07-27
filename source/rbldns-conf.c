@@ -12,12 +12,12 @@ void usage(void)
   strerr_die1x(100,"rbldns-conf: usage: rbldns-conf acct logacct /rbldns myip base");
 }
 
-char *dir;
-char *user;
-char *loguser;
-struct passwd *pw;
-char *myip;
-char *base;
+static char *dir;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
+static char *myip;
+static char *base;
 
 int main(int argc,char **argv)
 {

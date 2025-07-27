@@ -36,8 +36,12 @@ It accepts TAICLOCK requests from hosts around the Internet, and responds with t
 
 <para>
 Normally <command>taiclockd</command> is run via a server program such as <command>udp-socket-listen</command> to listen for TAICLOCK queries from hosts around the Internet.
-It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
-If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 4014 of the IP address given by the value of the <envar>IP</envar> environment variable.
+It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv6 socket.
+If no such open file descriptor is provided it falls back to opening its own UDP/IPv6 socket, bound to port 4014 of the IP address given by the value of the <envar>IP</envar> environment variable.
+</para>
+
+<para>
+<command>taiclockd</command> is capable of handling both IPv4 and IPv6 requests on combined-stack systems.
 </para>
 
 <para>
@@ -58,6 +62,7 @@ See <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname
 <title>History</title>
 <para>
 <command>taiclockd</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s clockspeed toolset in 1998.
+It was converted to IPv6 in 2025 with the original IPv4-only tool renamed to <citerefentry><refentrytitle>taiclock4d</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsection>
 

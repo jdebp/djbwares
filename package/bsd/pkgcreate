@@ -9,17 +9,25 @@ then
 	echo "usage: $0 meta-dir root-dir basename" 1>&2
 	exit 100
 fi
-new_pkg() {
+pkgng_create() {
 	pkg create -m "$1" -r "$2" -o ./
 }
-old_pkg() {
+old_pkg1() {
+	local version comment maintainer
+	version="`/bin/pwd -P | sed -E 's/^.*-([[:digit:]][[:alnum:].]*)$/\1/'`"
+	maintainer="`sed -n -e '/Maintainer:/s/^Maintainer://p' package/debian/control`"
+	comment="`head -n 1 $1/+COMMENT`"
+	pkg_create -f "$1/+MANIFEST" -d "$1/+DESC" -D COMMENT="${comment}" -D MAINTAINER="${maintainer}" -D FULLPKGPATH="sysutils/$3" -p / -B "$2" "./$3-${version}.tgz"
+}
+pkgsrc_create() {
 	local version comment maintainer
 	version="`/bin/pwd | sed -E 's/^.*-([[:digit:]][[:alnum:].]*)$/\1/'`"
 	maintainer="`sed -n -e '/Maintainer:/s/^Maintainer://p' package/debian/control`"
-	comment="djbwares: $i"
-	pkg_create -f "$1/+MANIFEST" -d "$1/+DESC" -D COMMENT="${comment}" -D MAINTAINER="${maintainer}" -D FULLPKGPATH="sysutils/$3" -p / -B "$2" "./$3-${version}.tgz"
+	pkg_create -f "$1/+MANIFEST" -d "$1/+DESC" -c "$1/+COMMENT" -b "$1/+BUILD_VERSION" -B "$1/+BUILD_INFO" -i "$1/+INSTALL" -k "$1/+DEINSTALL" -p "$2/" "./$3-${version}.tgz"
 }
 case "`uname`" in
-OpenBSD)	old_pkg "$@" ;;
-*)		new_pkg "$@" ;;
+OpenBSD)	old_pkg1 "$@" ;;
+NetBSD)		pkgsrc_create "$@" ;;
+FreeBSD)	pkgng_create "$@" ;;
+*)		exec false ;;
 esac

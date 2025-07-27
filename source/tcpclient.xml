@@ -66,21 +66,21 @@ On successful connection, the exit status is (of course) whatever the exit statu
 <refsection><title>General options</title>
 <variablelist>
 <varlistentry>
-<term><arg>-q</arg></term>
+<term><arg choice="plain">-q</arg></term>
 <listitem><para>
 Quiet.
 Do not print error messages. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-Q</arg></term>
+<term><arg choice="plain">-Q</arg></term>
 <listitem><para>
 (Default.)
 Print error messages. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-v</arg></term>
+<term><arg choice="plain">-v</arg></term>
 <listitem><para>
 Verbose.
 Print error messages and status messages. 
@@ -92,7 +92,7 @@ Print error messages and status messages.
 <refsection><title>Connection options</title>
 <variablelist>
 <varlistentry>
-<term><arg>-T</arg> <replaceable>x</replaceable>+<replaceable>y</replaceable></term>
+<term><arg choice="plain">-T <replaceable>x</replaceable>+<replaceable>y</replaceable></arg></term>
 <listitem><para>
 Give up on the connection attempt after <replaceable>x</replaceable>+<replaceable>y</replaceable> seconds.
 Default: 2+58. When a host has several IP addresses,
@@ -102,28 +102,28 @@ Before version 0.88, <command>tcpclient</command> will use only <replaceable>x</
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-i</arg> <replaceable>localip</replaceable></term>
+<term><arg choice="plain">-i <replaceable>localip</replaceable></arg></term>
 <listitem><para>
 Use <replaceable>localip</replaceable> as the IP address for the local side of the connection; quit if <replaceable>localip</replaceable> is not available.
 Normally <command>tcpclient</command> lets the operating system choose an address. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-p</arg> <replaceable>localport</replaceable></term>
+<term><arg choice="plain">-p <replaceable>localport</replaceable></arg></term>
 <listitem><para>
 Use <replaceable>localport</replaceable> as the TCP port for the local side of the connection; quit if <replaceable>localport</replaceable> is not available.
 Normally <command>tcpclient</command> lets the operating system choose a port. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-d</arg></term>
+<term><arg choice="plain">-d</arg></term>
 <listitem><para>
 Delay sending data for a fraction of a second whenever the remote host is responding slowly.
 This is currently the default, but it may not be in the future; if you want it, set it explicitly. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-D</arg></term>
+<term><arg choice="plain">-D</arg></term>
 <listitem><para>
 Never delay sending data; enable the <code>TCP_NODELAY</code> socket option. 
 </para></listitem>
@@ -134,7 +134,7 @@ Never delay sending data; enable the <code>TCP_NODELAY</code> socket option.
 <refsection><title>Data-gathering options</title>
 <variablelist>
 <varlistentry>
-<term><arg>-h</arg></term>
+<term><arg choice="plain">-h</arg></term>
 <listitem><para>
 (Default.)
 Look up the remote host name in DNS to set the environment variable <envar>TCPREMOTEHOST</envar>. 
@@ -146,20 +146,20 @@ Use <arg>-H</arg> wherever possible.
 </listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-H</arg></term>
+<term><arg choice="plain">-H</arg></term>
 <listitem><para>
 Do not look up the remote host name in DNS; remove the environment variable <envar>TCPREMOTEHOST</envar>. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-l</arg> <replaceable>localname</replaceable></term>
+<term><arg choice="plain">-l <replaceable>localname</replaceable></arg></term>
 <listitem><para>
 Do not look up the local host name in DNS; use <replaceable>localname</replaceable> for the environment variable <envar>TCPLOCALHOST</envar>.
 A common choice for localname is 0.
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-r</arg></term>
+<term><arg choice="plain">-r</arg></term>
 <listitem><para>
 (Default.)
 Attempt to obtain <envar>TCPREMOTEINFO</envar> from the remote host.
@@ -172,13 +172,13 @@ Other compatible tools (such as <citerefentry><refentrytitle>s6-tcpclient</refen
 </listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-R</arg></term>
+<term><arg choice="plain">-R</arg></term>
 <listitem><para>
 Do not attempt to obtain <envar>TCPREMOTEINFO</envar> from the remote host. 
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><arg>-t</arg> <replaceable>n</replaceable></term>
+<term><arg choice="plain">-t <replaceable>n</replaceable></arg></term>
 <listitem><para>
 Give up on the <envar>TCPREMOTEINFO</envar> connection attempt after <replaceable>n</replaceable> seconds.
 Default: 26. 
@@ -190,20 +190,22 @@ Default: 26.
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcprules</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

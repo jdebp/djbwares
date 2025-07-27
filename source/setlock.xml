@@ -98,22 +98,24 @@ If <filename><replaceable>fn</replaceable></filename> cannot be opened (or creat
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
-<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

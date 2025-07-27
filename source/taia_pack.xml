@@ -54,9 +54,11 @@ See
 <command>http://pobox.com/~djb/proto/tai64.txt</command>
 for more information about TAI64NA format.
 </refsection>
-<refsection><title>See also</title>
-<citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>taia</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

@@ -19,24 +19,24 @@ void usage(void)
   strerr_die1x(100,"configure: usage: configure acct logacct /public hostname hostip ...");
 }
 
-char *dir;
-char *fn;
-char buf[1024];
-int fd;
-substdio ss;
+static char *dir;
+static const char *fn;
+static char buf[1024];
+static int fd;
+static substdio ss;
 
 void fail(void)
 {
   strerr_die6sys(111,FATAL,"unable to create ",dir,"/",fn,": ");
 }
 
-void makedir(char *s)
+void makedir(const char *s)
 {
   fn = s;
   if (mkdir(fn,0700) == -1) fail();
 }
 
-void start(char *s)
+void start(const char *s)
 {
   fn = s;
   fd = open_trunc(fn);
@@ -61,9 +61,9 @@ void perm(int mode)
   if (chmod(fn,mode) == -1) fail();
 }
 
-char *user;
-char *loguser;
-struct passwd *pw;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
 
 int main(int argc,char **argv)
 {

@@ -34,6 +34,7 @@ fghack
 finger@
 fixcrio
 ftpd
+geminid
 gopherd
 host
 http@
@@ -68,6 +69,7 @@ svstat
 tai64n
 tai64nlocal
 taiclock
+taiclock4d
 taiclockd
 tcpcat
 tcpclient

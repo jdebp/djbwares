@@ -463,7 +463,7 @@ int main(int argc,char **argv)
       buffer_puts(buffer_1,"ALERT:some caches do not handle localhost internally\n");
       address_add(q,"\177\0\0\1");
     }
-    if (dd(q,"",ip) == 4) {
+    if (dd4(q,"",ip) == 4) {
       buffer_put(buffer_1,querystr.s,querystr.len);
       buffer_puts(buffer_1,"ALERT:some caches do not handle IP addresses internally\n");
       address_add(q,ip);

@@ -1,0 +1,38 @@
+div.sidebar { float:right; width:30%; border:4px ridge black; padding:0.2em; background-color:grey; color:white; }
+div.infobox { float:right; width:20%; border:4px ridge black; padding:0.2em; background-color:lime; color:black; }
+div.command-window { border:4px ridge black; padding:0.2em; color:white; background-color:black; }
+blockquote.standard-text { color:black; background-color:aqua; }
+blockquote.commentary { color:black; background-color:grey; }
+blockquote.config-file { color:black; background-color:khaki; }
+blockquote.script-file { padding:0.2em; color:black; background-color:khaki; }
+blockquote.epigraph { color:black; background-color:khaki; }
+blockquote.halfwidth { width:50%; margin:auto; }
+a.footnotelink { font-size:50%; vertical-align:super; }
+h1.ruled { border-bottom: double grey; }
+h2.ruled { border-bottom: 1px solid grey; }
+h3.ruled { border-bottom: 1px dotted grey; }
+h2.clearright { clear:right; }
+table.sidebar { float:right; border:4px ridge black; padding:0.2em; margin:0.5em; }
+table.grey caption { background-color:black; color:white; }
+table.grey th { background-color:grey; color:white; }
+th.grey { background-color:grey; color:white; }
+table.grey p.bottomright { background-color:grey; color:black; }
+td.absent { background-color:black; }
+td.halftone { color:grey; }
+td.center { text-align:center; }
+p.silver { background-color:silver; color:black; }
+p.compact { margin-top:0px; margin-bottom:0px; }
+p.bottomright { text-align:right; text-align-last:left; vertical-align:text-bottom; }
+p.book { text-indent:2em; }
+p.dropcap::first-line { text-indent:1em; line-height:1em; }
+p.dropcap::first-letter { font-size:200%; font-style:bold; }
+p.note { border:1px dashed; padding:0.5em }
+defn { font-style:italic; }
+span.kbd { border-radius:4px; padding:1px; }
+span.command-prompt { color:aqua; }
+span.kbd-white { border-radius:4px; padding:3px; border:4px outset; line-height:2em; background-color:AntiqueWhite; }
+ul.compact li p { margin-top:0px; margin-bottom:0px; }
+ul.footnotes { font-size:smaller; }
+ul.footnotes li p { margin-top:0px; margin-bottom:0px; }
+ol.footnotes { font-size:smaller; }
+ol.footnotes li p { margin-top:0px; margin-bottom:0px; }

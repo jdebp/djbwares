@@ -10,7 +10,7 @@ static char seed[128];
 
 static stralloc fqdn;
 static stralloc out;
-char str[IP4_FMT];
+static char str[IP4_FMT];
 
 int main(int argc,char **argv)
 {

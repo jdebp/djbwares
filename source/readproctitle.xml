@@ -20,77 +20,95 @@
 <refpurpose>maintains an automatically rotated log in memory for inspection by <citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
 </refnamediv>
 
-readproctitle is available in daemontools 0.75 and above.
 <refsynopsisdiv>
+<cmdsynopsis>
 <command>readproctitle</command>
-<replaceable>L</replaceable>
-<replaceable>D</replaceable>
+<arg choice="req"><replaceable>L</replaceable></arg>
+<arg choice="req"><replaceable>D</replaceable></arg>
+</cmdsynopsis>
 </refsynopsisdiv>
+
 <refsection><title>Description</title>
-<replaceable>L</replaceable>
-consists of any number of arguments.
-<replaceable>D</replaceable>
-is one argument consisting of at least five dots.
 
-<command>readproctitle</command>
-reads data into the end of
-<replaceable>D</replaceable>,
-shifting
-<replaceable>D</replaceable>
-to the left to make room. This means that the most recent data is visible
-to process-listing tools such as
-<citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-<command>readproctitle</command>
-always leaves three dots at the left of
-<replaceable>D</replaceable>.
+<para>
+<replaceable>L</replaceable> consists of any number of arguments.
+<replaceable>D</replaceable> is one argument consisting of at least five dots.
+</para>
 
+<para>
+<command>readproctitle</command> reads data into the end of <replaceable>D</replaceable>, shifting <replaceable>D</replaceable> to the left to make room.
+This means that the most recent data is visible to process-listing tools such as <citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<command>readproctitle</command> always leaves three dots at the left of <replaceable>D</replaceable>.
+</para>
+
+<informalexample>
+<para>
 For example, if
+</para>
 
- readproctitle io errors: ....................
+<literallayout><computeroutput>$ </computeroutput><userinput>readproctitle io errors: ....................
+</userinput></literallayout>
 
+<para>
 reads the data
+</para>
 
- fatal error xyz
- warning abc
+<literallayout>
+fatal error xyz
+warning abc
+</literallayout>
 
+<para>
 then its command-line arguments change to
+</para>
 
- readproctitle io errors: ... xyz!warning abc!
+<literallayout><computeroutput>readproctitle io errors: ... xyz!warning abc!
+</computeroutput></literallayout>
 
-with a newline character in place of each !. Process-listing tools typically
-show the newline character as ? or \\n.
+<para>
+with a newline character in place of each <quote>!</quote>.
+Process-listing tools typically show the newline character as <quote>?</quote> or <quote>\\n</quote>.
+</para>
+</informalexample>
 
-<command>readproctitle</command>
-exits when it reaches the end of input.
+<para>
+<command>readproctitle</command> exits when it reaches the end of input.
+</para>
 
-Beware that most implementations of
-<citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-have small argument-length limits. These limits apply to the total length
-of
-<command>readproctitle</command>
-<replaceable>L</replaceable>
-<replaceable>D</replaceable>.
+<warning>
+Beware that most implementations of <citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry> have small argument-length limits.
+These limits apply to the total length of <command>readproctitle</command> <replaceable>L</replaceable> <replaceable>D</replaceable>.
 I have not seen a system with a limit below 512 bytes.
-</refsection>
-<refsection><title>See also</title>
-<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
-<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+</warning>
 
+</refsection>
+
+<refsection><title>History</title>
+<para>
+<command>readproctitle</command> is available in daemontools 0.75 and above.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svscanboot</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

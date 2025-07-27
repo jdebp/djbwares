@@ -39,6 +39,10 @@ It expects to be run via a program such as <citerefentry><refentrytitle>tcpclien
 Everything that it receives from its standard input, it sends to the network server, adding a CR at the end of every line (as if by <citerefentry><refentrytitle>addcr</refentrytitle><manvolnum>1</manvolnum></citerefentry>).
 Everything that it receives from the network server, it sends to its standard output.
 </para>
+<note>
+This will only do the right thing interactively, when its standard input and output are a terminal device, if the line discipline has been configured into <code>icrnl -onlcr -ocrnl</code> mode, so that CR (often what a terminal's <keycap>&#x2ba0;&#xa0;Return</keycap> key really sends) is translated to LF on terminal input and both CR and LF are left as-is on terminal output.
+<command>mconnect-io</command> takes no steps to ensure this, and relies upon something else such as <citerefentry><refentrytitle>stty</refentrytitle><manvolnum>1</manvolnum></citerefentry> having configured the terminal device.
+</note>
 
 </refsection>
 

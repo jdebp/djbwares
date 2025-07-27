@@ -12,11 +12,11 @@ void usage(void)
   strerr_die1x(100,"pickdns-conf: usage: pickdns-conf acct logacct /pickdns myip");
 }
 
-char *dir;
-char *user;
-char *loguser;
-struct passwd *pw;
-char *myip;
+static char *dir;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
+static char *myip;
 
 int main(int argc,char **argv)
 {

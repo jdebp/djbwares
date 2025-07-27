@@ -1,6 +1,7 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 main="`basename "$1"`"
-objects="${main}.o auto_home.o file.o ucspi.o"
-libraries="strerr.a buffer.a substdio.a env.a str.a unix.a"
+objects="${main}.o auto_home.o file.o"
+libraries="ucspi.a strerr.a buffer.a substdio.a env.a str.a unix.a"
 redo-ifchange link ${objects} ${libraries} socket.lib
 exec ./link "$3" ${objects} ${libraries} `cat socket.lib`

@@ -5,12 +5,13 @@
 #include "strerr.h"
 #include "readwrite.h"
 #include <sys/signal.h>
+#include <signal.h>
 
-char outbuf[512];
-buffer bout;
+static char outbuf[512];
+static buffer bout;
 
-char inbuf[512];
-buffer bin;
+static char inbuf[512];
+static buffer bin;
 
 int myread(int fd,char *buf,int len)
 {
@@ -18,7 +19,7 @@ int myread(int fd,char *buf,int len)
   return read(fd,buf,len);
 }
 
-int main()
+int main(void)
 {
   int pid;
   int wstat;

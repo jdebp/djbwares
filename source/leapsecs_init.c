@@ -2,7 +2,7 @@
 
 static int flaginit = 0;
 
-int leapsecs_init()
+int leapsecs_init(void)
 {
   if (flaginit) return 0;
   if (leapsecs_read() == -1) return -1;

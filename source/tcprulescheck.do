@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 main="`basename "$1"`"
 objects="${main}.o rules.o"
 libraries="alloc.a cdb.a env.a buffer.a unix.a byte.a fs.a"

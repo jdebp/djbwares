@@ -30,12 +30,19 @@
 <title>Description</title>
 
 <para>
-<command>clockspeed</command> resets the local UNIX clock every three seconds according to (1) an internal hardware tick counter and (2) occasional real-time measurements from a reliable source.
+<command>clockspeed</command> resets the local UNIX clock every three seconds according to (1) an internal hardware counter on the central processing unit and (2) occasional real-time measurements from a reliable source.
 </para>
 
+<caution>
+On older x86 and amd64 processors, the CPU's internal counter does not run at a constant rate, as its update frequency is determined by CPU frequency, which the operating system can vary dynamically according to system load and system power management policy.
+The same is true for the virtual count register of arm64 processors.
+Only use <command>clockspeed</command> on processors that have what the amd64 world calls an "Invariant Time-Stamp Counter", whose update frequency is fixed.
+</caution>
+
 <para>
-<command>clockspeed</command> reads the real-time measurements from <filename>/usr/local/clockspeed/adjust</filename>.
+<command>clockspeed</command> reads the real-time measurements from <filename>/usr/local/clockspeed/adjust</filename>, a FIFO which it creates and reads from.
 Each real-time measurement must be a single 16-byte packet, expressed as a TAI64NA time adjustment to the local UNIX clock.
+This is the output of programs such as <citerefentry><refentrytitle>taiclock</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>sntpclock</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 
 <para>
@@ -44,9 +51,9 @@ It is your responsibility to make sure that the measurements are reliable.
 </para>
 
 <para>
-After two real-time measurements, <command>clockspeed</command> can figure out the number of real attoseconds per tick.
-It saves this number in TAI64NA format in <filename>/usr/local/clockspeed/etc/atto</filename>, overwriting <filename>usr/local/clockspeed/etc/atto.tmp</filename> for reliability.
-It reads <filename>usr/local/clockspeed/etc/atto</filename> when it starts up again.
+After two real-time measurements, <command>clockspeed</command> can figure out the number of real attoseconds per CPU tick.
+It saves this number in TAI64NA format in <filename>/usr/local/clockspeed/etc/atto</filename>, overwriting <filename>/usr/local/clockspeed/etc/atto.tmp</filename> for reliability.
+It reads <filename>/usr/local/clockspeed/etc/atto</filename> when it starts up again.
 </para>
 
 <para>

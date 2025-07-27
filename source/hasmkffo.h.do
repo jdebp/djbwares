@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange trymkffo.c compile link
 if ( ./compile trymkffo.o trymkffo.c trymkffo.d && ./link trymkffo trymkffo.o ) >/dev/null 2>&1
 then

@@ -1,8 +1,6 @@
 #include "str.h"
 
-unsigned int str_copy(s,t)
-register char *s;
-register const char *t;
+unsigned int str_copy(register char *s,register const char *t)
 {
  register int len;
 

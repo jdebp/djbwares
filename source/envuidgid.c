@@ -11,9 +11,9 @@ void nomem(void)
   strerr_die2x(111,FATAL,"out of memory");
 }
 
-char strnum[FMT_ULONG];
-const char *account;
-struct passwd *pw;
+static char strnum[FMT_ULONG];
+static const char *account;
+static struct passwd *pw;
 
 int main(int argc,const char *const *argv)
 {

@@ -49,12 +49,13 @@ It does not handle DNS/TCP.
 
 <para>
 <command>rbldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, TXT, or ANY, and queries for domain names not beneath the <replaceable>base</replaceable> domain name.
+<replaceable>base</replaceable> is a domain name apex given by the value of the <envar>BASE</envar> environment variable.
 </para>
 
 <para>
 ANY queries are answered with a single synthesized HINFO resource record set.
 <command>rbldns</command> otherwise answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>rbldns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-The reverse lookup domain names take the form <filename>d.c.b.a.<replaceable>base</replaceable></filename>, where <filename>a.b.c.d</filename> is the IP address being looked up and <replaceable>base</replaceable> is a domain name apex given by the value of the <envar>BASE</envar> environment variable.
+The reverse lookup domain names take the form <filename>d.c.b.a.<replaceable>base</replaceable></filename>, where <filename>a.b.c.d</filename> is the IP address being looked up and <replaceable>base</replaceable> is as aforementioned.
 A queries are answered with the IP address given in the file.
 TXT queries are answered with the message given in the file; replacing a final <code>$</code> in the message, if one is present, with the IP address being asked about.
 </para>

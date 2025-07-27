@@ -26,13 +26,19 @@
 
 #define FATAL "tinydns-data: fatal: "
 
+static unsigned long linenum = 0;
+
+static char strnum[FMT_ULONG];
+
 void die_semantic2(const char * s1, const char * s2)
 {
-  strerr_die3x(111,FATAL,s1,s2) ;
+  strnum[fmt_ulong(strnum,linenum)] = 0;
+  strerr_die5x(111,FATAL,strnum,": ",s1,s2) ;
 }
 void die_semantic4(const char * s1, const char * s2,const char * s3, const char * s4)
 {
-  strerr_die5x(111,FATAL,s1,s2,s3,s4) ;
+  strnum[fmt_ulong(strnum,linenum)] = 0;
+  strerr_die7x(111,FATAL,strnum,": ",s1,s2,s3,s4) ;
 }
 void die_datatmp(void)
 {
@@ -139,7 +145,7 @@ void txtparse(stralloc *sa)
   sa->len = j;
 }
 
-char defaultsoa[20];
+static char defaultsoa[20];
 
 void defaultsoa_init(int fd)
 {
@@ -152,8 +158,8 @@ void defaultsoa_init(int fd)
   byte_copy(defaultsoa + 4,16,"\0\0\100\000\0\0\010\000\0\020\000\000\0\0\012\000");
 }
 
-int fdcdb;
-struct cdb_make cdb;
+static int fdcdb;
+static struct cdb_make cdb;
 static stralloc key;
 static stralloc result;
 
@@ -191,22 +197,19 @@ void rr_finish(const char *owner)
     die_datatmp();
 }
 
-buffer b;
-char bspace[1024];
+static buffer b;
+static char bspace[1024];
 
 static stralloc line;
-int match = 1;
-unsigned long linenum = 0;
+static int match = 1;
 
 #define NUMFIELDS 15
 static stralloc f[NUMFIELDS];
 
 static char *d1;
 static char *d2;
-char dptr4[DNS_NAME4_DOMAIN];
-char dptr6[DNS_NAME6_DOMAIN];
-
-char strnum[FMT_ULONG];
+static char dptr4[DNS_NAME4_DOMAIN];
+static char dptr6[DNS_NAME6_DOMAIN];
 
 void syntaxerror(const char *why)
 {
@@ -214,7 +217,7 @@ void syntaxerror(const char *why)
   strerr_die4x(111,FATAL,"unable to parse data line ",strnum,why);
 }
 
-int main()
+int main(void)
 {
   int fddata;
   unsigned int i;
@@ -473,8 +476,15 @@ int main()
           rr_start(DNS_T_A,ttl,ttd,loc); 
           rr_add(ip4,sizeof ip4); 
           rr_finish(d2); 
-	} else if (f[1].len > 1)
-	  die_semantic4("unparseable IP address in ","S"," line: ", f[1].s) ;
+	} else if (f[1].len > 1) {
+	  iplen = ip6_scan(f[1].s,ip6,'_') ;
+	  if (iplen != 0 && iplen + 1 == f[1].len) {
+	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
+	    rr_add(ip6,sizeof ip6);
+	    rr_finish(d2);
+	  } else if (f[1].len > 1)
+	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
+	}
         break; 
 
       case '^': case 'C':

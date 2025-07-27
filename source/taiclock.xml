@@ -33,7 +33,7 @@
 <para>
 <command>taiclock</command> connects to a TAICLOCK server on <replaceable>host</replaceable>.
 It communicates using <ulink url="http://cr.yp.to/proto/taiclock.txt">the TAICLOCK protocol</ulink>.
-<replaceable>host</replaceable> must be a dotted-decimal IP address.
+<replaceable>host</replaceable> must be a dotted-decimal IPv4 address, or the value <code>0</code> which is translated to the IP address 127.0.0.1.
 </para>
 
 <para>

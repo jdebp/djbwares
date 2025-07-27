@@ -39,7 +39,7 @@ static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qc
   pos = dns_packet_getname(buf,len,pos,q); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) return 0;
-  if (byte_diff(qclass,2,DNS_C_IN) && byte_diff(qclass,2,DNS_C_ANY)) return 0;
+  if (byte_diff(qclass,2,DNS_C_IN)) return 0;
 
   byte_copy(id,2,header);
   return 1;
@@ -50,6 +50,7 @@ static char myipoutgoing[4];
 static char myipincoming[4];
 static char buf[1024];
 uint64 numqueries = 0;
+static uint16 myportincoming = 0;
 
 
 static int udp53;
@@ -132,7 +133,7 @@ void u_new(void)
 static int tcp53;
 
 #define MAXTCP 20
-struct tcpclient {
+static struct tcpclient {
   struct query q;
   struct taia start;
   struct taia timeout;
@@ -305,9 +306,9 @@ void t_new(void)
 }
 
 
-iopause_fd io[3 + MAXUDP + MAXTCP];
-iopause_fd *udp53io;
-iopause_fd *tcp53io;
+static iopause_fd io[3 + MAXUDP + MAXTCP];
+static iopause_fd *udp53io;
+static iopause_fd *tcp53io;
 
 static void doit(void)
 {
@@ -384,72 +385,22 @@ static void doit(void)
   
 #define FATAL "dnscache: fatal: "
 
-char seed[128];
+static char seed[128];
 
-int main()
+int main(void)
 {
   char *x;
   unsigned long cachesize;
-  int pid, fd;
-  unsigned long i;
-  unsigned int o, len;
-  int do_listen;
+  int do_listen, do_udp_options;
 
   udp53 = tcp53 = -1;
-  do_listen = 0;
-  x = env_get("LISTEN_PID");
-  if (x) {
-    pid = getpid();
-    len = scan_ulong(x, &i);
+  do_listen = do_udp_options = 1;
+  socket_listen_get_udptcp4(FATAL,&udp53,&tcp53,&do_listen,&do_udp_options,&myportincoming,myipincoming,53);
 
-    if (len && !x[len] && pid == i) {
-      x = env_get("LISTEN_FDS");
-      if (x) {
-        len = scan_ulong(x, &i);
+  droproot(FATAL);
 
-        if (len && !x[len]) {
-          for (o = 0U; o < i; ++o) {
-            fd = 3 + o;
-            if (socket_is_udp(fd))
-              udp53 = fd;
-            else
-            if (socket_is_tcp(fd))
-              tcp53 = fd;
-          }
-        }
-      }
-    }
-  }
-  if (udp53 == -1 || tcp53 == -1) {
-    x = env_get("IP");
-    if (!x)
-      strerr_die2x(111,FATAL,"$IP not set");
-    if (!ip4_scan(x,myipincoming))
-      strerr_die3x(111,FATAL,"unable to parse IP address ",x);
-
-    if (udp53 == -1) {
-      udp53 = socket_udp();
-      if (udp53 == -1)
-	strerr_die2sys(111,FATAL,"unable to create UDP socket: ");
-      if (socket_bind4_reuse(udp53,myipincoming,53) == -1)
-	strerr_die2sys(111,FATAL,"unable to bind UDP socket: ");
-    }
-
-    if (tcp53 == -1) {
-      tcp53 = socket_tcp();
-      if (tcp53 == -1)
-	strerr_die2sys(111,FATAL,"unable to create TCP socket: ");
-      if (socket_bind4_reuse(tcp53,myipincoming,53) == -1)
-	strerr_die2sys(111,FATAL,"unable to bind TCP socket: ");
-      do_listen = 1;
-    }
-
-    droproot(FATAL);
-
+  if (do_udp_options)
     socket_tryreservein(udp53,131072);
-  } else {
-    droproot(FATAL);
-  }
 
   byte_zero(seed,sizeof seed);
   read(0,seed,sizeof seed);

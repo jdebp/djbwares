@@ -32,8 +32,8 @@ long safewrite(int fd,char *buf,int len)
   return r;
 }
 
-char outbuf[1024];
-substdio out = SUBSTDIO_FDBUF(safewrite,1,outbuf,sizeof outbuf);
+static char outbuf[1024];
+static substdio out = SUBSTDIO_FDBUF(safewrite,1,outbuf,sizeof outbuf);
 
 void out_flush(void)
 {
@@ -64,8 +64,8 @@ long saferead(int fd,char *buf,int len)
   return r;
 }
 
-char inbuf[512];
-substdio in = SUBSTDIO_FDBUF(saferead,0,inbuf,sizeof inbuf);
+static char inbuf[512];
+static substdio in = SUBSTDIO_FDBUF(saferead,0,inbuf,sizeof inbuf);
 
 void in_get(char *ch)
 {
@@ -90,20 +90,20 @@ void in_get(char *ch)
   }
 }
 
-char strnum[FMT_ULONG];
-struct ip_address iplocal = { {0,0,0,0} };
-struct ip_address ipremote = { {0,0,0,0} };
-struct sockaddr_in sa;
+static char strnum[FMT_ULONG];
+static struct ip_address iplocal = { {0,0,0,0} };
+static struct ip_address ipremote = { {0,0,0,0} };
+static struct sockaddr_in sa;
 
-int fdlisten = -1; /* PASV socket; -1 if PASV not active */
-unsigned int portremote = 0;
+static int fdlisten = -1; /* PASV socket; -1 if PASV not active */
+static unsigned int portremote = 0;
 static int anonymous_login = 0;
 static int epsv_only = 0;
 
-stralloc host = stralloc_static_0;
-stralloc dir = stralloc_static_0;
-stralloc ndir = stralloc_static_0;
-stralloc fn = stralloc_static_0;
+static stralloc host = stralloc_static_0;
+static stralloc dir = stralloc_static_0;
+static stralloc ndir = stralloc_static_0;
+static stralloc fn = stralloc_static_0;
 
 void startlistening(unsigned char x[6])
 {
@@ -525,7 +525,7 @@ void request(char *cmd,char *arg)
     out_puts("214-See these:\r\n"
              " Daniel J. Bernstein's FTP doco: http://cr.yp.to/ftp.html\r\n"
              " publicfile home page: http://cr.yp.to/publicfile.html\r\n"
-             " djbwares home page: http://jdebp.eu./Source/djbwares/\r\n"
+             " djbwares home page: http://jdebp.uk./Source/djbwares/\r\n"
 	     "214 .\r\n");
     return;
   }
@@ -541,7 +541,7 @@ void request(char *cmd,char *arg)
   out_puts("502 Sorry, I don't understand that command.\r\n");
 }
 
-stralloc line = stralloc_static_0;
+static stralloc line = stralloc_static_0;
 
 void doit(void)
 {

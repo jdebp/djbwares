@@ -1,6 +1,6 @@
 #include "fmt.h"
 
-unsigned int fmt_xlong(s,u) register char *s; register unsigned long u;
+unsigned int fmt_xlong(register char *s,register unsigned long u)
 {
   register unsigned int len; register unsigned long q; register char c;
   len = 1; q = u;

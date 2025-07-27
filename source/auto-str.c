@@ -1,8 +1,8 @@
 #include "buffer.h"
 #include "exit.h"
 
-char bspace[256];
-buffer b = BUFFER_INIT(buffer_unixwrite,1,bspace,sizeof bspace);
+static char bspace[256];
+static buffer b = BUFFER_INIT(buffer_unixwrite,1,bspace,sizeof bspace);
 
 void puts(const char *s)
 {

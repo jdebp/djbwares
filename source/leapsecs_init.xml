@@ -86,23 +86,25 @@ Initially it is the same as <function>leapsecs_read</function>; however, once <f
 
 <para>
 <function>leapsecs_add</function> and <function>leapsecs_sub</function> call <function>leapsecs_init</function>.
-<emphasis>WARNING:</emphasis>
+</para>
+<warning>
 If <function>leapsecs_init</function> returns failure, <function>leapsecs_add</function> and <function>leapsecs_sub</function> will proceed without a leap-second table.
 For reliability, all programs should call <function>leapsecs_init</function> at startup and check for errors.
-</para>
+</warning>
 
-<para>
-<emphasis>WARNING:</emphasis>
+<warning>
 New entries are added to the leap-second table on disk every 12 to 18 months.
 <function>leapsecs_read</function> may be called repeatedly.
 It leaves the old table alone on error.
 For reliability, all long-running programs should call <function>leapsecs_read</function> at least once every month.
-</para>
+</warning>
+
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

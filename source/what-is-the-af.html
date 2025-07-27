@@ -1,0 +1,39 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>What is the "af"?</title>
+<h1 class="Ruled">What is the "af"?</h1>
+
+<p>
+Several of the manual pages for the DNS tools in the <a href="index.html">djbwares toolset</a> use the (super)domain name <code>af.example.</code>
+This is why.
+</p>
+
+<p>
+Daniel J. Bernstein's <a href="http://cr.yp.to/djbdns.html">djbdns</a> version 1.05 was released back on 2001-02-11.
+Bernstein had been working on it since December 1999.
+It had no manual pages per se, only HTML documentation on Bernstein's own site on the WWW.
+These pages still exist.
+Compare Daniel J. Bernstein's original <a href="http://cr.yp.to/djbdns/tinydns-data.html"><code>tinydns-data</code> documentation</a> with the <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> manual page here, for example.
+</p>
+
+<p>
+In the original documentation, IP addresses such as 1.2.3.4 were used as examples, as were domain names ending in <code>.af.mil</code>.
+This was not uncommon at the turn of the 21st century.
+<a href="https://www.rfc-editor.org/rfc/rfc2606">RFC 2606</a> had only just reserved <code>example.</code> as a top-level domain in 1999, a mere 5 months before Bernstein began; and IANA would not explicitly reserve ranges of IP addresses for use in documentation for another decade, with the release of <a href="https://www.rfc-editor.org/rfc/rfc5737">RFC 5737</a> in 2010.
+</p>
+
+<p>
+As of 2025, the use of domain names owned by the United States of America's Air Force was rather more jarring to readers than it would have been in February 2001, however.
+A lot of people had switched their documentation to the IANA reserved domain names, and things like <code>af.mil</code> were rather more prominent and unusual than they were back when Bill Clinton was president of the United States of America, Pink Floyd had toured just a handful of years prior, and <i>The Princess Bride</i> movie was only 12 years old.
+</p>
+
+<p>
+Furthermore, CloudFlare had gone through a very public process of <a href="https://blog.cloudflare.com/dns-resolver-1-1-1-1/">adopting the IP addresses 1.1.1.1 and 1.0.0.1</a> &mdash; for the purpose of providing open proxy DNS service, no less! &mdash; and combatting <a href="https://www.zdnet.com/article/1-1-1-1-cloudflares-new-dns-attracting-gigabits-per-second-of-rubbish/">decades of people abusing such off-the-cuff IP addresses as placeholders in documentation and indeed as default configuration settings in real network devices</a>.
+The continued use of 1.2.3.4 and suchlike in djbwares documentation was one more contributor to the world doing the same thing for a similar address range.
+(At the time of the change, various public services that looked up Autonomous Systems from IP address blocks gave a random company in China as the owner of 1.2.3.4, albeit listing hundreds of other companies and organizations who had just unilaterally purloined that IP address.)
+</p>
+
+<p>
+So both the domain names and IP addresses were updated in the manual pages in 2025.
+Although the superdomain <code>af.mil.</code> could have been entirely replaced by <code>example.</code>, retaining the <code>af</code> retains some of the spirit of the original documentation, whilst introducing a talking point of where the "af" comes from (and why it does not mean what you think that it means, you dirty-minded people!) for future generations.
+</p>

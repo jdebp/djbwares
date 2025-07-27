@@ -4,35 +4,42 @@
 
 .PHONY: build binary stage control clean
 
+BINARY_PACKAGES=djbwares-guide publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai djbdns-host leapsecs
+
 # Target this in order to make the package contents.
 build:
 	MAKEFLAGS= package/compile
 
 # Target this in order to clean the build areas.
 clean:
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
+	echo 1>&2 "Cleaning individual staged packages under bsd/ ."
+	for i in ${BINARY_PACKAGES} ; \
 	do \
 		rm -r -f bsd/"$$i"/ || exit 1 ; \
 	done
+	echo 1>&2 "Cleaning snapshot area in bsd/tmp/ ."
 	rm -r -f bsd/tmp/
 
 # Target this in order to make the package files.
-binary: stage control
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
-	do \
-		echo 1>&2 "Building package "$$i ; \
-		bsd/pkgcreate bsd/"$$i"/ bsd/"$$i"/ "$$i" || exit 1 ; \
-	done
+binary: stage control create
 
 stage:
-	echo 1>&2 "Building exported image."
-	package/export bsd/tmp/ bsd/tmp/ bsd/tmp/
-	echo 1>&2 "Building staging areas."
+	echo 1>&2 "Snapshotting slashpackage installed directory trees."
+	install -d -m 0755 bsd/tmp
+	pax -r -w -l command config guide manual header library bsd/tmp/
+	echo 1>&2 "Building staging areas for packages under bsd/."
 	package/stage bsd/tmp bsd
 
 control:
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
+	for i in ${BINARY_PACKAGES} ; \
 	do \
 		echo 1>&2 "Building control file for "$$i"." ; \
 		bsd/gencontrol "$$i" bsd/"$$i" || exit 1 ; \
+	done
+
+create:
+	for i in ${BINARY_PACKAGES} ; \
+	do \
+		echo 1>&2 "Building package "$$i ; \
+		bsd/pkgcreate bsd/"$$i"/ bsd/"$$i"/ "$$i" || exit 1 ; \
 	done

@@ -1,0 +1,203 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<meta name="description" content="A list of the commands and tools that are in the djbwares toolset, with hyperlinks to on-line copies of their manual pages." />
+<title>Command and tool list</title>
+<h1 class="Ruled">Command and tool list</h1>
+
+<p>
+The <a href="index.html">djbwares toolset</a> comprises these commands.
+See their manual pages for documentation.
+</p>
+
+<h2 class="Ruled" id="LogManagement">Log management</h2>
+
+<ul class="compact">
+<li><p> <a href="commands/multilog.xml"><code>multilog</code></a> &mdash; read a sequence of lines from stdin and append selected lines to any number of logs </p></li>
+<li><p> <a href="commands/tai64n.xml"><code>tai64n</code></a> &mdash; put a precise timestamp on each line </p></li>
+<li><p> <a href="commands/tai64nlocal.xml"><code>tai64nlocal</code></a> &mdash; convert precise TAI64N timestamps to a human-readable format </p></li>
+</ul>
+
+<h2 class="Ruled" id="DateTime">Date and time</h2>
+
+<h3 class="Ruled" id="Calendar">Calendar tools</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/easter.xml"><code>easter</code></a> &mdash; print the date of Easter in one or more years </p></li>
+<li><p> <a href="commands/nowutc.xml"><code>nowutc</code></a> &mdash; print the current UTC time </p></li>
+<li><p> <a href="commands/yearcal.xml"><code>yearcal</code></a> &mdash; print a calendar for one or more years </p></li>
+</ul>
+
+<h3 class="Ruled" id="ClockManagement">Clock management</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/clockadd.xml"><code>clockadd</code></a> &mdash; adjust the local UNIX clock, once </p></li>
+<li><p> <a href="commands/clockspeed.xml"><code>clockspeed</code></a> &mdash; speed up or slow down the local clock, continuously </p></li>
+<li><p> <a href="commands/clockview.xml"><code>clockview</code></a> &mdash; convert an adjustment to the local clock into human-readable form </p></li>
+<li><p> <a href="commands/date@.xml"><code>date@</code></a> &mdash; UCSPI-TCP DAYTIME client </p></li>
+<li><p> <a href="commands/leapsecs.xml"><code>leapsecs</code></a> &mdash; compile the leap seconds table used by the Bernstein TAI library </p></li>
+<li><p> <a href="commands/sntpclock.xml"><code>sntpclock</code></a> &mdash; check a system's clock through NTP </p></li>
+<li><p> <a href="commands/taiclock.xml"><code>taiclock</code></a> &mdash; check a system's clock through TAICLOCK </p></li>
+<li><p> <a href="commands/taiclockd.xml"><code>taiclockd</code></a> &mdash; announce the system's clock through TAICLOCK over a combined IPv4 and IPv6 stack </p></li>
+<li><p> <a href="commands/taiclock4d.xml"><code>taiclock4d</code></a> &mdash; announce the system's clock through TAICLOCK over IPv4 </p></li>
+</ul>
+
+<h2 class="Ruled" id="DNS">The Domain Name System</h2>
+
+<h3 class="Ruled" id="DNSServers">DNS servers</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/axfrdns.xml"><code>axfrdns</code></a> &mdash; UCSPI-TCP general-purpose content DNS server </p></li>
+<li><p> <a href="commands/dnscache.xml"><code>dnscache</code></a> &mdash; a caching proxy DNS server </p></li>
+<li><p> <a href="commands/pickdns.xml"><code>pickdns</code></a> &mdash; obsolete, a special-purpose content DNS server using the UDP protocol </p></li>
+<li><p> <a href="commands/rbldns.xml"><code>rbldns</code></a> &mdash; an RBL source content DNS server using the UDP protocol </p></li>
+<li><p> <a href="commands/tinydns.xml"><code>tinydns</code></a> &mdash; a general-purpose content DNS server using the UDP protocol </p></li>
+<li><p> <a href="commands/walldns.xml"><code>walldns</code></a> &mdash; an opaque content DNS server using the UDP protocol </p></li>
+</ul>
+
+<h3 class="Ruled" id="DNSLookup">DNS query tools</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/axfr-get.xml"><code>axfr-get</code></a> &mdash; perform an old-style "zone transfer" database replication </p></li>
+<li><p> <a href="commands/dnsfilter.xml"><code>dnsfilter</code></a> &mdash; filter a stream, looking up the domain names of any IP addresses </p></li>
+<li><p> <a href="commands/dnsip.xml"><code>dnsip</code></a> &mdash; look up the IP address(es) for a domain name </p></li>
+<li><p> <a href="commands/dnsipq.xml"><code>dnsipq</code></a> &mdash; look up the IP address(es) for a domain name after applying name qualification </p></li>
+<li><p> <a href="commands/dnsmx.xml"><code>dnsmx</code></a> &mdash; look up the mail exchanger names and weightings for a domain name </p></li>
+<li><p> <a href="commands/dnsname.xml"><code>dnsname</code></a> &mdash; look up the domain name for an IP address </p></li>
+<li><p> <a href="commands/dnsnamex.xml"><code>dnsnamex</code></a> &mdash; look up the domain name for an IP address </p></li>
+<li><p> <a href="commands/dnsq.xml"><code>dnsq</code></a> &mdash; query a content DNS server using the DNS protocol </p></li>
+<li><p> <a href="commands/dnsqr.xml"><code>dnsqr</code></a> &mdash; query a proxy DNS server using the DNS protocol </p></li>
+<li><p> <a href="commands/dnsqrx.xml"><code>dnsqrx</code></a> &mdash; query a proxy DNS server using the DNS protocol </p></li>
+<li><p> <a href="commands/dnstrace.xml"><code>dnstrace</code></a> &mdash; diagnose DNS query resolution problems </p></li>
+<li><p> <a href="commands/dnstracesort.xml"><code>dnstracesort</code></a> &mdash; translate the output of dnstrace into human-readable form </p></li>
+<li><p> <a href="commands/dnstxt.xml"><code>dnstxt</code></a> &mdash; look up the text resource records for a domain name </p></li>
+<li><p> <a href="commands/host.xml"><code>host</code></a> &mdash; query a proxy/content DNS server using the DNS protocol</p></li>
+<li><p> <a href="commands/tinydns-get.xml"><code>tinydns-get</code></a> &mdash; query a content DNS server by reading its database directly </p></li>
+</ul>
+
+<h3 class="Ruled" id="DNSData">DNS server data management</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/pickdns-data.xml"><code>pickdns-data</code></a> &mdash; compile the database used by pickdns </p></li>
+<li><p> <a href="commands/rbldns-data.xml"><code>rbldns-data</code></a> &mdash; compile the database used by rbldns </p></li>
+<li><p> <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> &mdash; compile the database used by tinydns </p></li>
+<li><p> <a href="commands/tinydns-edit.xml"><code>tinydns-edit</code></a> &mdash; modify a tinydns-data source file </p></li>
+</ul>
+
+<h3 class="Ruled" id="DNSServerConfiguration">DNS server configuration</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/axfrdns-conf.xml"><code>axfrdns-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+<li><p> <a href="commands/dnscache-conf.xml"><code>dnscache-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+<li><p> <a href="commands/dnscache-showctl.xml"><code>dnscache-showctl</code></a> &mdash; dump a <code>dnscache</code> service configuration </p></li>
+<li><p> <a href="commands/pickdns-conf.xml"><code>pickdns-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+<li><p> <a href="commands/rbldns-conf.xml"><code>rbldns-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+<li><p> <a href="commands/tinydns-conf.xml"><code>tinydns-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+<li><p> <a href="commands/tinydns-showctl.xml"><code>tinydns-showctl</code></a> &mdash; dump a <code>tinydns</code> service configuration </p></li>
+<li><p> <a href="commands/walldns-conf.xml"><code>walldns-conf</code></a> &mdash; obsolete program for creating service definitions </p></li>
+</ul>
+
+<h2 class="Ruled" id="UCSPI">Unix Client-Server Program Interface</h2>
+
+<ul class="compact">
+<li><p> <a href="commands/addcr.xml"><code>addcr</code></a> &mdash; insert a CR before each LF </p></li>
+<li><p> <a href="commands/delcr.xml"><code>delcr</code></a> &mdash; delete any CR before an LF</p></li>
+<li><p> <a href="commands/fixcrio.xml"><code>fixcrio</code></a> &mdash; insert missing CRs at the ends of lines in both input and output </p></li>
+<li><p> <a href="commands/mconnect-io.xml"><code>mconnect-io</code></a> &mdash; converse with a line-protocol network server </p></li>
+<li><p> <a href="commands/mconnect.xml"><code>mconnect</code></a> &mdash; connect to and converse with a line-protocol server over the network </p></li>
+<li><p> <a href="commands/rblsmtpd.xml"><code>rblsmtpd</code></a> &mdash; wrap a UCSPI-TCP SMTP server with RBL checks </p></li>
+<li><p> <a href="commands/recordio.xml"><code>recordio</code></a> &mdash; record the input and output of a program </p></li>
+<li><p> <a href="commands/tcpcat.xml"><code>tcpcat</code></a> &mdash; general-purpose empty-request UCSPI-TCP client </p></li>
+<li><p> <a href="commands/tcpclient.xml"><code>tcpclient</code></a> &mdash; create an outgoing TCP connection </p></li>
+<li><p> <a href="commands/tcprules.xml"><code>tcprules</code></a> &mdash; compile rules for tcpserver </p></li>
+<li><p> <a href="commands/tcprulescheck.xml"><code>tcprulescheck</code></a> &mdash; check tcprules</p></li>
+<li><p> <a href="commands/tcpserver.xml"><code>tcpserver</code></a> &mdash; accept incoming TCP connections </p></li>
+</ul>
+
+<h2 class="Ruled" id="ChainLoading">Chain-loading tools</h2>
+
+<h3 class="Ruled" id="ProcessState">Chain-loading tools for manipulating the current process state</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/argv0.xml"><code>argv0</code></a> &mdash; run a program with a specified 0th argument.</p></li>
+<li><p> <a href="commands/envdir.xml"><code>envdir</code></a> &mdash; run another program with environment modified according to files in a specified directory.</p></li>
+<li><p> <a href="commands/envuidgid.xml"><code>envuidgid</code></a> &mdash; run another program with environment variables indicating a</p></li>
+<li><p> <a href="commands/nobuf.xml"><code>nobuf</code></a> &mdash; run a program such that the C library does not attempt stdio block buffering </p></li>
+<li><p> <a href="commands/setlock.xml"><code>setlock</code></a> &mdash; run another program with a file locked </p></li>
+<li><p> <a href="commands/setuidgid.xml"><code>setuidgid</code></a> &mdash; run another program under a specified account's uid and gid </p></li>
+<li><p> <a href="commands/softlimit.xml"><code>softlimit</code></a> &mdash; run another program with new resource limits.</p></li>
+</ul>
+
+<h3 class="Ruled" id="ProcessState">Chain-loading tools for use in services</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/background.xml"><code>background</code></a> &mdash; run a program without waiting for it </p></li>
+<li><p> <a href="commands/fghack.xml"><code>fghack</code></a> &mdash; an anti-backgrounding tool </p></li>
+<li><p> <a href="commands/pgrphack.xml"><code>pgrphack</code></a> &mdash; run a program in a separate process group</p></li>
+</ul>
+
+<h2 class="Ruled" id="Daemontools">daemontools service management</h2>
+
+<ul class="compact">
+<!-- <li><p> <a href="commands/readproctitle.xml"><code>readproctitle</code></a> &mdash; obsolete, maintain an automatically rotated log in memory for <code>ps</code> </p></li> -->
+<li><p> <a href="commands/supervise.xml"><code>supervise</code></a> &mdash; start and monitors a service.</p></li>
+<li><p> <a href="commands/svc.xml"><code>svc</code></a> &mdash; control services monitored by supervise </p></li>
+<li><p> <a href="commands/svok.xml"><code>svok</code></a> &mdash; check whether supervise is running </p></li>
+<li><p> <a href="commands/svscan.xml"><code>svscan</code></a> &mdash; start and monitor a collection of services</p></li>
+<!-- <li><p> <a href="commands/svscanboot.xml"><code>svscanboot</code></a> &mdash; obsolete, run <code>svscan</code> piped into <code>readproctitle</code> </p></li> -->
+<li><p> <a href="commands/svstat.xml"><code>svstat</code></a> &mdash; print the status of services monitored byi supervise </p></li>
+</ul>
+
+<h2 class="Ruled" id="Publicfile">publicfile content service</h2>
+
+<h3 class="Ruled" id="PublicfileServers">publicfile servers</h3>
+
+<p>
+All publicfile servers can share a common content directory tree.
+</p>
+
+<ul class="compact">
+<li><p> <a href="commands/ftpd.xml"><code>ftpd</code></a> &mdash; UCSPI-TCP FTP server for static content </p></li>
+<li><p> <a href="commands/geminid.xml"><code>geminid</code></a> &mdash; UCSPI-TCP GEMINI server for static content (requires UCSPI-SSL tools; also usable for simple static NICNAME and FINGER servers that do not look at system accounts) </p></li>
+<li><p> <a href="commands/gopherd.xml"><code>gopherd</code></a> &mdash; UCSPI-TCP GOPHER server for static content </p></li>
+<li><p> <a href="commands/httpd.xml"><code>httpd</code></a> &mdash; UCSPI-TCP HTTP server for static content </p></li>
+</ul>
+
+<h3 class="Ruled" id="PublicfileClients">publicfile clients</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/finger@.xml"><code>finger@</code></a> &mdash; UCSPI-TCP FINGER client </p></li>
+<li><p> <a href="commands/http@.xml"><code>http@</code></a> &mdash; UCSPI-TCP HTTP client </p></li>
+<li><p> <a href="commands/who@.xml"><code>who@</code></a> &mdash; UCSPI-TCP SYSTAT client </p></li>
+</ul>
+
+<h3 class="Ruled" id="PublicfileMiscellany">publicfile miscellany</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/configure.xml"><code>configure</code></a> &mdash; obsolete publicfile configuration program</p></li>
+</ul>
+
+<h2 class="Ruled" id="Terminals">terminal management</h2>
+
+<h3 class="Ruled" id="PseudoTerminals">pseudo-terminal management</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/ptybandage.xml"><code>ptybandage</code></a> &mdash; wrap a transparent pseudo-terminal around a program </p></li>
+<li><p> <a href="commands/ptyget.xml"><code>ptyget</code></a> &mdash; allocate a pseudo-terminal </p></li>
+<li><p> <a href="commands/ptyio.xml"><code>ptyio</code></a> &mdash; feed input to a pseudo-terminal and print its output </p></li>
+<li><p> <a href="commands/ptyrun.xml"><code>ptyrun</code></a> &mdash; wrap a pseudo-terminal around a program </p></li>
+<li><p> <a href="commands/ptyspawn.xml"><code>ptyspawn</code></a> &mdash; run a program on a pseudo-terminal </p></li>
+</ul>
+
+<h3 class="Ruled" id="AnyTerminals">general terminal management</h3>
+
+<ul class="compact">
+<li><p> <a href="commands/excloff.xml"><code>excloff</code></a> &mdash; stop reserving a terminal device for exclusive use </p></li>
+<li><p> <a href="commands/exclon.xml"><code>exclon</code></a> &mdash; start reserving a terminal device for exclusive use </p></li>
+<li><p> <a href="commands/ttydetach.xml"><code>ttydetach</code></a> &mdash; run a program without a controlling terminal </p></li>
+</ul>
+
+<h2 class="Ruled" id="Miscellany">Miscellany</h2>
+
+<ul class="compact">
+<li><p> <a href="commands/random-ip.xml"><code>random-ip</code></a> &mdash; generate randomly-chosen IPv4 addresses </p></li>
+</ul>

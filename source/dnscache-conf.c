@@ -24,18 +24,18 @@ void usage(void)
   strerr_die1x(100,"dnscache-conf: usage: dnscache-conf acct logacct /dnscache [ myip ]");
 }
 
-int fdrootservers;
-char rootserversbuf[64];
-buffer ssrootservers;
+static int fdrootservers;
+static char rootserversbuf[64];
+static buffer ssrootservers;
 
-char *dir;
-char *user;
-char *loguser;
-struct passwd *pw;
-const char *myip;
+static char *dir;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
+static const char *myip;
 
-uint32 seed[32];
-int seedpos = 0;
+static uint32 seed[32];
+static int seedpos = 0;
 
 void seed_adduint32(uint32 u)
 {

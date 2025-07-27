@@ -8,10 +8,10 @@
 
 #define FATAL "clockadd: fatal: "
 
-unsigned char buf[16];
-struct timeval tv;
+static unsigned char buf[16];
+static struct timeval tv;
 
-int main()
+int main(void)
 {
   unsigned long u;
   unsigned long v;

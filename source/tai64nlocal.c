@@ -5,7 +5,7 @@
 #include "buffer.h"
 #include "fmt.h"
 
-char num[FMT_ULONG];
+static char num[FMT_ULONG];
 
 void get(char *ch)
 {
@@ -23,12 +23,12 @@ void out(const char *buf,int len)
     _exit(111);
 }
 
-time_t secs;
-unsigned long nanosecs;
-unsigned long u;
-struct tm *t;
+static time_t secs;
+static unsigned long nanosecs;
+static unsigned long u;
+static struct tm *t;
 
-int main()
+int main(void)
 {
   char ch;
 

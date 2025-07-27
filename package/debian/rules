@@ -1,44 +1,44 @@
 #!/usr/bin/make -sf
 
-.PHONY: build binary install clean stage control
+.PHONY: build binary install clean stage control create
 
+BINARY_PACKAGES=djbwares-guide publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai djbdns-host leapsecs
+
+# The Debian package builder targets this in order to make the package contents.
 build:
 	MAKEFLAGS= package/compile
 
-binary: stage control
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
+# The Debian package builder targets this in order to clean the build areas.
+clean:
+	echo 1>&2 "Cleaning individual staged packages under debian/ ."
+	${RM} debian/files debian/substvars
+	for i in ${BINARY_PACKAGES} ; \
 	do \
-		dpkg-deb -b debian/"$$i" ../ || exit 1 ; \
+		${RM} -r debian/"$$i"/ ; \
 	done
+	echo 1>&2 "Cleaning snapshot area in debian/tmp/ ."
+	${RM} -r debian/tmp/
+
+# The Debian package builder targets this in order to make the .deb files.
+binary: build stage control create
 
 stage:
-	echo 1>&2 "Building exported image."
-	package/export debian/tmp/ debian/tmp/ debian/tmp/
-	echo 1>&2 "Building staging areas."
+	echo 1>&2 "Snapshotting slashpackage installed directory trees."
+	install -d -m 0755 debian/tmp
+	pax -r -w -l command config guide manual header library debian/tmp/
+	echo 1>&2 "Building staging areas for packages under debian/."
 	package/stage debian/tmp debian
 
 control:
 	${RM} debian/files
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai djbdns-host ; \
+	for i in ${BINARY_PACKAGES} ; \
 	do \
 		echo 1>&2 "Building control file for "$$i"." ; \
-		${RM} debian/substvars ; \
-		install -d debian/"$$i"/DEBIAN || exit 1 ; \
-		dpkg-shlibdeps debian/"$$i"/usr/local/*bin/* || exit 1 ; \
-		debian/gencontrol "$$i" debian/"$$i" || exit 1 ; \
-	done
-	for i in leapsecs ; \
-	do \
-		echo 1>&2 "Building control file for "$$i"." ; \
-		${RM} debian/substvars ; \
-		install -d debian/"$$i"/DEBIAN || exit 1 ; \
 		debian/gencontrol "$$i" debian/"$$i" || exit 1 ; \
 	done
 
-clean:
-	${RM} debian/files debian/substvars
-	for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host ; \
+create:
+	for i in ${BINARY_PACKAGES} ; \
 	do \
-		${RM} -r debian/"$$i"/ ; \
+		dpkg-deb -b debian/"$$i" ./ || exit 1 ; \
 	done
-	${RM} -r debian/tmp/

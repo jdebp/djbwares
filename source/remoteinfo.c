@@ -91,7 +91,7 @@ int remoteinfo(stralloc *out,char ipremote[4],uint16 portremote,char iplocal[4],
   taia_uint(&deadline,timeout);
   taia_add(&deadline,&now,&deadline);
 
-  s = socket_tcp();
+  s = socket_tcp4();
   if (s == -1) return -1;
   r = doit(out,s,ipremote,portremote,iplocal,portlocal,timeout);
   close(s);

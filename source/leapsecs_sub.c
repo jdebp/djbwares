@@ -6,8 +6,7 @@
 extern struct tai *leapsecs;
 extern int leapsecs_num;
 
-int leapsecs_sub(t)
-struct tai *t;
+int leapsecs_sub(struct tai *t)
 {
   int i;
   uint64 u;

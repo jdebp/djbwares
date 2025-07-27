@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 cwd="`cd .. && /bin/pwd`"
 base_plus_version="`basename "${cwd}"`"
 base="`echo "${base_plus_version}" | sed -e 's/-[[:digit:]][[:alnum:].]*$//'`"

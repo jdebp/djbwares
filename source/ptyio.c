@@ -13,34 +13,34 @@
 #include "subfd.h"
 #include "fd.h"
 
-char bufin[1024];
-int bufinpos;
-int bufinsize;
-char bufout[1024];
-int bufoutsize;
-int bufoutpos;
+static char bufin[1024];
+static int bufinpos;
+static int bufinsize;
+static char bufout[1024];
+static int bufoutsize;
+static int bufoutpos;
 
-struct ttymodes tminit;
+static struct ttymodes tminit;
 
-int fdtty;
-struct ttymodes tmraw;
-int flagcont = 0;
-struct ttymodes tmcont;
-void sigcont()
+static int fdtty;
+static struct ttymodes tmraw;
+static int flagcont = 0;
+static struct ttymodes tmcont;
+void sigcont(void)
 {
   if (ttymodes_get(&tmcont,fdtty) != -1) flagcont = 1;
 }
 
-int pi9[2];
-int flagptyrok = 1;
-int flagptywok = 1;
-int flagremote = 0;
-int flagreading = 1;
-int flagwriting = 1;
-int flageof9 = 0;
-int flagtty = 0;
+static int pi9[2];
+static int flagptyrok = 1;
+static int flagptywok = 1;
+static int flagremote = 0;
+static int flagreading = 1;
+static int flagwriting = 1;
+static int flageof9 = 0;
+static int flagtty = 0;
 
-void sigwinch()
+void sigwinch(void)
 {
   if (flagtty) {
     ttymodes_getw(&tminit,fdtty);
@@ -48,9 +48,7 @@ void sigwinch()
   }
 }
 
-int main(argc,argv)
-int argc;
-char **argv;
+int main(int argc,char **argv)
 {
   int r;
   int w;
@@ -157,6 +155,8 @@ char **argv;
       execvp(*argv,argv);
       substdio_putsflush(subfderr,"ptyio: fatal: unable to run subprogram\n");
       _exit(111);
+    default:
+      break;
   }
 
   close(pi9[1]);

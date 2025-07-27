@@ -10,19 +10,19 @@
 
 #define FATAL "fixcrio: fatal: "
 
-char prebuf[256];
+static char prebuf[256];
 
-int leftstatus = 0;
-char leftbuf[512];
-int leftlen;
-int leftpos;
-int leftflagcr = 0;
+static int leftstatus = 0;
+static char leftbuf[512];
+static int leftlen;
+static int leftpos;
+static int leftflagcr = 0;
 
-int rightstatus = 0;
-char rightbuf[512];
-int rightlen;
-int rightpos;
-int rightflagcr = 0;
+static int rightstatus = 0;
+static char rightbuf[512];
+static int rightlen;
+static int rightpos;
+static int rightflagcr = 0;
 
 void doit(int fdleft,int fdright)
 {

@@ -1,1 +1,11 @@
-Bernstein djbdns, with some minor patches
+ dnscache is a caching proxy DNS server that takes queries from local client programs, looks up data on remote servers, and combines those data into the answers that it sends back to the local clients.
+ .
+ tinydns is a general purpose content DNS server, with ancillary tools tinydns-data to compile its database, tinydns-edit to edit its database (in scripts), and tinydns-get to check its database locally.
+ .
+ axfrdns is the equivalent content DNS server that provides the same service from the same data except as DNS/TCP rather than as DNS/UDP.
+ .
+ walldns and rbldns are special purpose servers, with ancillary tols walldns-data and rbldns-data.
+ .
+ dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnstrace, and dnstracesort are various tools for diagnosing DNS problems and for performing various DNS queries.
+ .
+ axfrdns is a UCSPI-TCP server program.  dnscache, tinydns, walldns, and rbldns all understand the LISTEN_FDS protocol and can be run with their listening sockets passed to them by nosh tools or systemd.

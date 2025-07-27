@@ -32,10 +32,12 @@
 <para>
 <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 optionally follows rules to decide whether a TCP connection is acceptable.
-<informalexample>
-For example, the rule <programlisting>18.23.0.32:deny</programlisting> prohibits connections from IP address 18.23.0.32. 
-</informalexample>
 </para>
+<informalexample>
+<para>
+For example, the rule <programlisting>18.23.0.32:deny</programlisting> prohibits connections from IP address 18.23.0.32. 
+</para>
+</informalexample>
 
 <para>
 <command>tcprules</command> reads rules from its standard input and writes them into <filename><replaceable>cdb</replaceable></filename> in a binary format suited for quick access by <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -104,7 +106,9 @@ the empty string.
 </para>
 
 <informalexample>
+<para>
 For example, here are some rules: 
+</para>
 <programlisting>joe@127.0.0.1:first
 18.23.0.32:second
 :third
@@ -135,7 +139,7 @@ You can use <citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum
 
 <refsection><title>Address ranges</title>
 <para>
-<command>tcprules</command> treats <code>1.2.3.37-53:ins</code> as an abbreviation for the rules <code>1.2.3.37:ins</code>, <code>1.2.3.38:ins</code>, and so on up through <code>1.2.3.53:ins</code>.
+<command>tcprules</command> treats <code>203.0.113.37-53:ins</code> as an abbreviation for the rules <code>203.0.113.37:ins</code>, <code>203.0.113.38:ins</code>, and so on up through <code>203.0.113.53:ins</code>.
 Similarly, <code>10.2-3.:ins</code> is an abbreviation for <code>10.2.:ins</code> and <code>10.3.:ins</code>.
 </para>
 </refsection>
@@ -144,38 +148,45 @@ Similarly, <code>10.2-3.:ins</code> is an abbreviation for <code>10.2.:ins</code
 <para>
 The instructions in a rule must begin with either <code>allow</code> or <code>deny</code>.
 <code>deny</code> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop the connection without running anything.
-<informalexample>
-For example, the rule <programlisting>:deny</programlisting> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop all connections that aren't handled by more specific rules. 
-</informalexample>
 </para>
+<informalexample>
+<para>
+For example, the rule <programlisting>:deny</programlisting> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop all connections that aren't handled by more specific rules. 
+</para>
+</informalexample>
 
 <para>
 The instructions may continue with some environment variables, in the form <code>var="x"</code>.
 <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> adds an environment variable <envar>var</envar> with value <replaceable>x</replaceable>.
+</para>
 <informalexample>
+<para>
 For example, <programlisting>10.0.:allow,RELAYCLIENT="@fix.me"</programlisting> adds an environment variable <envar>RELAYCLIENT</envar> with value <code>@fix.me</code>.
 The quotes may be replaced by any repeated character: <programlisting>10.0.:allow,RELAYCLIENT=/@fix.me/</programlisting>
 Any number of variables may be listed: <programlisting>127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"</programlisting>
-</informalexample>
 </para>
+</informalexample>
+
 </refsection>
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcprulescheck</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>argv0</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fixcrio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>recordio</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>rblsmtpd</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>who@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>date@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>finger@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>http@</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcpcat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>mconnect</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tcp-environ</refentrytitle><manvolnum>5</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

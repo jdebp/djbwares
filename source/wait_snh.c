@@ -2,7 +2,7 @@
 #include <sys/wait.h>
 #include "haswaitp.h"
 
-int wait_stopnohang(wstat) int *wstat;
+int wait_stopnohang(int *wstat)
 {
 #ifdef HASWAITPID
  return waitpid(-1,wstat,WNOHANG | WUNTRACED);

@@ -1,11 +1,11 @@
 #include "caltime.h"
 #include "httpdate.h"
 
-static char *weekday[7] = {
+static const char *weekday[7] = {
   " Sun, ", " Mon, ", " Tue, ", " Wed, ", " Thu, ", " Fri, ", " Sat, "
 } ;
 
-static char *month[12] = {
+static const char *month[12] = {
   " Jan ", " Feb ", " Mar ", " Apr ", " May ", " Jun "
 , " Jul ", " Aug ", " Sep ", " Oct ", " Nov ", " Dec "
 } ;

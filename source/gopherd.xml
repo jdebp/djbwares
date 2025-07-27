@@ -74,6 +74,9 @@ It can also be run under a UCSPI-SSL server program.
 gopherd determines its local host name <replaceable>v</replaceable> as explained in the section on "gophermap"s.
 It uses this in conjunction with the selector provided in the request by the client.
 </para>
+<note>
+The GOPHER protocol does not support virtual hosting as the GEMINI and HTTP protocols do.
+</note>
 
 <para>
 A request for selector <code><replaceable>f</replaceable></code> not ending in a slash refers to the file named <filename>./<replaceable>v</replaceable>/<replaceable>f</replaceable></filename> inside the <arg choice='plain'><replaceable>root</replaceable></arg> directory hierarchy.
@@ -167,6 +170,10 @@ gopherd chroots to <arg choice='plain'><replaceable>root</replaceable></arg> whe
 It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
 gopherd does not allow dots immediately after slashes in file names. It changes these dots to colons before attempting to open the file.
 </para>
+<note>
+Earlier versions of <command>gopherd</command> required the <filename>/etc/leapsecs.dat</filename> to be copied under <arg choice='plain'><replaceable>root</replaceable></arg>.
+This file is now read before the chroot.
+</note>
 
 <para>
 gopherd will refuse to read a file if the file

@@ -3,7 +3,7 @@
 #include "env_write.h"
 #include "str.h"
 
-#if 0	// Superseded by env_get.c
+#if 0	// Superseded by env.c
 extern char *env_get(s)
 char *s;
 {
@@ -19,12 +19,12 @@ char *s;
 }
 #endif
 
-extern char *env_pick()
+extern char *env_pick(void)
 {
  return environ[0];
 }
 
-extern char *env_findeq(char *s)
+extern const char *env_findeq(const char *s)
 {
  for (;*s;++s)
    if (*s == '=')

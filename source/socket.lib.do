@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange trylsock.o load
 if ./load trylsock -lsocket -lnsl && ./trylsock 
 then

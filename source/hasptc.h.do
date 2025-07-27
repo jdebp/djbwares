@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 redo-ifchange tryptc.c compile link
 if ( ./compile tryptc.o tryptc.c tryptc.d && ./link tryptc tryptc.o && ./tryptc ) >/dev/null 2>&1
 then

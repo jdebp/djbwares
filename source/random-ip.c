@@ -4,14 +4,14 @@
 #include "scan.h"
 #include "dns.h"
 
-char ip[4];
-int ipfixed = 0;
-unsigned long loops = 10000;
-unsigned char tab[256];
+static char ip[4];
+static int ipfixed = 0;
+static unsigned long loops = 10000;
+static unsigned char tab[256];
 
-char strnum[FMT_ULONG];
+static char strnum[FMT_ULONG];
 
-char seed[128];
+static char seed[128];
 
 int main(int argc,char **argv)
 {

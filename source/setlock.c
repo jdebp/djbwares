@@ -7,12 +7,12 @@
 
 #define FATAL "setlock: fatal: "
 
-void usage() {
+void usage(void) {
   strerr_die1x(100,"setlock: usage: setlock [ -nNxX ] file program [ arg ... ]");
 }
 
-int flagndelay = 0;
-int flagx = 0;
+static int flagndelay = 0;
+static int flagx = 0;
 
 int main(int argc,const char *const *argv,const char *const *envp)
 {

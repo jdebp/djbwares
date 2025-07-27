@@ -12,11 +12,11 @@ void usage(void)
   strerr_die1x(100,"walldns-conf: usage: walldns-conf acct logacct /walldns myip");
 }
 
-char *dir;
-char *user;
-char *loguser;
-struct passwd *pw;
-char *myip;
+static char *dir;
+static char *user;
+static char *loguser;
+static struct passwd *pw;
+static char *myip;
 
 int main(int argc,char **argv)
 {

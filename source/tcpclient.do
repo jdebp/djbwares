@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 main="`basename "$1"`"
 objects="${main}.o remoteinfo.o timeoutconn.o iopause.o"
 libraries="getopt.a dns.a libtai.a buffer.a env.a unix.a stralloc.a alloc.a sig.a byte.a fs.a"

@@ -1,6 +1,12 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
+(
+	echo ccflags
+	echo cc
+) | xargs redo-ifchange --verbose --
 (
 	echo auto_home.h 
+	echo auto_home.c 
 	echo uint64.h 
 	echo uint32.h 
 	echo select.h 
@@ -13,6 +19,7 @@
 	echo hasptc.h 
 	echo hasptmx.h 
 	echo hasrdtsc.h 
+	echo hasarmcnt.h 
 	echo hasdevtcp.h 
 	echo hassgact.h 
 	echo hassgprm.h 
@@ -55,4 +62,4 @@
 			echo "$i.xml"
 		done
 	done
-) | xargs redo-ifchange --
+) | xargs redo-ifchange --verbose --

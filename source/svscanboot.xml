@@ -17,57 +17,56 @@
 
 <refnamediv>
 <refname>svscanboot</refname>
-<refpurpose>starts <citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry> in the /service directory, with output and error messages logged through <citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
+<refpurpose>starts <citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry> in the <filename>/service</filename> directory, with output and error messages logged through <citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
 </refnamediv>
 
-svscanboot is available in daemontools 0.75 and above.
 <refsynopsisdiv>
 <command>svscanboot</command>
 </refsynopsisdiv>
 <refsection><title>Description</title>
-<command>svscanboot</command>
-runs the pipeline
 
-svscan /service 2>&1 | readproctitle service errors: .....
+<para>
+<command>svscanboot</command> runs the pipeline
 
-with 400 dots. The last 400 bytes of error messages from
-<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-will be visible to
-<citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-through
-<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<command>svscan</command> <arg choice="plain">/service</arg> 2&gt;&amp;1 | <command>readproctitle</command> <arg choice="plain">service errors: .....</arg>
 
-<command>svscanboot</command>
-sets $PATH to
+with 400 dots.
+The last 400 bytes of error messages from <citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry> will be visible to <citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry> through <citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
 
- /command:/usr/local/bin:/usr/local/sbin:
- /bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin
+<para>
+<command>svscanboot</command> sets <envar>$PATH</envar> to <code>/command:/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin</code> and clears all other environment variables.
+Program writers are encouraged to use globally allocated names in <command>/command</command>.
+</para>
 
-(all in one line, no space)
-
-and clears all other environment variables. Program writers are encouraged to
-use globally allocated names in
-<command>/command</command>.
 </refsection>
-<refsection><title>See also</title>
-<citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,  
-<citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 
+<refsection><title>History</title>
+<para>
+<command>svscanboot</command> is available in daemontools 0.75 and above.
+</para>
+</refsection>
+
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>supervise</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svc</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svok</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svstat</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>svscan</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>readproctitle</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>fghack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>pgrphack</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>multilog</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64n</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>tai64nlocal</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>setuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>envdir</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>softlimit</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>setlock</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>ps</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

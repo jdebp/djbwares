@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "strerr.h"
 #include "stralloc.h"
 #include "getln.h"
@@ -12,18 +13,18 @@
 
 #define FATAL "tcprules: fatal: "
 
-unsigned long linenum = 0;
-char *fntemp;
-char *fn;
+static unsigned long linenum = 0;
+static char *fntemp;
+static char *fn;
 
-stralloc line = stralloc_static_0;
-int match = 1;
+static stralloc line = stralloc_static_0;
+static int match = 1;
 
-stralloc address = stralloc_static_0;
-stralloc data = stralloc_static_0;
-stralloc key = stralloc_static_0;
+static stralloc address = stralloc_static_0;
+static stralloc data = stralloc_static_0;
+static stralloc key = stralloc_static_0;
 
-struct cdb_make c;
+static struct cdb_make c;
 
 void nomem(void)
 {
@@ -43,8 +44,8 @@ void die_write(void)
   strerr_die4sys(111,FATAL,"unable to write to ",fntemp,": ");
 }
 
-char strnum[FMT_ULONG];
-stralloc sanum = stralloc_static_0;
+static char strnum[FMT_ULONG];
+static stralloc sanum = stralloc_static_0;
 
 void getnum(char *buf,int len,unsigned long *u)
 {

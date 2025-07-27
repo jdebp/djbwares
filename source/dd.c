@@ -1,7 +1,7 @@
 #include "dns.h"
 #include "dd.h"
 
-int dd(const char *q,const char *base,char ip[4])
+int dd4(const char *q,const char *base,char ip[4])
 {
   int j;
   unsigned int x;
@@ -27,10 +27,37 @@ int dd(const char *q,const char *base,char ip[4])
       q += 3;
       continue;
     }
+    if (!x) return -1;
     if ((q[3] < '0') || (q[3] > '9')) return -1;
     x = x * 10 + (q[3] - '0');
     if (x > 255) return -1;
     ip[j] = x;
     q += 4;
+  }
+}
+
+static char hex[16] = "0123456789abcdef";
+
+int dd6(const char *q,const char *base,char ip[32])
+{
+  int j,k;
+  unsigned int x;
+
+  for (j = 0;;++j) {
+    if (dns_domain_equal(q,base)) return j;
+    if (j >= 64) return -1;
+
+    if (*q != 1) return -1;
+    for (k = 16;k--;) {
+      if (q[1] == hex[k]) break;
+    }
+    if (k < 0) return -1;
+    x = k;
+    if (j & 1) {
+      ip[j/2] = (ip[j/2] & 0x0f) | (x << 4);
+    } else {
+      ip[j/2] = x;
+    }
+    q += 2;
   }
 }

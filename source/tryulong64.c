@@ -1,7 +1,7 @@
 /* Public domain. */
 #include "exit.h"
 
-int main()
+int main(void)
 {
   unsigned long u;
   u = 1;

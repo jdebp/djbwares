@@ -1,8 +1,9 @@
-# http://cr.yp.to/libtai/leapsecs.txt, version 2015-06-20
+# http://cr.yp.to/libtai/leapsecs.txt, version 2025-05-28
 #
 # Official sources:
-# http://maia.usno.navy.mil/leapsec.html
+# https://hpiers.obspm.fr/iers/bul/bulc/ntp/leap-seconds.list
 # https://hpiers.obspm.fr/eop-pc/earthor/utc/UTC.html
+# http://maia.usno.navy.mil/leapsec.html
 #
 # Dates must be listed in sorted order.
 # + means a positive leap second, inserting 23:59:60 UTC.

@@ -1,4 +1,5 @@
 #!/bin/sh -e
+# vim: set filetype=sh:
 if test -r "$1.use"
 then
   redo-ifchange "$1.use"

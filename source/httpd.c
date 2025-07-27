@@ -16,6 +16,9 @@
 #include "error.h"
 #include "getln.h"
 #include "byte.h"
+#include "ucspi.h"
+#include "subfd.h"
+#include "env.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -45,24 +48,39 @@ void out_flush(void)
   buffer_flush(&out);
 }
 
-char strnum[FMT_ULONG];
+static void log(const char *code,const char *msg)
+{
+  const char *x;
 
-stralloc protocol = stralloc_static_0;
-int protocolnum = 0;
-stralloc method = stralloc_static_0;
-stralloc url = stralloc_static_0;
-stralloc host = stralloc_static_0;
-stralloc path = stralloc_static_0;
-stralloc ims = stralloc_static_0;
-int flagbody = 1;
+  x = ucspi_get_remoteip_str("0", "0", "0");
+  substdio_puts(subfderr,x);
+  substdio_puts(subfderr," barf ");
+  substdio_puts(subfderr,code);
+  substdio_puts(subfderr,msg);
+  substdio_puts(subfderr,"\n");
+  substdio_flush(subfderr);
+}
 
-char filebuf[1024];
+static char strnum[FMT_ULONG];
 
-struct tai now;
-stralloc nowstr = stralloc_static_0;
-struct tai mtime;
-struct tai mtimeage;
-stralloc mtimestr = stralloc_static_0;
+static stralloc protocol = stralloc_static_0;
+static int protocolnum = 0;
+static stralloc method = stralloc_static_0;
+static stralloc url = stralloc_static_0;
+static stralloc host = stralloc_static_0;
+static stralloc path = stralloc_static_0;
+static stralloc ims = stralloc_static_0;
+static int flagbody = 1;
+static int flagoldprotocol = 0;
+static int flaglogunsupported = 0;
+
+static char filebuf[BUFFER_INSIZE];
+
+static struct tai now;
+static stralloc nowstr = stralloc_static_0;
+static struct tai mtime;
+static struct tai mtimeage;
+static stralloc mtimestr = stralloc_static_0;
 
 void header(const char *code,const char *message)
 {
@@ -80,6 +98,8 @@ void header(const char *code,const char *message)
 
 void barf(const char *code,const char *message)
 {
+  if (flaglogunsupported)
+    log(code,message);
   if (protocolnum > 0) {
     tai_now(&now);
     header(code,message);
@@ -103,8 +123,8 @@ void barf(const char *code,const char *message)
   _exit(0);
 }
 
-stralloc fn = stralloc_static_0;
-stralloc contenttype = stralloc_static_0;
+static stralloc fn = stralloc_static_0;
+static stralloc contenttype = stralloc_static_0;
 
 void get(void)
 {
@@ -150,7 +170,9 @@ void get(void)
       }
     }
     filetype(fn.s,&contenttype);
+    out_puts("Content-Type: ");
     out_put(contenttype.s,contenttype.len);
+    out_puts("\r\n");
     if (protocolnum >= 2)
       out_puts("Transfer-Encoding: chunked\r\n");
     else {
@@ -187,8 +209,8 @@ void get(void)
   close(fd);
 }
 
-stralloc field = stralloc_static_0;
-stralloc line = stralloc_static_0;
+static stralloc field = stralloc_static_0;
+static stralloc line = stralloc_static_0;
 
 int saferead(int fd,char *buf,int len)
 {
@@ -216,6 +238,16 @@ void doit()
 {
   unsigned int i;
   int spaces;
+  const char *localhost;
+  int done_host;
+
+  localhost = ucspi_get_localhost_str(NULL, NULL, NULL);
+  if (!localhost)
+    localhost = ucspi_get_localip_str("0", "0", "0");
+  if (env_get("OLDPROTOCOLS"))
+    flagoldprotocol = 1;
+  if (env_get("LOGUNSUPPORTED"))
+    flaglogunsupported = 1;
 
   sig_ignore(sig_pipe);
 
@@ -226,11 +258,12 @@ void doit()
 
     if (!stralloc_copys(&method,"")) _exit(21);
     if (!stralloc_copys(&url,"")) _exit(21);
-    if (!stralloc_copys(&host,"")) _exit(21);
+    if (!stralloc_copys(&host,localhost)) _exit(21);
     if (!stralloc_copys(&path,"")) _exit(21);
     if (!stralloc_copys(&protocol,"")) _exit(21);
     if (!stralloc_copys(&ims,"")) _exit(21);
     protocolnum = 2;
+    done_host = 0;
 
     spaces = 0;
     for (i = 0;i < line.len;++i)
@@ -257,9 +290,11 @@ void doit()
       protocolnum = 0;
     else {
       if (!stralloc_0(&protocol)) _exit(21);
-      if (case_equals(protocol.s,"http/1.0"))
+      if (!case_equals(protocol.s,"http/1.1"))
         protocolnum = 1; /* if client uses http/001.00, tough luck */
     }
+    if (!flagoldprotocol && protocolnum < 2)
+      barf("426 ","please use HTTP/1.1");
 
     if (!stralloc_0(&method)) _exit(21);
     flagbody = 1;
@@ -273,12 +308,10 @@ void doit()
       i = byte_chr(host.s,host.len,'/');
       if (!stralloc_copyb(&path,host.s + i,host.len - i)) _exit(21);
       host.len = i;
+      done_host = 1;
     }
     else
       if (!stralloc_copy(&path,&url)) _exit(21);
-
-    if (!path.len || (path.s[path.len - 1] == '/'))
-      if (!stralloc_cats(&path,"index.html")) _exit(21);
 
     if (protocolnum > 0) {
       if (!stralloc_copys(&field,"")) _exit(21);
@@ -298,11 +331,14 @@ void doit()
           if (case_startb(field.s,field.len,"if-unmodified-since:"))
             barf("412 ","I do not accept If-Unmodified-Since");
           if (case_startb(field.s,field.len,"host:"))
-            if (!host.len)
+            if (!done_host) {
+              host.len = 0;
               for (i = 5;i < field.len;++i)
                 if (field.s[i] != ' ')
                   if (field.s[i] != '\t')
                     if (!stralloc_append(&host,&field.s[i])) _exit(21);
+              done_host = 1;
+            }
           if (case_startb(field.s,field.len,"if-modified-since:"))
 	    if (!stralloc_copyb(&ims,field.s + 18,field.len - 18)) _exit(21);
           field.len = 0;
@@ -311,6 +347,25 @@ void doit()
         if (!stralloc_cat(&field,&line)) _exit(21);
       }
     }
+
+    // This rule borrowed from GEMINI; a sensible-enough restriction for anonymous service.
+    i = byte_chr(host.s,host.len,'@');
+    if (i != host.len)
+      barf("501 ","HTTP requests may not have a user part.");
+    // This rule borrowed from GEMINI, also.
+    if (!path.len)
+      if (!stralloc_cats(&path,"/")) _exit(21);
+    // This rule borrowed from GEMINI, also.
+    i = byte_chr(path.s,path.len,'#');
+    if (i != path.len)
+      barf("501 ","HTTP requests may not have a fragment part.");
+
+    // Just strip the port.
+    i = byte_chr(host.s,host.len,':');
+    host.len = i;
+
+    if (!path.len || (path.s[path.len - 1] == '/'))
+      if (!stralloc_cats(&path,"index.html")) _exit(21);
 
     get();
   }

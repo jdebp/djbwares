@@ -49,10 +49,11 @@ This implementation of <function>tai_now</function> assumes that the <code>time_
 </refsection>
 
 <refsection><title>See also</title>
-<citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>taia_now</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>time</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>tai</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>taia_now</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>time</refentrytitle><manvolnum>3</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
 </refsection>
 
 <refsection>

@@ -3,7 +3,7 @@
 #include "iopause.h"
 #include "timeoutwrite.h"
 
-int timeoutwrite(int t,int fd,char *buf,int len)
+int timeoutwrite(int t,int fd,const char *buf,int len)
 {
   struct taia now;
   struct taia deadline;

@@ -18,6 +18,7 @@ int parsetype(const char *s,char type[2])
   else if (case_equals(s,"txt")) byte_copy(type,2,DNS_T_TXT);
   else if (case_equals(s,"cname")) byte_copy(type,2,DNS_T_CNAME);
   else if (case_equals(s,"soa")) byte_copy(type,2,DNS_T_SOA);
+  else if (case_equals(s,"loc")) byte_copy(type,2,DNS_T_LOC);
   else if (case_equals(s,"hinfo")) byte_copy(type,2,DNS_T_HINFO);
   else if (case_equals(s,"rp")) byte_copy(type,2,DNS_T_RP);
   else if (case_equals(s,"sig")) byte_copy(type,2,DNS_T_SIG);

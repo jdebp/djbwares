@@ -27,36 +27,60 @@ extern int respond(char *,char *,char *);
 
 #define FATAL "axfrdns: fatal: "
 
-void nomem()
+static void fatal1sys(const char *msg0)
 {
-  strerr_die2x(111,FATAL,"out of memory");
+  const char *x, *y;
+
+  x = ucspi_get_remoteip_str("0", "0", "0");
+  y = ucspi_get_remoteport_str("0", "0", "0");
+  strerr_die6sys(111,FATAL,x," ",y," ",msg0);
 }
-void die_truncated()
+static void fatal1x(const char *msg0)
 {
-  strerr_die2x(111,FATAL,"truncated request");
+  const char *x, *y;
+
+  x = ucspi_get_remoteip_str("0", "0", "0");
+  y = ucspi_get_remoteport_str("0", "0", "0");
+  strerr_die6x(111,FATAL,x," ",y," ",msg0);
 }
-void die_netwrite()
+static void fatal2x(const char *msg0,const char *msg1)
 {
-  strerr_die2sys(111,FATAL,"unable to write to network: ");
+  const char *x, *y;
+
+  x = ucspi_get_remoteip_str("0", "0", "0");
+  y = ucspi_get_remoteport_str("0", "0", "0");
+  strerr_die7x(111,FATAL,x," ",y," ",msg0,msg1);
 }
-void die_netread()
+static void nomem(void)
 {
-  strerr_die2sys(111,FATAL,"unable to read from network: ");
+  fatal1x("out of memory");
 }
-void die_outside()
+static void die_truncated(void)
 {
-  strerr_die2x(111,FATAL,"unable to locate information in data.cdb");
+  fatal1x("truncated request");
 }
-void die_cdbread()
+static void die_netwrite(void)
 {
-  strerr_die2sys(111,FATAL,"unable to read data.cdb: ");
+  fatal1sys("unable to write to network: ");
 }
-void die_cdbformat()
+static void die_netread(void)
 {
-  strerr_die3x(111,FATAL,"unable to read data.cdb: ","format error");
+  fatal1sys("unable to read from network: ");
+}
+static void die_outside(void)
+{
+  fatal1x("unable to locate information in data.cdb");
+}
+static void die_cdbread(void)
+{
+  fatal1sys("unable to read data.cdb: ");
+}
+static void die_cdbformat(void)
+{
+  fatal2x("unable to read data.cdb: ","format error");
 }
 
-int safewrite(int fd,char *buf,unsigned int len)
+static int safewrite(int fd,char *buf,unsigned int len)
 {
   int w;
 
@@ -65,10 +89,10 @@ int safewrite(int fd,char *buf,unsigned int len)
   return w;
 }
 
-char netwritespace[1024];
-buffer netwrite = BUFFER_INIT(safewrite,1,netwritespace,sizeof netwritespace);
+static char netwritespace[1024];
+static buffer netwrite = BUFFER_INIT(safewrite,1,netwritespace,sizeof netwritespace);
 
-void print(char *buf,unsigned int len)
+static void print(char *buf,unsigned int len)
 {
   char tcpheader[2];
   uint16_pack_big(tcpheader,len);
@@ -77,10 +101,10 @@ void print(char *buf,unsigned int len)
   buffer_flush(&netwrite);
 }
 
-char *axfr;
+static char *axfr;
 static char *axfrok;
 
-void axfrcheck(char *q)
+static void axfrcheck(char *q)
 {
   int i;
   int j;
@@ -100,18 +124,17 @@ void axfrcheck(char *q)
     ++i;
   }
 
-  strerr_die2x(111,FATAL,"disallowed zone transfer request");
+  fatal1x("disallowed zone transfer request");
 }
 
 static char *zone;
-unsigned int zonelen;
-char typeclass[4];
+static unsigned int zonelen;
 
-int fdcdb;
-buffer bcdb;
-char bcdbspace[1024];
+static int fdcdb;
+static buffer bcdb;
+static char bcdbspace[1024];
 
-void get(char *buf,unsigned int len)
+static void get(char *buf,unsigned int len)
 {
   int r;
 
@@ -124,22 +147,22 @@ void get(char *buf,unsigned int len)
   }
 }
 
-char ip[4];
-unsigned long port;
-char clientloc[2];
+static char ip[4];
+static unsigned long port;
+static char clientloc[2];
 
-struct tai now;
-char data[32767];
-uint32 dlen;
-uint32 dpos;
+static struct tai now;
+static char data[32767];
+static uint32 dlen;
+static uint32 dpos;
 
-void copy(char *buf,unsigned int len)
+static void copy(char *buf,unsigned int len)
 {
   dpos = dns_packet_copy(data,dlen,dpos,buf,len);
   if (!dpos) die_cdbread();
 }
 
-void doname(stralloc *sa)
+static void doname(stralloc *sa)
 {
   static char *d;
   dpos = dns_packet_getname(data,dlen,dpos,&d);
@@ -147,7 +170,7 @@ void doname(stralloc *sa)
   if (!stralloc_catb(sa,d,dns_domain_length(d))) nomem();
 }
 
-int build(stralloc *sa,char *q,int flagsoa,char id[2])
+static int build(stralloc *sa,char *q,int flagsoa,char id[2])
 {
   unsigned int rdatapos;
   char misc[20];
@@ -221,7 +244,7 @@ static char *q;
 static stralloc soa;
 static stralloc message;
 
-void doaxfr(char id[2])
+static void doaxfr(char id[2])
 {
   char key[512];
   uint32 klen;
@@ -297,7 +320,7 @@ void doaxfr(char id[2])
   print(soa.s,soa.len);
 }
 
-void netread(char *buf,unsigned int len)
+static void netread(char *buf,unsigned int len)
 {
   int r;
 
@@ -309,13 +332,13 @@ void netread(char *buf,unsigned int len)
   }
 }
 
-char tcpheader[2];
-char buf[512];
-uint16 len;
+static char tcpheader[2];
+static char buf[512];
+static uint16 len;
 
 static char seed[128];
 
-int main()
+int main(void)
 {
   unsigned int pos;
   char header[12];
@@ -340,27 +363,28 @@ int main()
   for (;;) {
     netread(tcpheader,2);
     uint16_unpack_big(tcpheader,&len);
-    if (len > 512) strerr_die2x(111,FATAL,"excessively large request");
+    if (len > 512) fatal1x("excessively large request");
     netread(buf,len);
 
     pos = dns_packet_copy(buf,len,0,header,12); if (!pos) die_truncated();
-    if (header[2] & 254) strerr_die2x(111,FATAL,"bogus query");
-    if (header[4] || (header[5] != 1)) strerr_die2x(111,FATAL,"bogus query");
+    if (header[2] & 254) fatal1x("bogus query");
+    if (header[4] || (header[5] != 1)) fatal1x("bogus query");
 
     pos = dns_packet_getname(buf,len,pos,&zone); if (!pos) die_truncated();
     zonelen = dns_domain_length(zone);
     pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) die_truncated();
     pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) die_truncated();
 
-    if (byte_diff(qclass,2,DNS_C_IN) && byte_diff(qclass,2,DNS_C_ANY))
-      strerr_die2x(111,FATAL,"bogus query: bad class");
+    if (byte_diff(qclass,2,DNS_C_IN))
+      fatal1x("bogus query: bad class");
 
-    qlog(ip,port,header,zone,qtype," ");
+//  qlog(ip,port,header,zone,qtype," ");
 
     if (byte_equal(qtype,2,DNS_T_AXFR)) {
       case_lowerb(zone,zonelen);
       fdcdb = open_read("data.cdb");
       if (fdcdb == -1) die_cdbread();
+      qlog(ip,port,header,zone,qtype," A ");
       doaxfr(header);
       close(fdcdb);
     }
@@ -371,8 +395,12 @@ int main()
       response_id(header);
       response[3] &= ~128;
       if (!(header[2] & 1)) response[2] &= ~1;
-      if (!respond(zone,qtype,ip)) die_outside();
+      if (!respond(zone,qtype,ip)) {
+	qlog(ip,port,header,zone,qtype," - ");
+	die_outside();
+      }
       print(response,response_len);
+      qlog(ip,port,header,zone,qtype," + ");
     }
   }
 }

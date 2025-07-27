@@ -1,17 +1,14 @@
 #include "byte.h"
 #include "case.h"
-#include "env.h"
 #include "buffer.h"
 #include "strerr.h"
 #include "ip4.h"
 #include "uint16.h"
-#include "ndelay.h"
 #include "socket.h"
 #include "droproot.h"
 #include "qlog.h"
 #include "response.h"
 #include "dns.h"
-#include "scan.h"
 #include <unistd.h>
 
 extern char *fatal;
@@ -53,7 +50,7 @@ static int doit(void)
   if (byte_equal(qclass,2,DNS_C_IN))
     response[2] |= 4;
   else
-    if (byte_diff(qclass,2,DNS_C_ANY)) goto WEIRDCLASS;
+    goto WEIRDCLASS;
   response[3] &= ~128;
   if (!(header[2] & 1)) response[2] &= ~1;
 
@@ -85,61 +82,18 @@ static int doit(void)
   return 0;
 }
 
-int main()
+int main(void)
 {
-  char *x;
-  int udp53;
+  int udp53, do_udp_options;
 
   udp53 = -1;
-  x = env_get("LISTEN_PID");
-  if (x) {
-    int pid, fd, len;
-    unsigned long i;
+  do_udp_options = 1;
+  socket_listen_get_udp4(fatal,&udp53,&do_udp_options,&port,ip,53);
 
-    pid = getpid();
-    len = scan_ulong(x, &i);
+  droproot(fatal);
 
-    if (len && !x[len] && pid == i) {
-      x = env_get("LISTEN_FDS");
-      if (x) {
-        len = scan_ulong(x, &i);
-
-        if (len && !x[len]) {
-          unsigned int o;
-
-          for (o = 0U; o < i; ++o) {
-            fd = 3 + o;
-            if (socket_is_udp4(fd)) {
-              if (0 > socket_local4(fd,ip,&port))
-                strerr_die2sys(111,fatal,"unable to get local address from UDP socket: ");
-              udp53 = fd;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (udp53 == -1) {
-    x = env_get("IP");
-    if (!x)
-      strerr_die2x(111,fatal,"$IP not set");
-    if (!ip4_scan(x,ip))
-      strerr_die3x(111,fatal,"unable to parse IP address ",x);
-
-    udp53 = socket_udp();
-    if (udp53 == -1)
-      strerr_die2sys(111,fatal,"unable to create UDP socket: ");
-    if (socket_bind4_reuse(udp53,ip,53) == -1)
-      strerr_die2sys(111,fatal,"unable to bind UDP socket: ");
-
-    droproot(fatal);
-
-    ndelay_off(udp53);
+  if (do_udp_options)
     socket_tryreservein(udp53,65536);
-  } else {
-    droproot(fatal);
-  }
 
   initialize();
 

@@ -107,7 +107,7 @@ static int thisudp(struct dns_transmit *d)
 	d->query[2] = dns_random(256);
 	d->query[3] = dns_random(256);
   
-        d->s1 = 1 + socket_udp();
+        d->s1 = 1 + socket_udp4();
         if (!d->s1) { dns_transmit_free(d); return -1; }
 	if (randombind(d) == -1) { dns_transmit_free(d); return -1; }
 
@@ -158,7 +158,7 @@ static int thistcp(struct dns_transmit *d)
       d->query[2] = dns_random(256);
       d->query[3] = dns_random(256);
 
-      d->s1 = 1 + socket_tcp();
+      d->s1 = 1 + socket_tcp4();
       if (!d->s1) { dns_transmit_free(d); return -1; }
       if (randombind(d) == -1) { dns_transmit_free(d); return -1; }
   
