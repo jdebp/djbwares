@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="djbdns-client">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>djbdns-client</refentrytitle>
+<manvolnum>5</manvolnum>
+<refmiscinfo class="manual">file formats</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>djbdns-client</refname>
+<refpurpose>configuring the DNS client in djbdns</refpurpose>
+</refnamediv>
+
+<refsection><title>Description</title>
+
+<para>
+The DNS client library common to all djbwares utilities is centred upon a <code>dns_resolve()</code> function.
+Like other DNS client libraries, it talks to one or more (local) proxy DNS servers, which do most of the actual lookup work.
+Several domain names are handled by the library internally, however, without contacting any servers at all.
+</para>
+
+<para>
+There are separate DNS server configuration settings for:
+</para>
+<itemizedlist>
+<listitem><para>
+DNS-SD lookups under <filename>service.arpa.</filename>, per RFC 9665;
+</para></listitem>
+<listitem><para>
+<filename>onion.</filename> lookups, per RFC 7686;
+</para></listitem>
+<listitem><para>
+mDNS lookups under <filename>local.</filename> and several subdomains of <filename>ip-addr.arpa.</filename> and <filename>ip6.arpa.</filename> corresponding to link-local IP addresses, per RFC 8375;
+</para></listitem>
+<listitem><para>
+homenet lookups under <filename>home.arpa.</filename>, per RFC 8375; and
+</para></listitem>
+<listitem><para>
+regular lookups, for everything else.
+</para></listitem>
+</itemizedlist>
+
+<para>
+There is also a name qualification procedure that some tools apply to some input names before performing the name lookups proper.
+</para>
+<note>
+Generally, debugging tools do not apply qualification to the domain names that they are given to perform lookups on, but non-debugging utilities apply name qualification.
+</note>
+
+<refsection><title>Short circuits and internally synthesized answers</title>
+
+<para>
+If the input string to be passed through name qualification is the human-readable form of an IP address, the DNS client simply synthesizes and returns corresponding <code>A</code> and <code>AAAA</code> resource records (and empty resource record sets for other types) without performing any name qualification or lookups.
+This is designed to accommodate a common mis-usage where people supply human-readable form IP addresses where domain names should be supplied.
+Renormalization is performed, so leading zeroes are discarded; but numeric values that are not legal for an IP address mean that the string will not take this short circuit synthesis route.
+</para>
+<note>
+<citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> also filters queries for such errors, but the DNS client library tries not to send such queries in the first place.
+</note>
+<note>
+IP version 6 addresses are currently not recognized in abbreviated form.
+<filename>::1</filename> is not taken to be a human-readable form of an IP version 6 address, for example.
+It must be spelled out in full as the single-label pseudo domain name <filename>0:0:0:0:0:0:0:1</filename>.
+</note>
+
+<refsection>
+<title>Historic mis-behaviour</title>
+
+<caution>
+<para>
+In the original Bernstein DNS client library, if the input string was to be passed through name qualification, and was an arbitrary length string of arbitrary valued dot-separated numbers it would be converted, without any name qualification or lookups being performed, into possibly more than 1 IPv4 address, not caring about numeric overflow or values larger than 256, and not caring about partially-complete addresses.
+This wholly undocumented mechanism would lead to stupid consequences and real-world risks such as:
+</para>
+<itemizedlist>
+<listitem><para>
+the domain name <filename>6.2.8.2.999999999999</filename> apparently existing and having an IPv4 address, 
+</para></listitem>
+<listitem><para>
+the domain name <filename>24.75.345.200</filename> (from a Sandra Bullock movie in the 1990s) apparently existing and having someone's real (and not reserved-use) IPv4 address, and
+</para></listitem>
+<listitem><para>
+the domain name <filename>1729.86400.99999.2147483647.100000000.10000000.10000000.10000000</filename> apparently existing and having two IPv4 addresses.
+</para></listitem>
+</itemizedlist>
+<para>
+This undocumented behaviour, that for one thing would make the deliberately invalid or malformed IPv4 addresses used in movies and television dramas work and have surprising consequences for unsuspecting people who just happened to be assigned the real IP addresses, is not present in this version of the DNS client library.
+</para>
+</caution>
+
+</refsection>
+
+<refsection>
+<title>After name qualification</title>
+
+<para>
+When name qualification is used, various queries have directly synthesized answers created by the DNS client library itself, short-circuiting any query to a proxy DNS server.
+</para>
+
+<para>
+Per RFC 7686, if there are no configured <filename>onion.</filename> proxy DNS servers, <filename>onion.</filename> and all of its subdomains are synthetic "no such domain" errors.
+Per RFC 6761, <filename>invalid.</filename> and all of its subdomains are synthetic "no such domain" errors.
+</para>
+
+<para>
+Per the implication of RFC 6761 and long-standing <filename>/etc/hosts</filename> convention, reverse lookups of 127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> IPv4 addresses map to <filename><replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.127.localhost.</filename>, except that 127.0.0.1 maps to <filename>localhost.</filename>.
+Likewise, reverse lookups of the ::1 IPv6 address map to <filename>localhost.</filename>.
+In the forward direction, A and AAAA lookups of <filename>localhost.</filename> map to 127.0.0.1 and ::1 respectively, and A and AAAA lookups of <filename><replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.127.localhost.</filename> map to 127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> and ::FFFF:127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> respectively.
+</para>
+
+<para>
+Per RFC 8880, <filename>ipv4only.arpa.</filename> exists synthetically with the fixed IPv4 addresses 192.0.0.170 and 192.0.0.171, reverse lookups of those IPv4 addresses synthetically map back to it, and all of its subdomains are synthetic "no such domain" errors.
+NAT64 prefix discovery is supposed not to be using this DNS client library.
+</para>
+
+<note>
+<citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>walldns</refentrytitle><manvolnum>1</manvolnum></citerefentry> <emphasis>also</emphasis> synthesize data for some of these domain names.
+But what answers a proxy DNS server can synthesize are different to what answers a content DNS server can synthesize and different to what answers a DNS client library can synthesize.
+Many "special-use domain names" have different rules for all three.
+</note>
+
+</refsection>
+
+</refsection>
+
+</refsection>
+
+<refsection><title>Location of the proxy DNS servers</title>
+
+<para>
+The IP addresses of the one or more proxy DNS servers are determined as follows:
+</para>
+
+<orderedlist>
+<listitem><para>
+The primary configuration setting is the process environment of whatever tool is running.
+The values of two environment variables are taken to be a list of whitespace-separated IP addresses and a numeric port number:
+</para>
+<variablelist>
+<varlistentry>
+<term><envar>DNSCACHEIP_DNSSD</envar> and <envar>DNSCACHEPORT_DNSSD</envar></term>
+<listitem><para>the proxy DNS server(s) used for DNS Service Discovery</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><envar>DNSCACHEIP_HOME</envar> and <envar>DNSCACHEPORT_HOME</envar></term>
+<listitem><para>the proxy DNS server(s) used for homenet</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><envar>DNSCACHEIP_ONION</envar> and <envar>DNSCACHEPORT_ONION</envar></term>
+<listitem><para>the proxy DNS server(s) used for <filename>onion.</filename></para></listitem>
+</varlistentry>
+<varlistentry>
+<term><envar>DNSCACHEIP_MDNS</envar> and <envar>DNSCACHEPORT_MDNS</envar></term>
+<listitem><para>the proxy DNS server(s) used for multicast DNS</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><envar>DNSCACHEIP</envar> and <envar>DNSCACHEPORT</envar></term>
+<listitem><para>the regular proxy DNS server(s) used for everything else</para></listitem>
+</varlistentry>
+</variablelist>
+</listitem>
+<listitem><para>
+If this environment variable is not found, the library falls back to <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry>.
+The values of various directives are likewise taken to be a list of whitespace-separated IP addresses.
+</para>
+<variablelist>
+<varlistentry>
+<term><code>nameserver-dnssd</code></term>
+<listitem><para>the proxy DNS server(s) used for DNS Service Discovery</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>nameserver-home</code></term>
+<listitem><para>the proxy DNS server(s) used for homenet</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>nameserver-onion</code></term>
+<listitem><para>the proxy DNS server(s) used for <filename>onion.</filename></para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>nameserver-mdns</code></term>
+<listitem><para>the proxy DNS server(s) used for multicast DNS</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>nameserver</code></term>
+<listitem><para>the regular proxy DNS server(s) used for everything else</para></listitem>
+</varlistentry>
+</variablelist>
+<note>
+All other configuration settings in <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> are ignored.
+This is a compatibility configuration mechanism only.
+</note><note>
+Several of these are extensions to the conventional <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> as used by ISC's BIND DNS client library.
+</note></listitem>
+<listitem><para>
+If no other configuration is specified, the library falls back to hardwired default IP address of 127.0.0.1 and ::1 for everything except for mDNS for which the hardwired defaults are 224.0.0.251 and FF02::FB.
+This is the same fallback as other DNS client libraries, and running an instance of <citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> listening on either 127.0.0.1 or ::1 is a conventional system configuration.
+</para></listitem>
+</orderedlist>
+
+</refsection>
+
+<refsection><title>Name qualification</title>
+
+<para>
+Several tools pass input strings through a name qualification phase before performing lookups with the <code>dns_resolve()</code> function.
+The name qualification procedure is the simple iterative application of a set of string matching and replacement rules.
+</para>
+
+<refsection><title>Construction of the ruleset</title>
+
+<para>
+The ruleset is determined as follows:
+</para>
+
+<orderedlist>
+<listitem><para>
+The primary configuration setting is the process environment of whatever tool is running.
+The value of the <envar>DNSREWRITEFILE</envar> environment variable is taken to be the name of a file from which rewrite rules are read.
+</para></listitem>
+<listitem><para>
+If this environment variable is not found, the library falls back to <filename>/etc/dnsrewrite</filename> as the name of the file.
+</para></listitem>
+<listitem><para>
+If the rules file is not found, the library falls back to the <envar>LOCALDOMAIN</envar> environment variable.
+If it exists, its value is used to synthesize rules.
+Its value is treated as a whitespace-separated list of <replaceable>domains</replaceable> and is turned into a <code>?:.<replaceable>domain</replaceable>+.<replaceable>domain</replaceable></code> rewrite rule with the <replaceable>domains</replaceable> separated by <code>+</code>.
+A final <code>*.:</code> rule is appended.
+</para></listitem>
+<listitem><para>
+If neither the rules file nor the <envar>LOCALDOMAIN</envar> environment variable are found, the library falls back to <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> and synthesizes rules from its directives.
+The first <code>search</code> or a <code>domain</code> directive followed by a whitespace-separated list of <replaceable>domains</replaceable> is turned into a <code>?:.<replaceable>domain</replaceable>+.<replaceable>domain</replaceable></code> rewrite rule with the <replaceable>domains</replaceable> separated by <code>+</code>.
+A final <code>*.:</code> rule is appended.
+</para><note>
+All other configuration settings in <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> are ignored.
+This is a compatibility configuration mechanism only.
+</note></listitem>
+<listitem><para>
+If not even a suitable directive in <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> is found, the library falls back on the result of the operating system's <citerefentry><refentrytitle>gethostname</refentrytitle><manvolnum>2</manvolnum></citerefentry> library function.
+A <code>?:.<replaceable>domain</replaceable></code> rewrite rule is synthesized where <replaceable>domain</replaceable> is the part of the (dynamic) hostname that follows the first dot.
+A final <code>*.:</code> rule is appended.
+</para></listitem>
+</orderedlist>
+
+</refsection>
+
+<refsection><title>Syntax of rewrite rules</title>
+
+<para>
+Rules comprise a single leading character, then a <replaceable>match</replaceable>, a <code>:</code>, and a <replaceable>replacement</replaceable>.
+</para>
+
+<variablelist>
+<varlistentry>
+<term><code>=<replaceable>match</replaceable>:<replaceable>replacement</replaceable></code></term>
+<listitem><para>
+An exact match rule and complete replacement rule.
+If the input string exactly matches <replaceable>match</replaceable> then the <replaceable>replacement</replaceable> is substituted.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>-<replaceable>match</replaceable>:<replaceable>replacement</replaceable></code></term>
+<listitem><para>
+A suffix match and complete replacement rule.
+If a suffix of the input string exactly matches <replaceable>match</replaceable> then the <replaceable>replacement</replaceable> is substituted.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>*<replaceable>match</replaceable>:<replaceable>replacement</replaceable></code></term>
+<listitem><para>
+An unconstrained suffix match and suffix replacement rule.
+If a suffix of the input string exactly matches <replaceable>match</replaceable> then the <replaceable>replacement</replaceable> is suffixed instead to the non-matching prefix part of the input string.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><code>?<replaceable>match</replaceable>:<replaceable>replacements</replaceable></code></term>
+<listitem><para>
+A constrained suffix match and suffix replacement rule.
+If a suffix of the input string exactly matches <replaceable>match</replaceable> and the remaining prefix does not contain a dot, then the <replaceable>replacement</replaceable> is suffixed instead to the non-matching prefix part of the input string.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+If the resultant string, after applying all of the rules, contains <code>+</code> characters, it is deemed to be a search path of the form <code><replaceable>prefix</replaceable>+<replaceable>suffix</replaceable>+<replaceable>suffix</replaceable></code>.
+A search path list of names to try looking up is constructed by each <replaceable>suffix</replaceable> in order being appended to <replaceable>prefix</replaceable>
+</para>
+
+<refsection><title>Examples</title>
+
+<refsection><title>A common final rule in a ruleset.</title>
+<informalexample>
+<programlisting>*.:
+</programlisting>
+<para>
+This simply removes trailing dots.
+The djbwares DNS client library does not need the trailing dots <emphasis>after</emphasis> qualification, as the output, search path, list of one or more names is taken to be the "fully-qualified" name(s) to actually look up.
+</para>
+</informalexample>
+</refsection>
+
+<refsection><title>A simple 1-result qualification for dot-less names.</title>
+<informalexample>
+<programlisting>?:.example.org
+</programlisting>
+<para>
+If the input string is <filename>curtin</filename>, the resultant name is <filename>curtin.example.org</filename>.
+But this rule will not apply if the input string is <filename>saint.james</filename> or <filename>curtin.</filename>.
+</para>
+<note>
+This is the search path behaviour that some users expect, and is thus the form into which the <envar>LOCALDOMAIN</envar> environment variable and <code>search</code> directives in <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> are converted when they have 1 entry, even though it is not actually traditional DNS client library behaviour.
+</note>
+</informalexample>
+</refsection>
+
+<refsection><title>A search path for dot-less names.</title>
+<informalexample>
+<programlisting>?:.intranet.example.org+.example.org+
+</programlisting>
+<para>
+If the input string is <filename>curtin</filename>, the resultant search list is <filename>curtin.intranet.example.org</filename> then <filename>curtin.example.org</filename> then <filename>curtin</filename>.
+But this rule will not apply if the input string is <filename>saint.james</filename> or <filename>curtin.</filename>.
+</para>
+<note>
+This rule yields the bogus top-level domain <filename>curtin</filename> if the input string is <filename>curtin</filename>, which is one way in which the world often generates bogus query traffic to the "<code>.</code>" content DNS servers (or, worse, happens to match one of the lesser-known global top-level domains unexpectedly).
+</note>
+<para>
+Converting the <envar>LOCALDOMAIN</envar> environment variable and <code>search</code> directives in <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> when they have more than 1 entry does not append an extra final blank search path beyond the search path that is given.
+But, rather, it yields the form:
+</para>
+<programlisting>?:.intranet.example.org+.example.org
+</programlisting>
+<para>
+If the input string is <filename>curtin</filename>, the resultant search list is <filename>curtin.intranet.example.org</filename> then <filename>curtin.example.org</filename>.
+</para>
+<caution>
+Search paths with more than 1 entry are usually poor ideas, as they lead to finding names in subdomains or superdomains that can surprise users.
+Users generally expect 1 domain name as <emphasis>the single</emphasis> domain name that is appended by name qualification.
+</caution>
+</informalexample>
+</refsection>
+
+<refsection><title>A search path for any names (dots or no) that searches multiple parts of an organization.</title>
+<informalexample>
+<programlisting>*:.work.example.org+.school.example.org+
+</programlisting>
+<para>
+If the input string is <filename>curtin</filename>, the resultant search list is <filename>curtin.work.example.org</filename> then <filename>curtin.school.example.org</filename> then <filename>curtin</filename>.
+If the input string is <filename>saint.james</filename>, the resultant search list is <filename>saint.james.work.example.org</filename> then <filename>saint.james.school.example.org</filename> then <filename>saint.james</filename>.
+</para>
+<caution>
+There is a common misconception amongst users that names that have an <emphasis>internal</emphasis> dot, rather than a <emphasis>trailing</emphasis> dot, are "fully qualified"; even though this has not in fact traditionally been the case, and (rather) this form of search path is in fact how other DNS client libraries traditionally worked for many years.
+Such users will be surprised by <filename>example.com</filename> becoming <filename>example.com.work.example.org</filename> and <filename>example.com.school.example.org</filename> here before <filename>example.com</filename> is finally tried.
+</caution>
+<caution>
+This rule is also applied if the input string is <filename>saint.james.</filename> or <filename>curtin.</filename>, which definitely surprises many users, even the ones that thought that they knew to use trailing dots.
+</caution>
+<para>
+In general, despite being the traditional DNS client library behaviour of yore, this is almost never a good rule.
+</para>
+</informalexample>
+</refsection>
+
+<refsection><title>A superdomain rename for subdomain names with and without dots.</title>
+<informalexample>
+<programlisting>*.example.org:.example.net
+</programlisting>
+<para>
+If the input string is <filename>saint.james.example.org</filename>, the resultant name is <filename>saint.james.example.net</filename>.
+However, if the input string is <filename>saint.james.example.org.</filename>, this rule does not apply, following the usual convention that a trailing dot indicates an already qualified name.
+</para>
+<note>
+Matching commonly happens at a dot as in this example, but does not actually have to.
+</note>
+</informalexample>
+</refsection>
+
+<refsection><title>A collapse of all subdomains onto a single name.</title>
+<informalexample>
+<programlisting>-.example.com:example.com
+</programlisting>
+<para>
+If the input string is <filename>smith.example.com</filename> or <filename>meyers.example.com</filename>, the resultant name is simply <filename>example.com</filename>.
+Again however, if the input string is instead <filename>smith.example.com.</filename> or <filename>meyers.example.com.</filename>, this rule does not apply, following the usual convention.
+The input string <filename>example.com</filename> sans any subdomain is also not matched by this rule; a separate extra <code>=</code> rule being necessary for that if appropriate.
+</para>
+<para>
+The most common real world use for this are the subdomains of <filename>localhost.</filename> and of <filename>invalid.</filename> all being their equivalents.
+</para>
+<programlisting>-.localhost:localhost
+-.invalid:invalid
+</programlisting>
+<para>
+But those are already special-use domain names handled by the DNS client library.
+</para>
+</informalexample>
+</refsection>
+
+</refsection>
+
+</refsection>
+
+</refsection>
+
+<refsection><title>See also</title>
+<variablelist>
+<varlistentry><term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsip</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsmx</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsname</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsnamex</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsns</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnstxt</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>dnsipq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+<varlistentry><term><citerefentry><refentrytitle>host</refentrytitle><manvolnum>1</manvolnum></citerefentry></term></varlistentry>
+</variablelist>
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+The <envar>DNSCACHEIP</envar>, <envar>DNSREWRITEFILE</envar>, and <envar>LOCALDOMAIN</envar> environment variables and limited compatibililty processing of <citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry> were originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset, begun in 1999.
+</para>
+<para>
+At the time, many of the additional systems and special-use domain names had not even been invented.
+The formal documentation of conventional DNS results for subdomains of <filename>localhost.</filename> and <filename>invalid.</filename> did not occur until 2013, for instance.
+</para>
+<para>
+The additional environment variables and mechanisms for special-use domain names were added in 2025.
+</para>
+<para>
+The caution against using search paths is also Bernstein's, and remains as true today as it did then.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation and modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+
+</refsection>
+</refentry>

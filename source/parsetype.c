@@ -1,7 +1,7 @@
 #include "scan.h"
 #include "byte.h"
 #include "case.h"
-#include "dns.h"
+#include "dns_constants.h"
 #include "uint16.h"
 #include "parsetype.h"
 
@@ -24,8 +24,12 @@ int parsetype(const char *s,char type[2])
   else if (case_equals(s,"sig")) byte_copy(type,2,DNS_T_SIG);
   else if (case_equals(s,"key")) byte_copy(type,2,DNS_T_KEY);
   else if (case_equals(s,"aaaa")) byte_copy(type,2,DNS_T_AAAA);
+  else if (case_equals(s,"ixfr")) byte_copy(type,2,DNS_T_IXFR);
   else if (case_equals(s,"axfr")) byte_copy(type,2,DNS_T_AXFR);
   else if (case_equals(s,"srv")) byte_copy(type,2,DNS_T_SRV);
+  else if (case_equals(s,"opt")) byte_copy(type,2,DNS_T_OPT);
+  else if (case_equals(s,"https")) byte_copy(type,2,DNS_T_HTTPS);
+  else if (case_equals(s,"svcb")) byte_copy(type,2,DNS_T_SVCB);
   else
     return 0;
 

@@ -38,7 +38,7 @@ It prints the results in a human-readable format, more compact than the <citeref
 </para>
 
 <para>
-<replaceable>s</replaceable> is expected to be the IP address or domain name of a content DNS server, and the request is marked as non-recursive.
+<replaceable>s</replaceable> is expected to indicate one or more content DNS servers, and the request is marked as non-recursive.
 <replaceable>t</replaceable> may be a name or a number.
 Currently recognized names are:
 <code>any</code>,
@@ -49,18 +49,44 @@ Currently recognized names are:
 <code>txt</code>,
 <code>cname</code>,
 <code>soa</code>,
+<code>loc</code>,
 <code>hinfo</code>,
 <code>rp</code>,
 <code>sig</code>,
 <code>key</code>,
 <code>aaaa</code>,
-<code>axfr</code>, and
-<code>srv</code>.
+<code>axfr</code>,
+<code>srv</code>, and
+<code>opt</code>.
 </para>
 
 <para>
-Note that if you want to perform a zone transfer you should use <citerefentry><refentrytitle>axfr-get</refentrytitle><manvolnum>1</manvolnum></citerefentry>, not <command>dnsq</command> <arg choice='plain'>axfr</arg>.
+<command>dnsq</command> feeds <replaceable>s</replaceable> through name qualification and then looks it up, to find those content DNS servers, using the locally configured DNS proxy server.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, for how name qualification operates, and for certain <replaceable>s</replaceable> values and standard domain names that short-circuit DNS lookups to the proxy DNS server(s) and possibly name qualification as well.
 </para>
+
+<para>
+<command>dnsq</command> makes all DNS lookups using the specified content DNS server(s), and performs no name qualification on what is taken to already be a "fully-qualified" domain name (trailing dot or no) <replaceable>fqdn</replaceable>.
+It does not treat any values of <replaceable>fqdn</replaceable> specially.
+</para>
+
+<caution>
+<command>dnsq</command> is a diagnostic tool, and thus permits using improper values of <replaceable>t</replaceable> and any value of <replaceable>fqdn</replaceable>.
+It also does not have a special multiple response "zone transfer" mode.
+</caution>
+
+<note>
+<command>dnsq</command> <arg choice='plain'>axfr</arg>, <command>dnsq</command> <arg choice='plain'>any</arg>, and <command>dnsq</command> <arg choice='plain'>opt</arg> simulate things that valid DNS clients will not actually do.
+See RFC 8482 for the particular case of <arg choice='plain'>any</arg> passing into desuetude, and RFC 6891 for why <arg choice='plain'>opt</arg> is never a valid client query type.
+</note>
+
+<note>
+If you want to perform (or diagnose) a "zone transfer" you should use <citerefentry><refentrytitle>axfr-get</refentrytitle><manvolnum>1</manvolnum></citerefentry>, not <command>dnsq</command> <arg choice='plain'>axfr</arg>.
+</note>
+
+<note>
+Some standard or widely abused values of <replaceable>fqdn</replaceable> are handled internally by DNS client libraries and proxy DNS servers, and in normal operations will never reach a content DNS server.
+</note>
 
 </refsection>
 

@@ -89,7 +89,7 @@ It exits 111 without an error message if it has trouble reading stdin or writing
 <title>Author</title>
 <para>
 Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
-Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname> <surname>Pape</surname></personname> in 2000, 2001, and 2002. 
 Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>

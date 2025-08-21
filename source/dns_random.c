@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include "dns.h"
+#include "dns_random.h"
 #include "taia.h"
 #include "uint32.h"
 

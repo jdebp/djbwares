@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="dnsqual">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsqual</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsqual</refname>
+<refpurpose>pass a name through the DNS name qualification rules</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsqual</command>
+<arg choice='req'><replaceable>dn</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsqual</command> feeds <replaceable>dn</replaceable> through name qualification.
+It prints the resultant name, or (if search paths are configured) list of names, 1 per line.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how name qualification operates.
+</para>
+
+<para>
+Normally <command>dnsqual</command> exits 0. 
+If it encounters a temporary problem that prevents it from performing name qualification, it prints an error message and exits 111.
+</para>
+
+<note>
+<command>dnsqual</command> outputs names as they would then be passed to DNS lookup in assumed-fully-qualified form (e.g. as the <replaceable>fqdn</replaceable> input to <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry>).
+This <emphasis>does not</emphasis> use a trailing dot as a marker.
+It is an error to pass the output names to something that will do name qualification <emphasis>again</emphasis>.
+</note>
+
+<note>
+Name qualification by itself does no renormalization of names that contain non-alphanumeric characters or octal escape sequences.
+That is done when a <replaceable>fqdn</replaceable> is converted to and from the on-the-wire DNS protocol form by DNS lookup.
+</note>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsqual</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code and documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

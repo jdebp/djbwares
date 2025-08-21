@@ -96,7 +96,7 @@ Description: djbdns built by JdeBP
  .
  walldns and rbldns are special purpose servers, with ancillary tols walldns-data and rbldns-data.
  .
- dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnstrace, and dnstracesort are various tools for diagnosing DNS problems and for performing various DNS queries.
+ dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnsns, dnstrace, and dnstracesort are various tools for diagnosing DNS problems and for performing various DNS queries.
  .
  axfrdns is a UCSPI-TCP server program.  dnscache, tinydns, walldns, and rbldns all understand the LISTEN_FDS protocol and can be run with their listening sockets passed to them by nosh tools or systemd.
 
@@ -157,7 +157,7 @@ Description: command-line tools for building TCP client-server applications
 Package: libtai
 Architecture: amd64
 Section: admin
-Depends: ${shlibs:Depends}
+Depends: 
 Suggests:
 Recommends: leapsecs
 Description: libtai built by JdeBP
@@ -181,6 +181,20 @@ Description: libtai built by JdeBP
  This version of libtai requires a UNIX system with gettimeofday().
  It will be easy to port to other operating systems with compilers supporting 64-bit arithmetic.
 
+Package: taitools
+Architecture: amd64
+Section: admin
+Depends: ${shlibs:Depends}
+Suggests:
+Recommends: leapsecs
+Description: tools for calendars, dates, and general TAI10 work
+ taitools contains various TAI10 utilities:
+ .
+ * nowutc: print the current TAI10 time in human-readable form
+ * easter: print the date and MJD for Easter in a given (proleptic) Gregorian year
+ * leapsecs: compile a new leapsecs.dat table
+ * yearcal: print a compact calendar for a given (proleptic) Gregorian year
+
 Package: leapsecs
 Architecture: amd64
 Section: admin
@@ -189,7 +203,7 @@ Suggests:
 Recommends:
 Description: leapsecs from libtai built by JdeBP
  This contains only the compiled leap seconds database.
- The database compiler tool is in the libtai package.
+ The database compiler tool is in the taitools package.
 
 Package: djbdns-host
 Architecture: amd64
@@ -199,7 +213,7 @@ Suggests: djbdns
 Recommends:
 Provides: host
 Conflicts: bind9-host, knot-host
-Description: host utility built upon djbdns libraries
+Description: host utility built upon the djbdns DNS client
  This is a cut-down host utility, similar to the ones supplied with BIND, KnotDNS, and FreeBSD.
  .
  It has no dependence upon special DNS library packages, and it uses the conventional djbdns mechanisms for name qualification and suchlike.

@@ -81,7 +81,7 @@ Currently recognized names are:
 <refsection>
 <title>History</title>
 <para>
-<command>dnsqrx</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername>  <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+<command>dnsqrx</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>
 

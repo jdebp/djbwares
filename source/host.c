@@ -11,9 +11,14 @@
 #include "buffer.h"
 #include "printpacket.h"
 #include "parsetype.h"
+#include "ip.h"
 #include "ip4.h"
 #include "ip6.h"
-#include "dns.h"
+#include "dns_transmit.h"
+#include "dns_resolve.h"
+#include "dns_random.h"
+#include "dns_nd.h"
+#include "dns_domain.h"
 
 #define FATAL "host: fatal: "
 
@@ -45,7 +50,7 @@ static stralloc rules;
 
 static
 int
-doit(const char * qname,const char qtype[2],const char servers[64],int flagrecursive)
+doit(const char * qname,const char qtype[2],const struct ip_address server_list[],unsigned int server_count,unsigned int port,int flagrecursive)
 {
   uint16 u16;
   int r = 0;
@@ -57,7 +62,7 @@ doit(const char * qname,const char qtype[2],const char servers[64],int flagrecur
   if (!dns_domain_todot_cat(&out,qname)) oops();
   if (!stralloc_cats(&out,":\n")) nomem();
 
-  if (dns_resolve_servers(qname,qtype,servers,flagrecursive) == -1) {
+  if (dns_resolve_servers(qname,qtype,server_list,server_count,port,flagrecursive) == -1) {
     if (!stralloc_cats(&out,error_str(errno))) nomem();
     if (!stralloc_cats(&out,"\n")) nomem();
   } else {
@@ -91,21 +96,22 @@ main(int argc,char **argv)
   int opt;
   int flag4 = 1;
   int flag6 = 1;
-  int flagd = 0;
+  int flagd = 0; /* unused! */
   int flagrecursive = 1;
-  int flags = 0;
-  int flagT = 0;
-  int flagv = 0;
-  int flagw = 0;
-  int retries = 0;
-  int waittime = 0;
-  const char * klass = 0;
+  int flags = 0; /* unused! */
+  int flagT = 0; /* unused! */
+  int flagv = 0; /* unused! */
+  int flagw = 0; /* unused! */
+  int retries = 0; /* unused! */
+  int waittime = 0; /* unused! */
+  const char * klass = 0; /* unused! */
   const char * type = 0;
   const char * name = 0;
   const char * server = 0;
   char * qname = 0;
   char qtype[2];
-  char servers[64];
+  struct ip_address server_list[16];
+  unsigned int server_count, port;
 
   while ((opt = getopt(argc,argv,"46adrsTvwc:t:R:W:")) != opteof)
     switch(opt) {
@@ -137,7 +143,7 @@ main(int argc,char **argv)
     if (!parsetype(type,qtype)) oops();
   }
   if (!qname && flag4) {
-    char ip4[4];
+    char ip4[IP4_LEN];
     unsigned int l;
 
     l = ip4_scan(name,ip4);
@@ -151,7 +157,7 @@ main(int argc,char **argv)
     }
   }
   if (!qname && flag6) {
-    char ip6[16];
+    char ip6[IP6_LEN];
     unsigned int l;
 
     l = ip6_scan(name,ip6,':');
@@ -168,17 +174,21 @@ main(int argc,char **argv)
   dns_random_init(seed);
 
   if (server) {
+    unsigned int j;
     if (!stralloc_copys(&srv,server)) nomem();
-    if (dns_ip4_qualify(&ip,&fqdn,&srv) == -1) oops();
-    if (ip.len >= 64) ip.len = 64;
-    byte_zero(servers,64);
-    byte_copy(servers,ip.len,ip.s);
+    if (dns_ip_qualify(&ip,&fqdn,&srv) == -1) oops();
+    if (ip.len >= sizeof server_list) ip.len = sizeof server_list;
+    for (j = 0;j < sizeof server_list/sizeof *server_list;++j)
+      ip_make_unassigned(server_list + j);
+    byte_copy(server_list,ip.len,ip.s);
+    server_count = ip.len / sizeof *server_list;
+    port = 53;
   } else {
-    if (dns_resolvconfip(servers) == -1) oops();
+    if (dns_resolvconfip("\000",server_list,sizeof server_list/sizeof *server_list,&server_count,&port) == -1) oops();
   }
 
   if (qname) {
-    r = doit(qname,qtype,servers,flagrecursive);
+    r = doit(qname,qtype,server_list,server_count,port,flagrecursive);
     dns_domain_free(&qname);
   } else {
     unsigned int plus,fqdnlen;
@@ -199,7 +209,7 @@ main(int argc,char **argv)
     plus = byte_chr(fqdn.s,fqdnlen,'+');
     if (plus >= fqdnlen) {
       if (!dns_domain_fromdot(&qname,fqdn.s,fqdn.len)) oops();
-      r = doit(qname,qtype,servers,flagrecursive);
+      r = doit(qname,qtype,server_list,server_count,port,flagrecursive);
       dns_domain_free(&qname);
     } else {
       unsigned int i;
@@ -212,7 +222,7 @@ main(int argc,char **argv)
 	byte_copy(fqdn.s + plus,j,fqdn.s + i);
 	fqdn.len = plus + j;
 	if (!dns_domain_fromdot(&qname,fqdn.s,fqdn.len)) oops();
-	r = doit(qname,qtype,servers,flagrecursive);
+	r = doit(qname,qtype,server_list,server_count,port,flagrecursive);
 	dns_domain_free(&qname);
 	if (r) break;
 	i += j;

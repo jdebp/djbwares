@@ -43,8 +43,8 @@ If it encounters a temporary problem that prevents it from determining the list 
 </para>
 
 <para>
-<command>dnsipq</command> makes all DNS lookups using the locally configured DNS proxy server.
-See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+<command>dnsipq</command> makes all DNS lookups using the locally configured DNS proxy server(s).
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, for how name qualification operates, and for certain <replaceable>dn</replaceable> values and standard domain names that short-circuit DNS lookups to the proxy DNS server(s) and possibly name qualification as well.
 </para>
 
 </refsection>
@@ -67,6 +67,11 @@ See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></
 <title>History</title>
 <para>
 <command>dnsipq</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+
+<para>
+In the original Bernstein <command>dnsipq</command>, the mis-behaviour with stupid consequences and real-world liabilities of the original Bernstein DNS client library would occur.
+This undocumented behaviour was removed in 2025 and is not present in this version of <command>dnsipq</command>.
 </para>
 </refsection>
 

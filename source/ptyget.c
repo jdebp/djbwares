@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-char *pty45()
+static char *pty45(void)
 {
   int fd;
   char * fnslave;
@@ -75,7 +75,7 @@ char *pty45()
 
 char fnslave[10 + FMT_ULONG]; /* 10 for /dev/pts/ */
 
-char *pty45()
+static char *pty45(void)
 {
   struct strioctl si;
   struct stat st;
@@ -135,7 +135,7 @@ char *pty45()
 
 static char fnslave[10 + FMT_ULONG]; /* 10 for /dev/pts/ */
 
-char *pty45()
+static char *pty45(void)
 {
   struct stat st;
   int fd;
@@ -170,7 +170,7 @@ static char fnslave[] = "/dev/tty??";
 static char pty1[16] = "pqrstuvwxyzPQRST";
 static char pty2[16] = "0123456789abcdef";
 
-char *pty45()
+static char *pty45(void)
 {
   int fd;
   struct stat st;

@@ -7,6 +7,7 @@
 #include "str.h"
 #include "byte.h"
 #include "fmt.h"
+#include "ip.h"
 #include "ip4.h"
 #include "ip6.h"
 #include "exit.h"
@@ -18,11 +19,9 @@
 #include "cdb_make.h"
 #include "stralloc.h"
 #include "open.h"
-#include "dns.h"
-
-#define TTL_NS 259200
-#define TTL_POSITIVE 86400
-#define TTL_NEGATIVE 2560
+#include "dns_nd.h"
+#include "dns_constants.h"
+#include "dns_domain.h"
 
 #define FATAL "tinydns-data: fatal: "
 
@@ -230,12 +229,13 @@ int main(void)
   char loc[2];
   unsigned long u;
   uint32 u32;
-  char ip4[4];
-  char ip6[16];
+  char ip4[IP4_LEN];
+  char ip6[IP6_LEN];
   char type[2];
   char soa[20];
   char buf[4];
   char srv[6];
+  char svcb[2];
 
   umask(022);
 
@@ -355,7 +355,7 @@ int main(void)
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
-	    rr_add(ip6,sizeof ip6);
+	    rr_add(ip6,IP6_SANS_SCOPE_LEN);
 	    rr_finish(d2);
 	  } else if (f[1].len > 1)
 	    die_semantic4("unparseable IP address in ","& or ."," line: ", f[1].s) ;
@@ -387,7 +387,7 @@ int main(void)
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
-	    rr_add(ip6,sizeof ip6);
+	    rr_add(ip6,IP6_SANS_SCOPE_LEN);
 	    rr_finish(d1);
 
 	    if (line.s[0] == '=') {
@@ -435,7 +435,7 @@ int main(void)
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
-	    rr_add(ip6,sizeof ip6);
+	    rr_add(ip6,IP6_SANS_SCOPE_LEN);
 	    rr_finish(d2);
 	  } else if (f[1].len > 1)
 	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
@@ -480,7 +480,51 @@ int main(void)
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
 	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
-	    rr_add(ip6,sizeof ip6);
+	    rr_add(ip6,IP6_SANS_SCOPE_LEN);
+	    rr_finish(d2);
+	  } else if (f[1].len > 1)
+	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
+	}
+        break; 
+
+      case 'H': 
+        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem(); 
+	ttlparse(&f[5],&ttl,TTL_POSITIVE,"H");
+        ttdparse(&f[6],ttd); 
+        locparse(&f[7],loc); 
+  
+        if (!stralloc_0(&f[1])) nomem(); 
+  
+	if (f[2].len < 1) {
+          if (!stralloc_cats(&f[2],".")) nomem(); 
+	} else if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) { 
+          if (!stralloc_cats(&f[2],".")) nomem(); 
+          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem(); 
+        } 
+        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem(); 
+  
+        if (!stralloc_0(&f[3])) nomem(); 
+        if (!scan_ulong(f[3].s,&u)) u = 0; 
+        uint16_pack_big(svcb,u); 
+  
+        if (f[4].len > 1)
+          die_semantic4("unparseable parameters in ","H"," line", "");
+
+        rr_start(DNS_T_HTTPS,ttl,ttd,loc); 
+        rr_add(svcb,sizeof svcb); 
+        rr_addname(d2); 
+        rr_finish(d1); 
+  
+	iplen = ip4_scan(f[1].s,ip4) ;
+	if (iplen != 0 && iplen + 1 == f[1].len) {
+          rr_start(DNS_T_A,ttl,ttd,loc); 
+          rr_add(ip4,sizeof ip4); 
+          rr_finish(d2); 
+	} else if (f[1].len > 1) {
+	  iplen = ip6_scan(f[1].s,ip6,'_') ;
+	  if (iplen != 0 && iplen + 1 == f[1].len) {
+	    rr_start(DNS_T_AAAA,ttl,ttd,loc);
+	    rr_add(ip6,IP6_SANS_SCOPE_LEN);
 	    rr_finish(d2);
 	  } else if (f[1].len > 1)
 	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
@@ -535,17 +579,21 @@ int main(void)
 	uint16_pack_big(type,u);
 	if (byte_equal(type,2,DNS_T_AXFR))
 	  syntaxerror(": type AXFR prohibited");
-	if (byte_equal(type,2,"\0\0"))
+	else if (byte_equal(type,2,DNS_T_IXFR))
+	  syntaxerror(": type IXFR prohibited");
+	else if (byte_equal(type,2,DNS_T_ANY))
+	  syntaxerror(": type ANY prohibited");
+	else if (byte_equal(type,2,DNS_T_0))
 	  syntaxerror(": type 0 prohibited");
-	if (byte_equal(type,2,DNS_T_SOA))
+	else if (byte_equal(type,2,DNS_T_SOA))
 	  syntaxerror(": type SOA prohibited");
-	if (byte_equal(type,2,DNS_T_NS))
+	else if (byte_equal(type,2,DNS_T_NS))
 	  syntaxerror(": type NS prohibited");
-	if (byte_equal(type,2,DNS_T_CNAME))
+	else if (byte_equal(type,2,DNS_T_CNAME))
 	  syntaxerror(": type CNAME prohibited");
-	if (byte_equal(type,2,DNS_T_PTR))
+	else if (byte_equal(type,2,DNS_T_PTR))
 	  syntaxerror(": type PTR prohibited");
-	if (byte_equal(type,2,DNS_T_MX))
+	else if (byte_equal(type,2,DNS_T_MX))
 	  syntaxerror(": type MX prohibited");
 
 	txtparse(&f[2]);
@@ -566,5 +614,5 @@ int main(void)
   if (rename("data.cdb.tmp","data.cdb") == -1)
     strerr_die2sys(111,FATAL,"unable to move data.cdb.tmp to data.cdb: ");
 
-  _exit(0);
+  return 0;
 }

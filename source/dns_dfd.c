@@ -1,7 +1,7 @@
 #include "error.h"
 #include "alloc.h"
 #include "byte.h"
-#include "dns.h"
+#include "dns_domain.h"
 
 int dns_domain_fromdot(char **out,const char *buf,unsigned int n)
 {

@@ -12,6 +12,7 @@ fi
 gen_pkgng() {
 	local name="$1"
 	local dir="$2"
+	local checksum_type=1
 	for j in pre- post-
 	do
 		for k in install deinstall upgrade
@@ -19,7 +20,7 @@ gen_pkgng() {
 			s="$j$k"
 			if test -r bsd/"${name}"."$s"
 			then
-				cp -p bsd/"${name}"."$s" "${dir}"/"$s"
+				install -m 0755 -p bsd/"${name}"."$s" "${dir}"/"$s"
 			elif test -r bsd/"${name}".p && test -r bsd/"$s".funcs
 			then
 				install -m 0755 /dev/null "${dir}"/"$s"
@@ -36,7 +37,7 @@ gen_pkgng() {
 					fi
 					cat bsd/"${name}".p
 				) > "${dir}"/"$s"
-				chmod a-w -- "${dir}"/"$s"
+				chmod a-w "${dir}"/"$s"
 			fi
 		done
 	done
@@ -108,7 +109,7 @@ gen_pkgng() {
 			! test -d "$j" || find "$j" -type d
 		done | while read k
 		do
-			printf '  "/%s": { uname:%s; gname:%s; perm:%s; }\n' "$k" "root" "wheel" "`stat -f '%Lp' \"$k\"`"
+			printf '  "/%s": { uname:"%s"; gname:"%s"; perm:%s; }\n' "$k" "root" "wheel" "`stat -f '%Lp' \"$k\"`"
 		done
 		printf '}\n'
 		printf '%s: {\n' 'files'
@@ -124,7 +125,7 @@ gen_pkgng() {
 			! test -d "$j" || find "$j" -type f
 		done | while read k
 		do
-			printf '  "/%s": { uname:%s; gname:%s; sum:%s; perm:%s; }\n' "$k" "root" "wheel" "`sha256 -q $k`" "`stat -f '%Lp' \"$k\"`"
+			printf '  "/%s": { uname:"%s"; gname:"%s"; sum:"%d$%s"; perm:%s; }\n' "$k" "root" "wheel" "${checksum_type}" "`sha256 -q $k`" "`stat -f '%Lp' \"$k\"`"
 		done
 		printf '}\n'
 	) > ${dir}/+MANIFEST

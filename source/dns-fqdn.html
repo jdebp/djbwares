@@ -1,0 +1,44 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Fully-qualified domain names</title>
+<h1 class="Ruled">Fully-qualified domain names</h1>
+
+<p>
+It is a convention going back to the 1980s that in human-readable form a domain name that terminates in a dot is a <em>fully qualified</em> domain name, that DNS client libraries such as <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> do not perform any pre-processing on to turn into different domain names, and a domain name that does not terminate in a dot is a <em>not fully qualified</em> domain name, that can be turned into something else by a name qualfication mechanism of some form.
+</p>
+
+<p>
+Bernstein's original djbdns blurred this distinction intentionally, to protect from a very common configuration error in years of BIND use:
+People would forget (or not even learn) the convention, and not use the trailing dot where it was needed.
+They would, moreover, forget that the convention did not <em>solely</em> apply to BIND's DNS client library.
+It also applied to BIND's "zone file" parser.
+</p>
+
+<p>
+Worse, there is a lot of samizdat and folkloric documentation on the World Wide Web and elsewhere that <em>explains the convention incorrectly</em>.
+An <em>internal</em> dot does not make a domain name fully-qualified.
+Originally, multiple-label domain names without trailing dots were a means for sophisticated users to navigate complex multi-level intranet name hierarchies (such as universities or companies with different departments) without always having to tack on the common organization suffix.
+</p>
+
+<p>
+Alas, however, the people who forgot the trailing dots would end up unexpectedly navigating internal hierarchies when they thought that they were using public, global, names.
+They would use the name <code>example.org</code> sans trailing dot, and end up at <code>example.org.example.com.</code> instead of at <code>example.org.</code> as they were expecting, because of a search path mechanism used by name qualification.
+At best this would yield a negative result.
+Oftentimes, worse, wildcards could yield what would seem to be domain hi-jacking.
+(One Hacker News commentator once mentioned to the author of this Guide having made actual use of this for denying access to particular domains from computers within an organization.)
+</p>
+
+<p>
+To many of the tools in djbdns, and djbwares, a domain name supplied is simply <em>always</em> fully qualified, trailing dot or no.
+This is the case for domain names in <code>data</code> files compiled by <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> (the trailing dot omission error having particularly acute consequences in BIND's old "zone files") and the domain names in the various diagnostic tools such as <a href="commands/dnsqr.xml"><code>dnsqr</code></a>.
+</p>
+
+<p>
+However, other tools such as <a href="commands/dnsmx.xml"><code>dnsmx</code></a> run their input strings through a name qualification mechanism, as these are application utilities and not diagnostic tools.
+The compatibility mode name qualification mechanism in <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> is created in such a way that the trailing dot convention works, and so does the interior dot assumption.
+</p>
+
+<p>
+This does mean that the mechanism for sophisticated users is no longer present (albeit that administrators whose users <em>all</em> know what they are doing can hand-create a different form of rewrite rule that has the old behaviour).
+The gains in preventing errors outweigh its loss.
+</p>

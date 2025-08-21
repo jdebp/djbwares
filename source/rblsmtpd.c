@@ -12,7 +12,8 @@
 #include "stralloc.h"
 #include "commands.h"
 #include "pathexec.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_resolve.h"
 #include "ucspi.h"
 
 #define FATAL "rblsmtpd: fatal: "

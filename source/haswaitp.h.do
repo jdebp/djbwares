@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange trywaitp.c compile link
 if ( ./compile trywaitp.o trywaitp.c trywaitp.d && ./link trywaitp trywaitp.o ) >/dev/null 2>&1

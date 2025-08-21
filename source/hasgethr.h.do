@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange trygethr.c compile link
 if ( ./compile trygethr.o trygethr.c trygethr.d && ./link trygethr trygethr.o ) >/dev/null 2>&1

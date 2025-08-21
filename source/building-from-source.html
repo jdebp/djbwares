@@ -13,9 +13,14 @@ The source is structured as a <a href="https://jdebp.uk/FGA/slashpackage.html">s
 </p>
 
 <p>
-It requires <a href="https://jdebp.uk/Softwares/redo/">redo</a> to build, and builds with the gcc and clang compilers.
+It requires <a href="https://jdebp.uk/Softwares/redo/">redo</a>, <code>install</code>, <code>xmlto</code>, the host operating system's equivalent of <a href="https://debian.org/doc/debian-policy/ch-source.html#package-relationships">Debian's <code>build-essential</code> tools</a> (whatever thay may be), and a POSIX-conformant operating system (with the standard utilities present) to build.
+</p>
+
+<p>
+It builds with the g++ and clang++ compilers.
 The build system attempts to autodetect the available compiler, as well as various operating-system-dependant features.
-The way that it does this was in some of Daniel J. Bernstein's original softwares: a short test program that references the desired features, and a header that defines a preprocessor macro according to whether the build system can successfully compile and link the test program.
+The way that it autodetects features was in some of Daniel J. Bernstein's original softwares: a short test program that references the desired features, and a header that defines a preprocessor macro according to whether the build system can successfully compile and link the test program.
+(People who absolutely must can override the compiler autodetection with an environment variable.)
 </p>
 
 <link rel="Section" href="#Build" title="Building the toolset itself">

@@ -1,4 +1,6 @@
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_server.h"
+#include "dns_random.h"
 
 const char *fatal = "tinydns: fatal: ";
 const char *starting = "starting tinydns\n";

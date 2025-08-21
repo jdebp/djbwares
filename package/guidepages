@@ -1,6 +1,17 @@
 building-from-source
 changes
 commands
+dns-fqdn
+dns-private-root
+dns-public-root-list
+dns-replication
+dns-security
+dns-services
 index
 non-commands
+publicfile-security
+publicfile-services
+time-publication
+time-synchronization
+time-tai
 what-is-the-af

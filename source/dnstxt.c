@@ -1,7 +1,8 @@
 #include "buffer.h"
 #include "exit.h"
 #include "strerr.h"
-#include "dns.h"
+#include "dns_resolve.h"
+#include "dns_random.h"
 
 #define FATAL "dnstxt: fatal: "
 

@@ -5,8 +5,10 @@
 #include <unistd.h>
 #include "ndelay.h"
 #include "socket.h"
+#include "ip.h"
+#include "error.h"
 
-int socket_tcp4(void)
+static int socket_tcp4(void)
 {
   int s;
 
@@ -16,7 +18,7 @@ int socket_tcp4(void)
   return s;
 }
 
-int socket_tcp6(void)
+static int socket_tcp6(void)
 {
   int s;
 
@@ -24,4 +26,13 @@ int socket_tcp6(void)
   if (s == -1) return -1;
   if (ndelay_on(s) == -1) { close(s); return -1; }
   return s;
+}
+
+int socket_tcp(const struct ip_address * ip)
+{
+  switch (ip->len) {
+    case IP4_LEN:	return socket_tcp4();
+    case IP6_LEN:	return socket_tcp6();
+    default:  errno = error_proto; return -1;
+  }
 }

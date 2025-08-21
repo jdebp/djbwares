@@ -1,6 +1,6 @@
 #!/bin/sh -e
-redo-ifchange ./cc ./ccflags
+redo-ifchange ./cc ./ccflags ./ldflags
 read cc < ./cc
 read ccflags < ./ccflags
-ldflags=""
+read ldflags < ./ccflags
 exec ${cc} ${ccflags} -o "$@" ${ldflags}

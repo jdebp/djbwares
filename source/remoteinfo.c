@@ -6,6 +6,8 @@
 #include "timeoutconn.h"
 #include "remoteinfo.h"
 #include "readwrite.h"
+#include "ip.h"
+#include "ip4.h"
 
 static struct taia now;
 static struct taia deadline;
@@ -46,7 +48,7 @@ static int myread(int fd,char *buf,int len)
   return read(fd,buf,len);
 }
 
-static int doit(stralloc *out,int s,char ipremote[4],uint16 portremote,char iplocal[4],uint16 portlocal,unsigned int timeout)
+static int doit(stralloc *out,int s,const struct ip_address *ipremote,uint16 portremote,const struct ip_address *iplocal,uint16 portlocal,unsigned int timeout)
 {
   buffer b;
   char bspace[128];
@@ -54,7 +56,7 @@ static int doit(stralloc *out,int s,char ipremote[4],uint16 portremote,char iplo
   int numcolons;
   char ch;
 
-  if (socket_bind4(s,iplocal,0) == -1) return -1;
+  if (socket_bind(s,iplocal,0) == -1) return -1;
   if (timeoutconn(s,ipremote,113,timeout) == -1) return -1;
 
   buffer_init(&b,mywrite,s,bspace,sizeof bspace);
@@ -80,7 +82,7 @@ static int doit(stralloc *out,int s,char ipremote[4],uint16 portremote,char iplo
   }
 }
 
-int remoteinfo(stralloc *out,char ipremote[4],uint16 portremote,char iplocal[4],uint16 portlocal,unsigned int timeout)
+int remoteinfo(stralloc *out,const struct ip_address *ipremote,uint16 portremote,const struct ip_address *iplocal,uint16 portlocal,unsigned int timeout)
 {
   int s;
   int r;
@@ -91,7 +93,7 @@ int remoteinfo(stralloc *out,char ipremote[4],uint16 portremote,char iplocal[4],
   taia_uint(&deadline,timeout);
   taia_add(&deadline,&now,&deadline);
 
-  s = socket_tcp4();
+  s = socket_tcp(ipremote);
   if (s == -1) return -1;
   r = doit(out,s,ipremote,portremote,iplocal,portlocal,timeout);
   close(s);

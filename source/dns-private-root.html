@@ -1,0 +1,45 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>A private root content DNS server</title>
+<h1 class="Ruled">A private root content DNS server</h1>
+
+<p>
+Running a private root content DNS server was <a href="http://cr.yp.to/dnsroot.html">pioneered by djbdns</a> and experimental when djbdns was originally developed at the turn of the 21st century.
+In djbwares, it is nowadays <a href="dns-services.html">one of the conventional DNS services</a>.
+</p>
+
+<p>
+The benefits of doing this are well known, and this is a brief summary.
+</p>
+<ul>
+<li><p>
+There is a fair amount of DNS lookup traffic that for privacy reasons should not be sent out to Internet at large, where anyone on any hop between the originating system and (at least, but not limited to) the public root content DNS servers can read the DNS queries in flight.
+</p></li>
+<li><p>
+There is a fair amount of DNS lookup traffic that is just useless, being totally bogus transactions, that will never succeed, caused by some very common mis-configurations or mis-uses.
+</p></li>
+<li><p>
+No off-site content DNS server, no matter how far out to "the edge" it may be pushed, is going to be fewer hops away than an on-site, or even an on-machine, one.
+</p></li>
+<li><p>
+There have for decades been concerns at how much the fundamentals of the Internet still rely upon the good intentions of one particular country's government.
+Fears that it may one day decide no longer to fund infrastructure for the global good have not exactly been allayed by events in the 2020s.
+</p></li>
+<li><p>
+In the event of one's LAN losing Internet connectivity, an on-LAN private root will keep at least some DNS functionality alive, including one's own domains (if combined into the same database) and the handling of the bogus traffic.
+Amusingly, this is the same sort of thinking that has this very Guide installable in off-line form.
+</p></li>
+</ul>
+
+<p>
+Conceptually, a private root content DNS server introduces pretty much nothing that is not simply the normal operation of <a href="commands/tinydns.xml"><code>tinydns</code></a>.
+One obtains the data to publish from a primary source; one filters out extraneous items; one handles any overlaps and conflicts with other data; and one compiles the result with <a href="commands/dtinydns-data.xml"><code>tinydns-data</code></a>.
+The traditional mechanism for managing the tinydns database is <code>make</code> and a <code>Makefile</code> and all of these tasks are fairly simple exercises in <code>make</code> rules and widely-available flat-file variable-length text-database processing tools like <a href="https://mlr.readthedocs.io">Miller</a> and AWK.
+</p>
+
+<p>
+An example private root <code>Makefile</code> is not provided with djbwares; because it would overlap with the one provided by <a href="https://jdebp.uk/Softwares/nosh/">the nosh toolset</a> which is used as an initial template when creating new tinydns services.
+That example actually replicates more than just the root, as several subdomains of the root, including Estonia's for example, provide downloadable/replicatable versions of their data.
+It demonstrates one way in which to resolve conflicts when one is combining data from (the database of) a delegated-from server with data from (the database of) a delegated-to server.
+It also demonstrates the necessary location tagging, so that the private root data do not affect what is published publicly, and split-horizon DNS service.
+</p>

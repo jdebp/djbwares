@@ -5,11 +5,14 @@
 #include "str.h"
 #include "byte.h"
 #include "error.h"
-#include "ip4.h"
+#include "ip.h"
 #include "iopause.h"
 #include "printpacket.h"
 #include "parsetype.h"
-#include "dns.h"
+#include "dns_transmit.h"
+#include "dns_resolve.h"
+#include "dns_random.h"
+#include "dns_domain.h"
 #include "exit.h"
 
 #define FATAL "dnsq: fatal: "
@@ -36,7 +39,9 @@ static char seed[128];
 int main(int argc,char **argv)
 {
   uint16 u16;
-  char servers[64];
+  unsigned int server_count;
+  struct ip_address server_list[16];
+  unsigned int j;
 
   dns_random_init(seed);
 
@@ -50,10 +55,12 @@ int main(int argc,char **argv)
 
   if (!*++argv) usage();
   if (!stralloc_copys(&out,*argv)) oops();
-  if (dns_ip4_qualify(&ip,&fqdn,&out) == -1) oops();
-  if (ip.len >= 64) ip.len = 64;
-  byte_zero(servers,64);
-  byte_copy(servers,ip.len,ip.s);
+  if (dns_ip_qualify(&ip,&fqdn,&out) == -1) oops();
+  if (ip.len > sizeof server_list) ip.len = sizeof server_list;
+  for (j = 0; j < sizeof server_list/sizeof *server_list; ++j)
+    ip_make_unassigned(server_list + j);
+  byte_copy(server_list,ip.len,ip.s);
+  server_count = ip.len / sizeof *server_list;
 
   if (!stralloc_copys(&out,"")) oops();
   uint16_unpack_big(type,&u16);
@@ -62,7 +69,7 @@ int main(int argc,char **argv)
   if (!dns_domain_todot_cat(&out,q)) oops();
   if (!stralloc_cats(&out,":\n")) oops();
 
-  if (dns_resolve_servers(q,type,servers,0) == -1) {
+  if (dns_resolve_servers_nospecials(q,type,server_list,server_count,53,0) == -1) {
     if (!stralloc_cats(&out,error_str(errno))) oops();
     if (!stralloc_cats(&out,"\n")) oops();
   }
@@ -71,5 +78,5 @@ int main(int argc,char **argv)
   }
 
   buffer_putflush(buffer_1,out.s,out.len);
-  _exit(0);
+  return 0;
 }

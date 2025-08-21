@@ -1,11 +1,13 @@
 #include <unistd.h>
 #include "str.h"
 #include "byte.h"
-#include "ip4.h"
+#include "ip.h"
 #include "open.h"
 #include "env.h"
 #include "cdb.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_server.h"
+#include "dns_domain.h"
 #include "dd.h"
 #include "strerr.h"
 #include "response.h"
@@ -14,28 +16,36 @@ static char *base;
 
 static struct cdb c;
 static char key[5];
-static char data[100 + IP4_FMT];
+static char data[100 + IP_FMT];
 
-static int doit(char *q,char qtype[2])
+static int doit(const char *q,const char qtype[2])
 {
   int flaga;
   int flagtxt;
   char ch;
-  char reverseip[4];
-  char ip[4];
+  char a[IP4_LEN];
   uint32 ipnum;
-  int r;
+  struct ip_address ip;
+  int r = 0;
   uint32 dlen;
   int i;
 
+  if (byte_equal(qtype,2,DNS_T_ANY)) {
+    if (!response_noany(q)) return 0;
+    return 1;
+  }
+  if (byte_equal(qtype,2,DNS_T_OPT)) {
+    if (!response_noopt(q)) return 0;
+    return 1;
+  }
+
   flaga = byte_equal(qtype,2,DNS_T_A);
   flagtxt = byte_equal(qtype,2,DNS_T_TXT);
-  if (byte_equal(qtype,2,DNS_T_ANY)) goto NO_ANY;
   if (!flaga && !flagtxt) goto REFUSE;
 
-  if (dd4(q,base,reverseip) != 4) goto REFUSE;
-  uint32_unpack(reverseip,&ipnum);
-  uint32_pack_big(ip,ipnum);
+  if (dd4(q,base,a) != IP4_LEN) goto REFUSE;
+  uint32_unpack_big(a,&ipnum);
+  ip_make4(&ip,a);
 
   for (i = 0;i <= 24;++i) {
     ipnum >>= i;
@@ -61,7 +71,7 @@ static int doit(char *q,char qtype[2])
 
   if ((dlen >= 5) && (data[dlen - 1] == '$')) {
     --dlen;
-    dlen += ip4_fmt(data + dlen,ip);
+    dlen += ip_fmt(data + dlen,&ip,':');
   }
 
   if (flaga) {
@@ -79,23 +89,17 @@ static int doit(char *q,char qtype[2])
 
   return 1;
 
-
-NO_ANY:
-  if (!response_noany(q)) return 0;
-  return 1;
-
   REFUSE:
-  response[2] &= ~4;
-  response[3] &= ~15;
-  response[3] |= 5;
+  response_refuse();
   return 1;
 }
 
-int respond(char *q,char qtype[2],char ip[4])
+int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_address *ipremote)
 {
   int fd;
   int result;
 
+  (void)ipremote; /* Silence a compiler warning. */
   fd = open_read("data.cdb");
   if (fd == -1) return 0;
   cdb_init(&c,fd);

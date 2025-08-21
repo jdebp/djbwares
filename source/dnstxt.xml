@@ -31,18 +31,18 @@
 <title>Description</title>
 
 <para>
-<command>dnstxt</command> looks up the TXT resource records for <replaceable>fqdn</replaceable> in the Domain Name System, and prints them.
-If there are no TXT resource records, <command>dnstxt</command> prints a blank line.
+<command>dnstxt</command> looks up the <code>TXT</code> resource records for <replaceable>fqdn</replaceable> in the Domain Name System, and prints them.
+If there are no <code>TXT</code> resource records, <command>dnstxt</command> prints a blank line.
 </para>
 
 <para>
 Normally <command>dnstxt</command> exits 0. 
-If it encounters a temporary problem that prevents it from determining the MX resource records, it prints an error message and exits 111.
+If it encounters a temporary problem that prevents it from determining the <code>TXT</code> resource records, it prints an error message and exits 111.
 </para>
 
 <para>
-<command>dnstxt</command> makes all DNS lookups using the locally configured DNS proxy server.
-See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+<command>dnstxt</command> makes all DNS lookups using the locally configured DNS proxy server(s), and performs no name qualification on what is taken to already be a "fully-qualified" domain name (trailing dot or no) <replaceable>fqdn</replaceable>.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, and for certain standard domain names that short-circuit DNS lookups to the proxy DNS server(s).
 </para>
 
 </refsection>

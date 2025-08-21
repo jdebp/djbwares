@@ -4,11 +4,13 @@
 #include "scan.h"
 #include "strerr.h"
 #include "error.h"
-#include "ip4.h"
+#include "ip.h"
 #include "uint16.h"
 #include "uint64.h"
 #include "socket.h"
-#include "dns.h"
+#include "dns_transmit.h"
+#include "dns_random.h"
+#include "dns_packet.h"
 #include "taia.h"
 #include "byte.h"
 #include "roots.h"
@@ -22,38 +24,65 @@
 #include "log.h"
 #include "okclient.h"
 #include "droproot.h"
+#include "dnscache.h"
 
-static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qclass[2],char id[2])
+static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qclass[2],char id[2],uint16 *max_response)
 {
   unsigned int pos;
-  char header[12];
+  char header[HEADER_SIZE];
+  uint16 numquery;
+  uint16 numanswer;
+  uint16 numauthority;
+  uint16 numglue;
+  unsigned int j;
 
   errno = error_proto;
-  pos = dns_packet_copy(buf,len,0,header,12); if (!pos) return 0;
-  if (header[2] & 128) return 0; /* must not respond to responses */
-  if (!(header[2] & 1)) return 0; /* do not respond to non-recursive queries */
-  if (header[2] & 120) return 0;
-  if (header[2] & 2) return 0;
-  if (byte_diff(header + 4,2,"\0\1")) return 0;
+  pos = dns_packet_copy(buf,len,0,header,HEADER_SIZE); if (!pos) return 0;
+  if (header[2] & 128) return 0;	/* must not respond to responses */
+  if (!(header[2] & 1)) return 0;	/* do not respond to non-recursive queries */
+  if (header[2] & 120) return 0;	/* do not respond to OPCODE != 0 (forward query) */
+  if (header[2] & 2) return 0;		/* do not respond when TC = 1 */
+
+  uint16_unpack_big(header + HEADER_QUERY,&numquery);
+  if (1 != numquery) return 0;
+  uint16_unpack_big(header + HEADER_ANSWER,&numanswer);
+  if (numanswer) return 0;
+  uint16_unpack_big(header + HEADER_AUTHORITY,&numauthority);
+  if (numauthority) return 0;
+  uint16_unpack_big(header + HEADER_ADDITIONAL,&numglue);
+  if (numglue > 1) return 0;
 
   pos = dns_packet_getname(buf,len,pos,q); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) return 0;
   if (byte_diff(qclass,2,DNS_C_IN)) return 0;
-
   byte_copy(id,2,header);
+
+  *max_response = 512;
+  for (j = 0;j < numglue;++j) {
+    uint16 udpsize;
+    uint16 datalen;
+    char rrfixed[RRFIXED_SIZE];
+    pos = dns_packet_skipname(buf,len,pos); if (!pos) return 0;
+    pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) return 0;
+    uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
+    if (byte_diff(rrfixed + RRFIXED_TYPE,2,DNS_T_OPT)) return 0;
+    uint16_unpack_big(rrfixed + RRFIXED_CLASS,&udpsize);
+    /* The 512 octet floor is obvious, but RFC 6891 explicitly states it too. */
+    if (udpsize > 512 && udpsize <= MAX_RESPONSE) *max_response = udpsize;
+    pos += datalen;
+  }
+
   return 1;
 }
 
 
-static char myipoutgoing[4];
-static char myipincoming[4];
+static struct ip_address myipoutgoing = IP_ADDRESS_INIT;
+static struct ip_address myipincoming = IP_ADDRESS_INIT;
 static char buf[1024];
 uint64 numqueries = 0;
-static uint16 myportincoming = 0;
+static uint16 myportincoming = 53;  /* DNS */
 
-
-static int udp53;
 
 #define MAXUDP 200
 static struct udpclient {
@@ -61,30 +90,31 @@ static struct udpclient {
   struct taia start;
   uint64 active; /* query number, if active; otherwise 0 */
   iopause_fd *io;
-  char ip[4];
+  struct ip_address ip;
   uint16 port;
+  uint16 max_response;
   char id[2];
 } u[MAXUDP];
 int uactive = 0;
 
-void u_drop(int j)
+static void u_drop(int j)
 {
   if (!u[j].active) return;
   log_querydrop(&u[j].active);
   u[j].active = 0; --uactive;
 }
 
-void u_respond(int j)
+static void u_respond(int udp53,int j)
 {
   if (!u[j].active) return;
   response_id(u[j].id);
-  if (response_len > 512) response_tc();
-  socket_send4(udp53,response,response_len,u[j].ip,u[j].port);
+  if (response_len > u[j].max_response) response_tc();
+  socket_send(udp53,response,response_len,&u[j].ip,u[j].port);
   log_querydone(&u[j].active,response_len);
   u[j].active = 0; --uactive;
 }
 
-void u_new(void)
+static void u_new(int udp53)
 {
   int j;
   int i;
@@ -110,27 +140,22 @@ void u_new(void)
   x = u + j;
   taia_now(&x->start);
 
-  len = socket_recv4(udp53,buf,sizeof buf,x->ip,&x->port);
+  len = socket_recv(udp53,buf,sizeof buf,&x->ip,&x->port);
   if (len == -1) return;
   if (len >= sizeof buf) return;
   if (x->port < 1024) if (x->port != 53) return;
-  if (!okclient(x->ip)) return;
+  if (!okclient(&x->ip)) return;
 
-  if (!packetquery(buf,len,&q,qtype,qclass,x->id)) return;
+  if (!packetquery(buf,len,&q,qtype,qclass,x->id,&x->max_response)) return;
 
   x->active = ++numqueries; ++uactive;
-  log_query(&x->active,x->ip,x->port,x->id,q,qtype);
-  switch(query_start(&x->q,q,qtype,qclass,myipoutgoing)) {
-    case -1:
-      u_drop(j);
-      return;
-    case 1:
-      u_respond(j);
+  log_query(&x->active,&x->ip,x->port,x->id,q,qtype,x->max_response);
+  switch(query_start(&x->q,q,qtype,qclass,&myipoutgoing)) {
+    case -1: u_drop(j); return;
+    case 1: u_respond(udp53,j); break;
   }
 }
 
-
-static int tcp53;
 
 #define MAXTCP 20
 static struct tcpclient {
@@ -139,7 +164,7 @@ static struct tcpclient {
   struct taia timeout;
   uint64 active; /* query number or 1, if active; otherwise 0 */
   iopause_fd *io;
-  char ip[4]; /* send response to this address */
+  struct ip_address ip; /* send response to this address */
   uint16 port; /* send response to this port */
   char id[2];
   int tcp; /* open TCP socket, if active */
@@ -158,14 +183,14 @@ state 0: buf 0; handling query in q
 state -1: buf allocated; have written pos bytes
 */
 
-void t_free(int j)
+static void t_free(int j)
 {
   if (!t[j].buf) return;
   alloc_free(t[j].buf);
   t[j].buf = 0;
 }
 
-void t_timeout(int j)
+static void t_timeout(int j)
 {
   struct taia now;
   if (!t[j].active) return;
@@ -174,23 +199,23 @@ void t_timeout(int j)
   taia_add(&t[j].timeout,&t[j].timeout,&now);
 }
 
-void t_close(int j)
+static void t_close(int j)
 {
   if (!t[j].active) return;
   t_free(j);
-  log_tcpclose(t[j].ip,t[j].port);
+  log_tcpclose(&t[j].ip,t[j].port);
   close(t[j].tcp);
   t[j].active = 0; --tactive;
 }
 
-void t_drop(int j)
+static void t_drop(int j)
 {
   log_querydrop(&t[j].active);
   errno = error_pipe;
   t_close(j);
 }
 
-void t_respond(int j)
+static void t_respond(int j)
 {
   if (!t[j].active) return;
   log_querydone(&t[j].active,response_len);
@@ -205,7 +230,7 @@ void t_respond(int j)
   t[j].state = -1;
 }
 
-void t_rw(int j)
+static void t_rw(int j)
 {
   struct tcpclient *x;
   char ch;
@@ -213,6 +238,7 @@ void t_rw(int j)
   char qtype[2];
   char qclass[2];
   int r;
+  uint16 max_response;
 
   x = t + j;
   if (x->state == -1) {
@@ -251,23 +277,19 @@ void t_rw(int j)
   x->buf[x->pos++] = ch;
   if (x->pos < x->len) return;
 
-  if (!packetquery(x->buf,x->len,&q,qtype,qclass,x->id)) { t_close(j); return; }
+  if (!packetquery(x->buf,x->len,&q,qtype,qclass,x->id,&max_response)) { t_close(j); return; }
 
   x->active = ++numqueries;
-  log_query(&x->active,x->ip,x->port,x->id,q,qtype);
-  switch(query_start(&x->q,q,qtype,qclass,myipoutgoing)) {
-    case -1:
-      t_drop(j);
-      return;
-    case 1:
-      t_respond(j);
-      return;
+  log_query(&x->active,&x->ip,x->port,x->id,q,qtype,max_response);
+  switch(query_start(&x->q,q,qtype,qclass,&myipoutgoing)) {
+    case -1: t_drop(j); return;
+    case 1: t_respond(j); return;
   }
   t_free(j);
   x->state = 0;
 }
 
-void t_new(void)
+static void t_new(int tcp53)
 {
   int i;
   int j;
@@ -292,38 +314,35 @@ void t_new(void)
   x = t + j;
   taia_now(&x->start);
 
-  x->tcp = socket_accept4(tcp53,x->ip,&x->port);
+  x->tcp = socket_accept(tcp53,&x->ip,&x->port);
   if (x->tcp == -1) return;
   if (x->port < 1024) if (x->port != 53) { close(x->tcp); return; }
-  if (!okclient(x->ip)) { close(x->tcp); return; }
+  if (!okclient(&x->ip)) { close(x->tcp); return; }
   if (ndelay_on(x->tcp) == -1) { close(x->tcp); return; } /* Linux bug */
 
   x->active = 1; ++tactive;
   x->state = 1;
   t_timeout(j);
 
-  log_tcpopen(x->ip,x->port);
+  log_tcpopen(&x->ip,x->port);
 }
 
-
-static iopause_fd io[3 + MAXUDP + MAXTCP];
-static iopause_fd *udp53io;
-static iopause_fd *tcp53io;
-
-static void doit(void)
+static void doit(int udp53, int tcp53)
 {
-  int j;
-  struct taia deadline;
-  struct taia stamp;
-  int iolen;
-  int r;
+  iopause_fd io[3 + MAXUDP + MAXTCP];
 
   for (;;) {
+    iopause_fd *udp53io;
+    iopause_fd *tcp53io;
+    struct taia deadline;
+    struct taia stamp;
+    int iolen = 0;
+    unsigned int j;
+    int r;
+
     taia_now(&stamp);
     taia_uint(&deadline,120);
     taia_add(&deadline,&deadline,&stamp);
-
-    iolen = 0;
 
     udp53io = io + iolen++;
     udp53io->fd = udp53;
@@ -356,7 +375,7 @@ static void doit(void)
       if (u[j].active) {
 	r = query_get(&u[j].q,u[j].io,&stamp);
 	if (r == -1) u_drop(j);
-	if (r == 1) u_respond(j);
+	if (r == 1) u_respond(udp53,j);
       }
 
     for (j = 0;j < MAXTCP;++j)
@@ -375,11 +394,11 @@ static void doit(void)
 
     if (udp53io)
       if (udp53io->revents)
-	u_new();
+	u_new(udp53);
 
     if (tcp53io)
       if (tcp53io->revents)
-	t_new();
+	t_new(tcp53);
   }
 }
   
@@ -392,10 +411,12 @@ int main(void)
   char *x;
   unsigned long cachesize;
   int do_listen, do_udp_options;
+  int udp53 = -1;
+  int tcp53 = -1;
 
   udp53 = tcp53 = -1;
   do_listen = do_udp_options = 1;
-  socket_listen_get_udptcp4(FATAL,&udp53,&tcp53,&do_listen,&do_udp_options,&myportincoming,myipincoming,53);
+  socket_listen_get_udptcp(FATAL,&udp53,&tcp53,&do_listen,&do_udp_options,&myportincoming,&myipincoming,myportincoming);
 
   droproot(FATAL);
 
@@ -408,10 +429,9 @@ int main(void)
   close(0);
 
   x = env_get("IPSEND");
-  if (!x)
-    strerr_die2x(111,FATAL,"$IPSEND not set");
-  if (!ip4_scan(x,myipoutgoing))
-    strerr_die3x(111,FATAL,"unable to parse IP address ",x);
+  if (x)
+    if (!ip_scan(x,&myipoutgoing,':'))
+      strerr_die3x(111,FATAL,"unable to parse IP address ",x);
 
   x = env_get("CACHESIZE");
   if (!x)
@@ -435,6 +455,6 @@ int main(void)
       strerr_die2sys(111,FATAL,"unable to listen on TCP socket: ");
 
   log_startup();
-  doit();
+  doit(udp53,tcp53);
   /*NOTREACHED*/ return 0;
 }

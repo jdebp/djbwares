@@ -30,6 +30,8 @@ p.note { border:1px dashed; padding:0.5em }
 defn { font-style:italic; }
 span.kbd { border-radius:4px; padding:1px; }
 span.command-prompt { color:aqua; }
+span.user-input { }
+span.computer-output { }
 span.kbd-white { border-radius:4px; padding:3px; border:4px outset; line-height:2em; background-color:AntiqueWhite; }
 ul.compact li p { margin-top:0px; margin-bottom:0px; }
 ul.footnotes { font-size:smaller; }

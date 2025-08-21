@@ -1,0 +1,50 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Replicating your DNS data</title>
+<h1 class="Ruled">Replicating your DNS data</h1>
+
+<p>
+The <a href="dns-services.html">conventional setup for DNS services</a></li> has an instance of <a href="commands/tinydns.xml"><code>tinydns</code></a> serving your public data, on an IP address delegated-to by superdomain content DNS servers from a (shared) database file.
+</p>
+
+<p>
+To replicate the data that are published to other <a href="commands/tinydns.xml"><code>tinydns</code></a> servers, just copy the <samp>data</samp> file and compile it with <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> on the copied-to machine.
+</p>
+
+<blockquote><div class="command-window"><pre><span class="command-prompt">admin@b.ns.example ~ %</span><span class="user-input">cd ~publicfile/dns</span>
+<span class="command-prompt">admin@b.ns.example ~publicfile/dns %</span><span class="user-input">rsync --compress a.ns.example:/home/publicfile/dns/data .</span>
+<span class="command-prompt">admin@b.ns.example ~publicfile/dns %</span><span class="user-input">tinydns-data</span>
+<span class="command-prompt">admin@b.ns.example ~publicfile/dns %</span></pre></div></blockquote>
+
+<p>
+Yes, it is as simple as using <code>rsync</code>.
+</p>
+
+<p>
+In fact, any method that will copy a file from one location to another is satisfactory.
+Bernstein djbdns always has been neutral with respect to how one copies files.
+One could even use the <samp>cp</samp> command, for example, or the <samp>uucp</samp> command, or Zmodem, or SneakerNet.
+<samp>rsync</samp> and <samp>scp</samp> are no more than suggestions.
+</p>
+
+<p>
+No, do not use "zone transfer".
+</p>
+
+<p>
+"zone transfer" even ("incremental zone transfer") is hopelessly inefficient, uses the DNS protocol with its (in Bernstein's own words) sophomoric compression scheme, and lacks the ability to transfer any of the things (such as location codes, time to die, temporarily disabled addresses, and even comments) that have never been understood by "zone transfer".
+Simple file copying of the <samp>data</samp> source file preserves all of these, effortlessly; and with general-purpose file copying tools, proper compression, and no special DNS-only protocol involved.
+</p>
+
+<p>
+No, do not copy <samp>data.cdb</samp>
+</p>
+
+<p>
+One of the guarantees required by <a href="commands/tinydns.xml"><code>tinydns</code></a> and provided by <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> is that <samp>data.cdb</samp> is <em>never</em> in a partly-written state.
+This is why it compiles to a temporary file, renames it once it has fully completed writing it, and the <samp>data.cdb</samp> file is never modified again.
+("cdb" is short for Bernstein's Constant DataBase file format.)
+<samp>rsync</samp> et al. do not provide this guarantee and will mess up DNS service for the period that the file is in the partly-copied state.
+If you <em>really</em> want to copy compiled files around, then copy them to a temporary name and rename them over the target after the copy has fully completed successfully.
+</p>
+

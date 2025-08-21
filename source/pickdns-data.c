@@ -16,8 +16,10 @@
 #include "byte.h"
 #include "scan.h"
 #include "fmt.h"
+#include "ip.h"
 #include "ip4.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_domain.h"
 
 #define FATAL "pickdns-data: fatal: "
 
@@ -47,7 +49,7 @@ void ipprefix_cat(stralloc *out,char *s)
 struct address {
   char *name;
   unsigned int namelen;
-  char ip[4];
+  struct ip_address ip;
   char location[2];
 } ;
 
@@ -183,7 +185,7 @@ int main(void)
 	t.namelen = dns_domain_length(t.name);
 	case_lowerb(t.name,t.namelen);
 	if (!stralloc_0(&f[1])) nomem();
-	if (!ip4_scan(f[1].s,t.ip)) syntaxerror(": malformed IP address");
+	if (!ip_scan(f[1].s,&t.ip,'_')) syntaxerror(": malformed IP address");
 	if (!stralloc_0(&f[2])) nomem();
 	if (!stralloc_0(&f[2])) nomem();
 	byte_copy(t.location,2,f[2].s);
@@ -215,7 +217,7 @@ int main(void)
     if (!stralloc_catb(&key,x.s[i].name,x.s[i].namelen)) nomem();
     if (!stralloc_copys(&result,"")) nomem();
     while (i < j)
-      if (!stralloc_catb(&result,x.s[i++].ip,4)) nomem();
+      if (!stralloc_catb(&result,&x.s[i++].ip,sizeof(struct ip_address))) nomem();
     if (cdb_make_add(&cdb,key.s,key.len,result.s,result.len) == -1)
       die_datatmp();
   }

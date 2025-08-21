@@ -1,0 +1,152 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>publicfile security</title>
+<h1 class="Ruled">publicfile security</h1>
+
+<h2 class="Ruled">Ownership of public files and logs</h2>
+
+<p>
+The <a href="publicfile-services.html">conventional root</a> of the filesystem tree served up by publicfile services must not be writable by <em>or owned by</em> the account which <a href="commands/httpd.xml"><code>httpd</code></a>, <a href="commands/gopherd.xml"><code>gopherd</code></a>, <a href="commands/geminid.xml"><code>geminid</code></a>, and <a href="commands/ftpd.xml"><code>ftpd</code></a> drop privileges and run as.
+Ownership is a means by which a hypothetical attacker who had somehow managed to compromise an HTTP/GOPHER/GEMINI/FTP/NICNAME/FINGER server could then gain write access to things.
+</p>
+
+<p>
+In the modern convention, the <code>publicfile</code> account does not own or have write access to its home directory or <code>~publicfile/public</code> or <em>any other file on the filesystem</em>.
+The publicfile services have <em>zero</em> legitimate reason to ever open any file in the filesystem for write access.
+Their logs are sent to standard error and are expected to be passed through <a href="commands/multilog.xml"><code>multilog</code></a> or some similar utility, that runs as a <em>different</em> user account.
+A hypothetical attacker who had somehow managed to compromise an HTTP/GOPHER/GEMINI/FTP/NICNAME/FINGER server cannot gain access to that server's past logs.
+</p>
+
+<p>
+The services and their loggers are mutually untrusting processes.
+</p>
+
+<p>
+Write access can be given to a designated <em>publicfile administrator</em>, either a particular user account who owns the files and directories, or a group that has write access to the files and directories, and whose group ID is assigned to any files or directories created within the publicfile root.
+This administrator does not require any form of superuser privileges in order to administer published content.
+</p>
+
+<h2 class="Ruled">All publicfile data are public</h2>
+
+<p>
+Everything at or below the root of the filesystem tree served up by publicfile services is publishable to Internet at large.
+Do not place <em>anything anywhere</em> in this filesystem tree that is to be considered private.
+If you would not feel comfortable with it being in 3 metre high lettering on billboards above the departure/arrival lounges at major international aeroports such as London Heathrow, Cochin, or Los Angeles; do not publish it with publicfile.
+</p>
+
+<p>
+The publicfile servers have no settings files that live in this directory tree.
+(On older versions of djbwares, an <code>/etc/leapsecs.dat</code> file used to be required in this tree, in order for the services to publish last modification timestamps <a href="time-tai.html">correctly</a>; which is no longer the case as of djbwares version 10.)
+</p>
+
+<p>
+There is nothing special, or privileged, to the <code>Host:</code> header in HTTP or the <code>vhost</code> verb in FTP.
+They provide <em>attacker-supplied data</em> and one should assume that attackers can try any arbitrary virtual host.
+Virtual host names are not security measures.
+</p>
+
+<p>
+For best results:
+If you <em>are</em> generating public content programmatically (e.g. constructing an <code>index.gopher</code>, <code>index.gemini</code>, or <code>index.html</code> from a directory scan) then (unless you want to show the world how the sausage is made &mdash; what your <code>Makefile</code>s, shell scripts, and whatnot are) construct the content elsewhere, entirely out of tree, and copy <em>only the final output</em> into the publicfile root.
+</p>
+
+<p>
+This, and other reasons such as skeleton dotfiles that get set up when creating user accounts, are why the convention for the publicfile root is <code>~publicfile/public/</code> not simply <code>~publicfile/</code>.
+</p>
+
+<h2 class="Ruled">All publicfile data are static</h2>
+
+<p>
+None of the servers in publicfile create data on the fly.
+They are <em>static content</em> servers.
+Any directory listing served up over HTTP, GEMINI, or GOPHER has to be pre-constructed as an <code>index.html</code>, <code>index.gemini</code>, or <code>index.gopher</code> file.
+<a href="commands/ftpd.xml"><code>ftpd</code></a> lists actual directory contents in EPLF, but that is effectively a way of reading the actual directory as a file (something that is actually possible in Unix, and thus on the BSDs, but forbidden by the publicfile services for obvious reasons, as it would expose internals such as i-node numbers and potentially any deleted but not reclaimed-for-space directory entries) and directories are static too.
+</p>
+
+<p>
+The original Bernstein publicfile allowed URLs to contain query parameters (after a <code>?</code> character) and fragment identifiers (after a <code>#</code> character) which would translate into rather bizarre (and unless the publicfile administrator has set things up very oddly, always unsuccessful) attempts to actually open and read files with these characters in their names.
+Taking a leaf out of the GEMINI protocol's design, which was invented two decades after the final Bernstein version of publicfile, the publicfile servers in djbwares quietly reject all URLs with query parts or fragment parts.
+Clients simply have no legitimate reason to expect <em>static</em> servers to accept let alone deal in such things.
+</p>
+
+<p>
+Whilst <a href="commands/httpd.xml"><code>httpd</code></a> allows clients to check whether the last modification timestamps have been changed (by a publicfile administrator changing one of the static files), no publicfile server uses last access timestamps, of files or directories, and the <code>noatime</code> mount option can be used to reduce the amount of incidental (and pointless) disc update traffic caused by publicfile servers reading files and directories, without affecting those publicfile servers.
+(The traffic is pointless, because every file that is opened and read is logged, and a TAI64N timestamp added to that log by <a href="commands/multilog.xml"><code>multilog</code></a> or one of its ilk.)
+</p>
+
+<h2 class="Ruled">GEMINI as NICNAME and FINGER</h2>
+
+<p>
+The original purpose of the NICNAME protocol (later known as WHOIS) was to look up <em>people</em> and report their names, ranks, addresses, and telephone numbers.
+(From RFC 952 in October 1985 to RFC 3912 in September 2004, military personnel who had USDOD Internet access were required to register with the official NICNAME server.)
+Only later did it morph into a system for looking up <em>WWW sites</em>.
+</p>
+
+<p>
+The FINGER protocol's original purpose was to provide similar personally identifying information about people with accounts on local and remote systems, to anyone at all who asked, without authentication, in plaintext that could be intercepted at any intermediate hop.
+</p>
+
+<p>
+Both of these are privacy nightmares, and in many countries legal minefields (such personally identifying information risking falling foul of the GDPR and other countries's data privacy regulations).
+For privacy, security, and legal reasons, you should <em>never</em> run the traditional <code>fingerd</code> or <code>whoisd</code> service programs supplied with operating systems, or included in their packages/ports systems.
+(And you should of course be careful not to put personally identifying data in the publicfile root.)
+</p>
+
+<p>
+djbwares allows one to <a href="publicfile-services.html">repurpose FINGER and NICNAME/WHOIS</a> as rather absurd yet comedically quite functional ways of accessing the publicfile published tree, using <a href="commands/geminid.xml"><code>geminid</code></a> as the FINGER/NICNAME/WHOIS server.
+The protocols are wire-compatible, except that <a href="commands/geminid.xml"><code>geminid</code></a> will expect to receive something that looks like a schema-less URL.
+</p>
+
+<h2 class="Ruled">Attacks</h2>
+
+<p>
+Expect any Internet-facing publicfile service to be attacked immediately that it is up and running.
+As static content servers that reject queries and fragments, do not provide any sort of proxying, do not sit above databases or "reverse proxies", and do not have in-tree configuration files, publicfile content servers are immune to the attacks that are widely deployed against public HTTP/FTP/GOPHER services.
+They do not even log many of them, as flooding logs with bad requests is <em>itself</em> a form of attack; albeit that more logging can be turned on with the <code>LOGUNSUPPORTED</code> environment variable as described in the servers's manuals.
+</p>
+
+<p>
+Common attacks that you may see take an extensive range of forms.
+Here are but a few and how they do not apply to publicfile:
+</p>
+<dl>
+<dt>General PHP vulnerabilities, usually using command injection inside query parameters</dt>
+<dd><p>
+publicfile servers simply do not use PHP, or CGI, or FastCGI, or anything of that ilk.
+And they reject any URL that has query parameters, as aforementioned.
+</p></dd>
+<dt>Well-known weaknesses in particular server softwares</dt>
+<dd><p>
+publicfile servers simply do not have special WordPress or Apache files and suchlike in their directory trees.
+There are no <code>.env</code> files or <code>.htaccess</code> files or suchlike, and any attempt to read such files has the dot changed anyway.
+</p></dd>
+<dt>virtual hosts that are supported out of the box</dt>
+<dd><p>
+In this attack, attackers use virtual hosts that administrators generally forget that their softwares will support, and so do not correctly secure.
+One particularly popular virtual host choice is the server's IP address, or the domain name that results from a reverse lookup of that IP address.
+Some server softwares support these out of the box as convenience features, which end up pointing, without the security settings in place, virtual hosts at either default or internal WWW sites.
+publicfile does not support such virtual hosts out of the box.
+</p><p> <strong>Caution:</strong>
+For best results, do not use <code>0</code>, even though it is the default fallback, as the main virtual host, with symbolic links pointing to it.
+Use an actual virtual host name that the server genuinely serves.
+Getting rid of the automatic fallback to <code>0</code> is one reason that <a href="commands/httpd.xml"><code>httpd</code></a> has HTTP/0.9 and HTTP/1.0 switched off out-of-the-box.
+Of course, any client can manually pick it as the virtual host; although this is a very uncommon attack practice.
+</p></dd>
+<dt>Assuming that everything might be closet HTTP</dt>
+<dd><p>
+One of the sad things to watch is a GOPHER server receiving an HTTP/1.0 GET command, but this is a regular occurrence as attackers target "stealth" HTTP servers where administrators think that merely using a different TCP port, and doing nothing else (sometimes not even putting into place the security measures that are on the standard port), provides a form of security.
+This attack will try to get the entire HTTP command line as a GOPHER selector, and not work (bar some oddball manual file and directory setup by an administrator to make it work).
+</p></dd>
+<dt>Path traversal attacks</dt>
+<dd><p>
+Although not as common as they were at the turn of the 21st century, when publicfile <a href="commands/http.xml"><code>http</code></a> and <a href="commands/ftpd.xml"><code>ftpd</code></a> running unprivileged in a largely empty changed-root jail was not as normalized a way to run HTTP and FTP servers as it is now (publicfile having blazed this trail to some extent), these attacks do sometimes happen.
+</p></dd>
+</dl>
+
+<p>
+Log flooding is another form of attack.
+Because any Internet-facing publicfile service is attacked as soon as it is switched on, which effectively performs a log flood, <a href="commands/httpd.xml"><code>httpd</code></a> does not log bad requests, that it outright rejects, and requests involving unsupported features, by default.
+(See the manual page for details or unsupported features and bad requests.)
+To debug unsupported feature uses, one can set the <code>LOGUNSUPPORTED</code> environment variable.
+For best results, this should not be set on across the board, but on a more fine grained basis via a rules system like the <a href="commands/tcprules.xml"><code>tcprules</code></a> database that is passed to the <code>-x</code> option to <a href="commands/tcpserver.xml"><code>tcpserver</code></a>.
+</p>

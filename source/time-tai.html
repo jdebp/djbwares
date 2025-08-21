@@ -1,0 +1,52 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>TAI-10 and UTC</title>
+<h1 class="Ruled">TAI-10 and UTC</h1>
+
+<div class="sidebar">
+Further reading:
+<ul class="compact">
+<li> Daniel J. Bernstein. <a href="http://cr.yp.to/proto/utctai.html"><i>UTC, TAI, and UNIX time</i></a>. cr.yp.to. </li>
+<li> David Madore (2010-12-27). "<a href="http://www.madore.org/~david/computers/unix-leap-seconds.html#tai-minus-10">The TAI−10 setup</a>". <i>The Unix leap second mess</i>. </li>
+<li> Daniel J. Bernstein. <a href="http://cr.yp.to/libtai.html"><i>libtai</i></a>. cr.yp.to. </li>
+</ul>
+</div>
+
+<h2 class="Ruled">Keeping the time in TAI</h2>
+
+<p>
+All of the Bernstein softwares operate, and always have operated, in terms of TAI-10.
+This is where the operating system's kernel clock counts SI seconds since 1970-01-01 00:00:10 (proleptic) UTC and applications softwares are expected to use the Olson "right" (as opposed to "posix") <a href="https://www.iana.org/time-zones">timezone data files</a>.
+</p>
+
+<p>
+This does not apply just to the timekeeping utilities such as <a href="commands/clockadd.xml"><code>clockadd</code></a> and <a href="commands/nowutc.xml"><code>nowutc</code></a>, but also applies to the Internet publication tools such as <a href="commands/httpd.xml"><code>httpd</code></a> (which converts from system timestamps in TAI-10 to a human-readable timestamp in HTTP <code>Last-Modified:</code> headers).
+</p>
+
+<p>
+Although the SNTP protocol uses UTC, not TAI, the <a href="commands/sntpclock.xml"><code>sntpclock</code></a> tool attempts to convert timestamps in the SNTP form to TAI timestamps as used by the system, if SNTP is the chosen form of <a href="time-synchronization.html">time synchronization</a>.
+<a href="commands/taiclock.xml"><code>taiclock</code></a> and <a href="commands/taiclockd.xml"><code>taiclockd</code></a> synchronize directly in TAI-10.
+</p>
+
+<p>
+TAI-10 timekeeping (except where <a href="commands/clockspeed.xml"><code>clockspeed</code></a> is in the mix) does not slew or smear leap seconds out, over periods of a day or longer; but rather provides (or at least makes best effort attempts to provide, in the face of <a href="time-synchronization.html">hardware limitations</a>) a guarantee that one second of the system clock is one SI second, leap second or otherwise.
+</p>
+
+<h2 class="Ruled">Leap seconds</h2>
+
+<p>
+The Olson "right" timezones have within them tables of when leap seconds (positive or negative) have occurred, so that the SI seconds counts are converted into broken-down clock dates and times the leap seconds are correctly accounted for.
+</p>
+
+<p>
+Bernstein's softwares use Bernstein's own libtai library, which does not read Olson timezone files, but which instead has its own timezone table in the <code>/usr/local/etc/leapsecs.dat</code> file; which is much the same idea only in a file of its own.
+</p>
+
+<p>
+This file is a machine-readable very simple table of leap seconds, a pre-compiled (and up-to-date as of 2025) form of which is built from a human-readable source file (named <code>source/leapsecs.txt</code>) when <a href="building-from-source.html">building from source</a> and is packaged into one of the djbwares binary packages.
+(There is a very similar, although not quite identical, <code>leap-seconds.list</code> file in the source code of the timezone files, that is compiled into a binary form too.)
+</p>
+
+<p>
+If for some reason this becomes out of date, the <a href="commands/leapsecs.xml"><code>leapsecs</code></a> tool can simply be used to compile a new <code>/usr/local/etc/leapsecs.dat</code> file by hand.
+</p>

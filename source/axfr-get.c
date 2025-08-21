@@ -12,11 +12,14 @@
 #include "scan.h"
 #include "byte.h"
 #include "str.h"
+#include "ip.h"
 #include "ip4.h"
 #include "ip6.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
-#include "dns.h"
+#include "dns_packet.h"
+#include "dns_domain.h"
+#include "dns_constants.h"
 
 #define FATAL "axfr-get: fatal: "
 
@@ -230,20 +233,20 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!stralloc_cats(&line,".:")) return 0;
     if (!stralloc_catulong0(&line,dist,0)) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_A) && (dlen == 4)) {
+  else if (byte_equal(data,2,DNS_T_A) && (dlen == IP4_LEN)) {
     char ipstr[IP4_FMT];
     if (!stralloc_copys(&line,"+")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,":")) return 0;
-    x_copy(buf,len,pos,data,4);
+    x_copy(buf,len,pos,data,IP4_LEN);
     if (!stralloc_catb(&line,ipstr,ip4_fmt(ipstr,data))) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_AAAA) && (dlen == 16)) {
+  else if (byte_equal(data,2,DNS_T_AAAA) && (dlen == IP6_SANS_SCOPE_LEN)) {
     char ipstr[IP6_FMT];
     if (!stralloc_copys(&line,"+")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,":")) return 0;
-    x_copy(buf,len,pos,data,16);
+    x_copy(buf,len,pos,data,IP6_SANS_SCOPE_LEN);
     if (!stralloc_catb(&line,ipstr,ip6_fmt(ipstr,data,'_'))) return 0;
   }
   else {
@@ -319,7 +322,7 @@ int main(int argc,char **argv)
     close(fd);
   }
 
-  if (!stralloc_copyb(&packet,"\0\0\0\0\0\1\0\0\0\0\0\0",12)) die_generate();
+  if (!stralloc_copyb(&packet,"\0\0\0\0\0\1\0\0\0\0\0\0",HEADER_SIZE)) die_generate();
   if (!stralloc_catb(&packet,zone,zonelen)) die_generate();
   if (!stralloc_catb(&packet,DNS_T_SOA DNS_C_IN,4)) die_generate();
   uint16_pack_big(out,packet.len);
@@ -333,9 +336,9 @@ int main(int argc,char **argv)
   netget(packet.s,dlen);
   packet.len = dlen;
 
-  pos = x_copy(packet.s,packet.len,0,out,12);
-  uint16_unpack_big(out + 4,&numqueries);
-  uint16_unpack_big(out + 6,&numanswers);
+  pos = x_copy(packet.s,packet.len,0,out,HEADER_SIZE);
+  uint16_unpack_big(out + HEADER_QUERY,&numqueries);
+  uint16_unpack_big(out + HEADER_ANSWER,&numanswers);
 
   while (numqueries) {
     --numqueries;

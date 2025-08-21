@@ -4,7 +4,7 @@
 #include "env.h"
 #include "uint32.h"
 #include "uint16.h"
-#include "ip4.h"
+#include "ip.h"
 #include "tai.h"
 #include "buffer.h"
 #include "timeoutread.h"
@@ -17,13 +17,16 @@
 #include "str.h"
 #include "byte.h"
 #include "case.h"
-#include "dns.h"
 #include "scan.h"
 #include "qlog.h"
 #include "response.h"
 #include "ucspi.h"
+#include "dns_constants.h"
+#include "dns_packet.h"
+#include "dns_domain.h"
+#include "dns_random.h"
 
-extern int respond(char *,char *,char *);
+extern int respond(char *,char *,const struct ip_address *);
 
 #define FATAL "axfrdns: fatal: "
 
@@ -147,7 +150,7 @@ static void get(char *buf,unsigned int len)
   }
 }
 
-static char ip[4];
+static struct ip_address ip;
 static unsigned long port;
 static char clientloc[2];
 
@@ -182,8 +185,7 @@ static int build(stralloc *sa,char *q,int flagsoa,char id[2])
 
   dpos = 0;
   copy(type,2);
-  if (flagsoa) if (byte_diff(type,2,DNS_T_SOA)) return 0;
-  if (!flagsoa) if (byte_equal(type,2,DNS_T_SOA)) return 0;
+  if (flagsoa != byte_equal(type,2,DNS_T_SOA)) return 0;
 
   if (!stralloc_copyb(sa,id,2)) nomem();
   if (!stralloc_catb(sa,"\204\000\0\0\0\1\0\0\0\0",10)) nomem();
@@ -259,17 +261,19 @@ static void doaxfr(char id[2])
   cdb_init(&c,fdcdb);
 
   byte_zero(clientloc,2);
-  key[0] = 0;
-  key[1] = '%';
-  byte_copy(key + 2,4,ip);
-  r = cdb_find(&c,key,6);
-  if (!r) r = cdb_find(&c,key,5);
-  if (!r) r = cdb_find(&c,key,4);
-  if (!r) r = cdb_find(&c,key,3);
-  if (!r) r = cdb_find(&c,key,2);
-  if (r == -1) die_cdbread();
-  if (r && (cdb_datalen(&c) == 2))
-    if (cdb_read(&c,clientloc,2,cdb_datapos(&c)) == -1) die_cdbread();
+  if (ip_is4(&ip)) {
+    key[0] = 0;
+    key[1] = '%';
+    byte_copy(key + 2,4,ip.d4);
+    r = cdb_find(&c,key,6);
+    if (!r) r = cdb_find(&c,key,5);
+    if (!r) r = cdb_find(&c,key,4);
+    if (!r) r = cdb_find(&c,key,3);
+    if (!r) r = cdb_find(&c,key,2);
+    if (r == -1) die_cdbread();
+    if (r && (cdb_datalen(&c) == 2))
+      if (cdb_read(&c,clientloc,2,cdb_datapos(&c)) == -1) die_cdbread();
+  }
 
   cdb_findstart(&c);
   for (;;) {
@@ -332,7 +336,6 @@ static void netread(char *buf,unsigned int len)
   }
 }
 
-static char tcpheader[2];
 static char buf[512];
 static uint16 len;
 
@@ -340,10 +343,6 @@ static char seed[128];
 
 int main(void)
 {
-  unsigned int pos;
-  char header[12];
-  char qtype[2];
-  char qclass[2];
   const char *x;
 
   droproot(FATAL);
@@ -352,55 +351,72 @@ int main(void)
   axfr = env_get("AXFR");
   
   x = ucspi_get_remoteip_str(NULL, NULL, NULL);
-  if (x && ip4_scan(x,ip))
-    ;
-  else
-    byte_zero(ip,4);
+  if (!x || !ip_scan(x,&ip,':'))
+    ip_make_zero4(&ip);
 
   x = ucspi_get_remoteport_str("0", "0", "0");
   scan_ulong(x,&port);
 
   for (;;) {
+    unsigned int pos;
+    char tcpheader[2];
+    char header[HEADER_SIZE];
+    char qtype[2];
+    char qclass[2];
+    uint16 numqueries;
+    uint16 numanswers;
+    uint16 numauthority;
+    uint16 numglue;
+
     netread(tcpheader,2);
     uint16_unpack_big(tcpheader,&len);
-    if (len > 512) fatal1x("excessively large request");
+    if (len > sizeof buf) fatal1x("excessively large request");
     netread(buf,len);
 
-    pos = dns_packet_copy(buf,len,0,header,12); if (!pos) die_truncated();
-    if (header[2] & 254) fatal1x("bogus query");
-    if (header[4] || (header[5] != 1)) fatal1x("bogus query");
+    pos = dns_packet_copy(buf,len,0,header,sizeof header); if (!pos) die_truncated();
+    if (header[2] & 128) fatal1x("bogus request: reply");  /* must not respond to responses */
+    if (header[2] & 126) fatal1x("bogus query: non-zero OPCODE, TC, or AA"); /* OPCODE must be 0, and TC and AA must be 0 */
+
+    uint16_unpack_big(header + HEADER_QUERY,&numqueries);
+    if (1 != numqueries) fatal1x("bogus query: bad question");
+    uint16_unpack_big(header + HEADER_ANSWER,&numanswers);
+    if (numanswers) fatal1x("bogus query: answer records");
+    uint16_unpack_big(header + HEADER_AUTHORITY,&numauthority);
+    if (numauthority > 1) fatal1x("bogus query: more than 1 authority record");
+    uint16_unpack_big(header + HEADER_ADDITIONAL,&numglue);
+    if (numglue) fatal1x("bogus query: additional records");
 
     pos = dns_packet_getname(buf,len,pos,&zone); if (!pos) die_truncated();
     zonelen = dns_domain_length(zone);
     pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) die_truncated();
     pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) die_truncated();
 
-    if (byte_diff(qclass,2,DNS_C_IN))
+    if (byte_diff(qclass,2,DNS_C_IN)) {
+      qlog(&ip,port,header + HEADER_ID,65535,zone,qtype," C ");
       fatal1x("bogus query: bad class");
+    }
 
-//  qlog(ip,port,header,zone,qtype," ");
-
-    if (byte_equal(qtype,2,DNS_T_AXFR)) {
+    if (byte_equal(qtype,2,DNS_T_AXFR) || byte_equal(qtype,2,DNS_T_IXFR)) {
       case_lowerb(zone,zonelen);
       fdcdb = open_read("data.cdb");
       if (fdcdb == -1) die_cdbread();
-      qlog(ip,port,header,zone,qtype," A ");
-      doaxfr(header);
+      qlog(&ip,port,header + HEADER_ID,65535,zone,qtype,byte_equal(qtype,2,DNS_T_IXFR) ? " I " : " A ");
+      doaxfr(header + HEADER_ID);
       close(fdcdb);
     }
     else {
       if (!response_query(zone,qtype,qclass)) nomem();
-      response[2] |= 4;
+      response[2] |= 4; /* set AA=1 */
       case_lowerb(zone,zonelen);
-      response_id(header);
-      response[3] &= ~128;
-      if (!(header[2] & 1)) response[2] &= ~1;
-      if (!respond(zone,qtype,ip)) {
-	qlog(ip,port,header,zone,qtype," - ");
+      response_id(header + HEADER_ID);
+      response[3] &= ~128;	/* set RA=0 */
+      if (!(header[2] & 1)) response[2] &= ~1; /* echo client's RD */
+      if (!respond(zone,qtype,&ip)) {
+	qlog(&ip,port,header + HEADER_ID,65535,zone,qtype," - ");
 	die_outside();
       }
       print(response,response_len);
-      qlog(ip,port,header,zone,qtype," + ");
+      qlog(&ip,port,header + HEADER_ID,65535,zone,qtype," + ");
     }
   }
 }

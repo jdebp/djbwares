@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange tryflock.c compile link
 if ( ./compile tryflock.o tryflock.c tryflock.d && ./link tryflock tryflock.o )  # >/dev/null 2>&1 

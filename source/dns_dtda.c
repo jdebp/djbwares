@@ -1,5 +1,5 @@
 #include "stralloc.h"
-#include "dns.h"
+#include "dns_domain.h"
 
 int dns_domain_todot_cat(stralloc *out,const char *d)
 {

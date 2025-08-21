@@ -13,7 +13,6 @@
 
 #define FATAL "tcprules: fatal: "
 
-static unsigned long linenum = 0;
 static char *fntemp;
 static char *fn;
 

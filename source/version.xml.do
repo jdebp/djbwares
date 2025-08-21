@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 cwd="`cd .. && /bin/pwd`"
 base_plus_version="`basename "${cwd}"`"

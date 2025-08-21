@@ -24,7 +24,7 @@
 #include "ip.h"
 #include "ucspi.h"
 
-long safewrite(int fd,char *buf,int len)
+static long safewrite(int fd,char *buf,int len)
 {
   int r;
   r = timeoutwrite(60,fd,buf,len);
@@ -35,12 +35,12 @@ long safewrite(int fd,char *buf,int len)
 static char outbuf[1024];
 static substdio out = SUBSTDIO_FDBUF(safewrite,1,outbuf,sizeof outbuf);
 
-void out_flush(void)
+static void out_flush(void)
 {
   substdio_flush(&out);
 }
 
-void out_put(const char *s,int len)
+static void out_put(const char *s,int len)
 {
   while (len > 0) {
     substdio_put(&out,s,1);
@@ -50,12 +50,13 @@ void out_put(const char *s,int len)
   }
 }
 
+// used by fetch.c
 void out_puts(const char *s)
 {
   out_put(s,str_len(s));
 }
 
-long saferead(int fd,char *buf,int len)
+static long saferead(int fd,char *buf,int len)
 {
   int r;
   out_flush();
@@ -67,7 +68,7 @@ long saferead(int fd,char *buf,int len)
 static char inbuf[512];
 static substdio in = SUBSTDIO_FDBUF(saferead,0,inbuf,sizeof inbuf);
 
-void in_get(char *ch)
+static void in_get(char *ch)
 {
   for (;;) {
     substdio_get(&in,ch,1);
@@ -91,8 +92,8 @@ void in_get(char *ch)
 }
 
 static char strnum[FMT_ULONG];
-static struct ip_address iplocal = { {0,0,0,0} };
-static struct ip_address ipremote = { {0,0,0,0} };
+static struct ip_address iplocal = IP_ADDRESS_INIT;
+static struct ip_address ipremote = IP_ADDRESS_INIT;
 static struct sockaddr_in sa;
 
 static int fdlisten = -1; /* PASV socket; -1 if PASV not active */
@@ -105,16 +106,21 @@ static stralloc dir = stralloc_static_0;
 static stralloc ndir = stralloc_static_0;
 static stralloc fn = stralloc_static_0;
 
-void startlistening(unsigned char x[6])
+static void stoplistening()
+{
+  if (fdlisten != -1) { close(fdlisten); fdlisten = -1; }
+}
+
+static void startlistening(unsigned char x[6])
 {
   socklen_t dummy;
   int opt;
 
-  if (fdlisten != -1) { close(fdlisten); fdlisten = -1; }
+  stoplistening();
 
   byte_zero(&sa,sizeof sa);
   sa.sin_family = AF_INET;
-  byte_copy(&sa.sin_addr,4,&iplocal);
+  byte_copy(&sa.sin_addr,4,iplocal.d4);  /* FIXME: IPv6 */
 
   fdlisten = socket(AF_INET,SOCK_STREAM,0);
   if (fdlisten == -1) _exit(22);
@@ -131,7 +137,7 @@ void startlistening(unsigned char x[6])
   byte_copy(x + 4,2,&sa.sin_port);
 }
 
-void spsv(void)
+static void spsv(void)
 {
   unsigned char x[6];
 
@@ -147,7 +153,7 @@ void spsv(void)
   out_puts("\r\n");
 }
 
-void pasv(void)
+static void pasv(void)
 {
   unsigned char x[6];
 
@@ -178,7 +184,7 @@ void pasv(void)
   out_puts(")\r\n");
 }
 
-void epsv(const char *arg)
+static void epsv(const char *arg)
 {
   unsigned char x[6];
 
@@ -198,7 +204,7 @@ void epsv(const char *arg)
   out_puts("|)\r\n");
 }
 
-int portparse(char *arg,unsigned char x[6])
+static int portparse(char *arg,unsigned char x[6])
 {
   unsigned int i;
   unsigned long u;
@@ -217,11 +223,11 @@ int portparse(char *arg,unsigned char x[6])
   return 1;
 }
 
-void port(char *arg)
+static void port(char *arg)
 {
   unsigned char x[6];
 
-  if (fdlisten != -1) { close(fdlisten); fdlisten = -1; }
+  stoplistening();
 
   if (!portparse(arg,x)) {
     out_puts("501 Sorry, you need to give me six numbers separated by commas.\r\n");
@@ -231,7 +237,7 @@ void port(char *arg)
     out_puts("501 Sorry, I don't accept port numbers below 1024.\r\n");
     return;
   }
-  if (byte_diff(x,4,&ipremote)) {
+  if (byte_diff(x,4,ipremote.d4)) {  /* FIXME: IPv6 */
     out_puts("501 Sorry, I don't allow PORT relaying.\r\n");
     return;
   }
@@ -240,13 +246,13 @@ void port(char *arg)
   out_puts("200 Okay.\r\n");
 }
 
-void rest(char *arg)
+static void rest(char *arg)
 {
   scan_ulong(arg,&fetch_rest);
   out_puts("350 Okay.\r\n");
 }
 
-void get(char *arg,int how)
+static void get(char *arg,int how)
 {
   int fdfile;
   int fddata;
@@ -285,7 +291,7 @@ void get(char *arg,int how)
     if (fddata == -1) _exit(22);
 
     /* kernel will reject port 0 at this point */
-    if (timeoutconn(fddata,&ipremote,portremote,60) == -1) {
+    if (timeoutconn(fddata,&ipremote,portremote,60) == -1) {  /* FIXME: IPv6 */
       close(fddata);
       close(fdfile);
       out_puts("425 Sorry, I couldn't make a connection: ");
@@ -299,14 +305,14 @@ void get(char *arg,int how)
     out_flush();
 
     fddata = timeoutaccept(fdlisten,60);
-    close(fdlisten); fdlisten = -1;
+    stoplistening();
 
     if (fddata != -1) {
       dummy = sizeof sa;
       if (getpeername(fddata,(struct sockaddr *) &sa,&dummy) == -1) {
         close(fddata); fddata = -1;
       }
-      else if (byte_diff(&sa.sin_addr,4,&ipremote)) {
+      else if (byte_diff(&sa.sin_addr,4,ipremote.d4)) {  /* FIXME: IPv6 */
 	errno = error_acces;
 	close(fddata); fddata = -1;
       }
@@ -329,13 +335,18 @@ void get(char *arg,int how)
   portremote = 0;
 }
 
-void dir_moveup(void)
+static void dir_moveroot()
+{
+  if (!stralloc_copys(&ndir,"")) _exit(21);
+}
+
+static void dir_moveup(void)
 {
   if (!stralloc_copy(&ndir,&dir)) _exit(21);
   ndir.len = byte_rchr(ndir.s,ndir.len,'/');
 }
 
-void dir_move(const char *to)
+static void dir_move(const char *to)
 {
   if (*to == '/') {
     if (!stralloc_copys(&ndir,"")) _exit(21);
@@ -348,7 +359,7 @@ void dir_move(const char *to)
   }
 }
 
-int ok_dir()
+static int ok_dir()
 {
   int fdfile;
   struct tai mtime;
@@ -374,7 +385,7 @@ int ok_dir()
   return 1;
 }
 
-void say_dir(const char *code)
+static void say_dir(const char *code)
 {
   unsigned int i;
   char ch;
@@ -393,21 +404,29 @@ void say_dir(const char *code)
   out_puts("\" \r\n");
 }
 
-void cwd(const char *arg) 
+static void cwd(const char *arg) 
 {
   dir_move(arg);
   if (!ok_dir()) return;
   say_dir("250 ");
 }
 
-void cdup()
+static void cdup()
 {
   dir_moveup();
   if (!ok_dir()) return;
   say_dir("200 ");
 }
 
-void vhost(const char *h)
+static void rein()
+{
+  stoplistening();
+  dir_moveroot();
+  if (!ok_dir()) return;
+  say_dir("200 ");
+}
+
+static void vhost(const char *h)
 {
   if (!*h) {
     out_puts("501 bad virtual host\r\n");
@@ -418,8 +437,9 @@ void vhost(const char *h)
   out_puts("220 virtual host accepted\r\n");
 }
 
-void request(char *cmd,char *arg)
+static void request(char *cmd,char *arg)
 {
+  if (case_equals(cmd,"rein")) { rein(); return; }
   if (case_equals(cmd,"spsv")) { spsv(); return; }
   if (case_equals(cmd,"pasv")) { pasv(); return; }
   if (case_equals(cmd,"epsv")) { epsv(arg); return; }
@@ -561,12 +581,12 @@ void doit(void)
   if (!stralloc_copys(&host,x)) _exit(21);
 
   x = ucspi_get_localip_str(NULL, NULL, NULL);
-  if (!x || !ip_scan(x,&iplocal))
-    byte_zero(&iplocal,4);
+  if (!x || !ip_scan(x,&iplocal,':'))
+    ip_make_zero4(&iplocal);
 
   x = ucspi_get_remoteip_str(NULL, NULL, NULL);
-  if (!x || !ip_scan(x,&ipremote))
-    byte_zero(&ipremote,4);
+  if (!x || !ip_scan(x,&ipremote,':'))
+    ip_make_zero4(&ipremote);
 
   if (!stralloc_copys(&dir,"")) _exit(21);
 

@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange trypsx.c compile link
 if ( ./compile trypsx.o trypsx.c trypsx.d && ./link trypsx trypsx.o && ./trypsx ) >/dev/null 2>&1

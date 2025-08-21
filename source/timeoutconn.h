@@ -3,6 +3,7 @@
 
 #include "uint16.h"
 
-extern int timeoutconn(int,char *,uint16,unsigned int);
+struct ip_address;
+extern int timeoutconn(int,const struct ip_address *,uint16,unsigned int);
 
 #endif

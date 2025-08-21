@@ -15,7 +15,11 @@ extern void strerr_sysinit(void);
 
 extern const char *strerr(const struct strerr *);
 extern void strerr_warn(const char *,const char *,const char *,const char *,const char *,const char *,const char *x7,const struct strerr *);
-extern void strerr_die(int,const char *,const char *,const char *,const char *,const char *,const char *,const char *x7,const struct strerr *);
+extern void strerr_die(int,const char *,const char *,const char *,const char *,const char *,const char *,const char *x7,const struct strerr *)
+#if defined(__GNUC__)
+	__attribute__((noreturn))
+#endif
+	;
 
 #define STRERR(r,se,a) \
 { se.who = 0; se.x = a; se.y = 0; se.z = 0; return r; }

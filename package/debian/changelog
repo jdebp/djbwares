@@ -1,3 +1,52 @@
+djbwares (12) stable; urgency=low
+ 
+  *
+  
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Thu, 21 Aug 2025 17:05:49 +0100
+
+djbwares (11) stable; urgency=low
+ 
+  * Important changes that need special attention:
+    * Because of IP version 6, setting dnscache's IPSEND environment variable to 0.0.0.0 is no longer the correct default.
+      To specify that the operating system pick the sending IP address, unset the IPSEND variable, which is no longer mandatory for dnscache.
+    * Because of IP version 6, the memory requirements for dnscache have increased, and may exceed some resource limits if they are tightly constrained.
+      If a dnscache service fails to start, try raising its data size limit.
+    * Because of EDNS0, less DNS/TCP traffic will happen but more DNS/UDP traffic will, with larger datagram sizes.
+      The knowledge of how this impacts firewalls has been around since at least 2004, and it is not the problem that it was two decades ago.
+  * Documentation:
+    * COPYING is updated.  No legal changes; but it's not really the case that it's a few minor modifications, now.
+    * minor enhencements to some of the djbdns tools's documentation
+    * There is now a djbdns-client manual.
+    * There are several new chapters in the Guide on timekeeping, Internet publication with publicfile, and the Domain Name System.
+  * Packages:
+    * FreeBSD packaging now works for at least FreeBSD version 13.
+      (Credit to Rune Morling for help testing the builds on FreeBSD 13.)
+      The manifest file syntax on the pkg-create(8) manual page is a falsehood, with most items given in the wrong file format and some with the wrong names, and much of how this works is educated guesswork and experimentation.
+      Likewise, NetBSD's pkg_create(1) manual page does not even document two of its input files (which cause complaints by pkg_info(1) if omitted) at all.
+    * There is now a mechanism for overriding the compiler auto-detection if one really must.
+    * Debian package-building now builds a (not quite right) source package.
+    * The command-line tools for TAI-10 work have been split out of libtai, which is now a purely "development" package, into a new taitools package.
+  * Tools:
+    * pickdns, obsolete for 24 years and broken by IP version 6, has been removed from the toolset.
+    * httpd and geminid now impose the filesystem path length limit as an additional URL maximum length limit.
+    * httpd and geminid now reject URLs with query parts.
+    * Several of httpd's 5xx rejection errors are now 4xx errors, because they are really client-end problems, not server problems.
+    * ftpd now supports REIN.
+    * There is now a dnsns command.
+    * There is now a dnsqual command.
+    * dnscache, rbldns, walldns, and tinydns now support the EDNS0 mechanism for DNS/UDP packets bigger than 512 octets.
+    * All of the querying tools advertise their long DNS/UDP packet support.
+    * dnscache will not query for, but will use if given, IP version 6 addresses for content DNS servers.
+    * All of the querying tools support IP version 6 addresses in DNSCACHEIP and /etc/resolv.conf .
+    * dnscache's maximum nested gluelessness limit has been raised from 2 to 3.
+      Several common domain names nowdays involve resolving intermediate names in com., org., net., and info. before getting to the final nameservers.
+      This easily and regularly exceeds dnscache's old limit, which would cause it to fall back to a slower query resolution algorithm at the third level.
+    * A bug that prevented tinydns/axfrdns/tinydns-get from serving up CNAME chains with capital letters in has been fixed.
+    * tinydns-data now has an H convenience shorthand for the HTTPS resource record type.
+      The various diagnosis tools also recognize "https" as a query type.
+ 
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Thu, 21 Aug 2025 17:05:48 +0100
+
 djbwares (10) stable; urgency=low
  
   * dnsqrx no longer requires the Bourne Again shell.

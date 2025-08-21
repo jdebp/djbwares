@@ -17,7 +17,7 @@
 
 <refnamediv>
 <refname>walldns</refname>
-<refpurpose>an opaque content DNS server using the UDP protocol</refpurpose>
+<refpurpose>a database-less content DNS server using the UDP protocol</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -31,8 +31,8 @@
 
 <para>
 <command>walldns</command> is a content DNS server that speaks the DNS/UDP protocol.
-It accepts DNS queries from hosts around the Internet, and responds with fixed information.
-The queries ask about various IP addresses, taking the form of a reverse lookup, to which it supplies generic responses that avoid revealing local host information.
+It accepts DNS queries from hosts around the Internet, and responds with fixed information that it synthesizes on the spot.
+It does not have any database at all.
 </para>
 
 <para>
@@ -45,43 +45,156 @@ Normally <command>walldns</command> is run via a server program such as <command
 It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
 If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
 It does not handle DNS/TCP.
+However, none of its synthetic responses can ever exceed the non-EDNS0 DNS/UDP limit of 512 octets, meaning that there will never be occasion for DNS/TCP fallback.
+</para>
+
+<refsection>
+<title>Purposes</title>
+
+<para>
+<command>walldns</command> got its name from the idea of an opaque "wall" that hides private site information.
 </para>
 
 <para>
-<command>walldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, packets that contain anything other than a single query, query types other than A, PTR, or ANY, and queries for domain names not beneath <filename>in-addr.arpa</filename> or <filename>ip6.arpa</filename>.
+Its initial, and still major, use is queries that ask about various IP addresses, taking the form of a reverse lookup, to which it supplies generic responses that avoid revealing local host information.
+For this purpose, it should be run listening on a publicly-routable IP address and have the relevant subtree of <filename>in-addr.arpa.</filename> or <filename>ip6.arpa.</filename> delegated to that address.
 </para>
 
 <para>
-<code>ANY</code> queries are answered with a single synthesized <code>HINFO</code> resource record set.
-<command>walldns</command> otherwise answers queries in a fixed form.
-It does not include any <code>NS</code> or <code>SOA</code> resource records in its responses; and uses TTLs of one week.
+A secondary use has developed where it responds for various well-known domain names with defined standard DNS resource record information.
+For this purpose, it should be run listening on a non-publicly-routable IP address and proxy DNS servers should be configured with prune-and-graft overrides for the well-known domain names.
+(A conventional choice for this IP address is 127.53.1.1, with <command>walldns</command> running on the same machine as the proxy DNS server.)
+</para>
+<note>
+<citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> <emphasis>also</emphasis> synthesizes data for some of these domain names, and some domain names are handled internally by the DNS client library (see <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry>).
+But what answers a proxy DNS server can synthesize are different to what answers a content DNS server can synthesize and different to what answers a DNS client library can synthesize.
+Many "special-use domain names" have different rules for all three.
+</note>
+
+<para>
+This second purpose is in part to prevent burdening the public content DNS servers for various well-known "special-use domain names" with slow traffic asking for answers that could be more quickly synthesized locally, and in part to prevent test traffic and traffic containing information about hosts and devices on LANs, from being seen by the people who run these public servers.
+</para>
+
+</refsection>
+
+</refsection>
+
+<refsection>
+<title>Responses</title>
+
+<para>
+<command>walldns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, and packets that contain anything other than a single query.
+</para>
+
+<refsection>
+<title>Unanswered domains</title>
+
+<para>
+RFCs 6761 and 8375 specify that <filename>home.arpa.</filename>, <filename>example.</filename>, <filename>example.org.</filename>, <filename>example.com.</filename>, <filename>example.net.</filename>, and their subdomains should be treated as any other public domain names.
+For these, <command>walldns</command> behaves as <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> would do when asked about domains that have no SOA record in its database: it does not respond to the query at all.
 </para>
 
 <para>
-<command>walldns</command> creates a bidirectional mapping that maps IP addresses to domain names that map back to those same IP addresses.
+The same goes in general for any other domain names not covered here.
+But these specific domain names are covered by RFCs.
+It is an error to delegate or to prune-and-graft them to an instance of <command>walldns</command>, and <command>walldns</command> behaves as <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> would do in such a case (which in turn is motivated by minimizing "amplification" attacks and data sent to third parties by dint of falsified reply IP addresses).
+</para>
+
+</refsection>
+
+<refsection>
+<title>Non-existent domains</title>
+
+<para>
+RFCs 6761, 7686, 8880, 9031, 9140, 9462, and 9476 specify that <filename>test.</filename>, <filename>invalid.</filename>, <filename>alt.</filename>, <filename>onion.</filename>, <filename>local.</filename>, <filename>resolver.arpa.</filename>, <filename>6tisch.arpa.</filename>, <filename>eap-noob.com.</filename>, and their subdomains, and subdomains of <filename>ipv4only.arpa.</filename>, should be non-existent on the global DNS.
+They are either looked up via other mechanisms, if they are looked up at all, and queries for them should never have reached <command>walldns</command>, or they are by their natures non-existent as far as the global DNS is concerned.
+For these, <command>walldns</command> returns a "no such domain" error response.
+For "no such domain" errors, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
+</para>
+<note>
+RFC 9476 actually contradicts itself.
+<command>walldns</command> goes with its several statements that <filename>alt.</filename> is a non-existent top-level-domain and content DNS servers for the public DNS always return "no such domain" responses rather than its one statement that content DNS servers should not synthesize "no such domain" responses.
+</note>
+
+</refsection>
+
+<refsection>
+<title>Well-known domains with fixed data</title>
+
+<para>
+RFCs 6761 and 8880 specify that <filename>localhost.</filename> and its subdomains, and <filename>ipv4only.arpa.</filename> itself should exist on the global DNS, but have invariant standard data associated with them.
+<code>ANY</code> and <code>OPT</code> queries are answered with a single synthesized <code>HINFO</code> resource record set.
+Its value points people to RFC 8482 and RFC 6891, respectively.
+<code>A</code> and <code>AAAA</code> queries are answered with the standard data, which are 127.0.0.1 and ::1 for <filename>localhost.</filename> itself, 127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> and ::FFFF:127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> respectively for its <filename><replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.127.localhost.</filename> subdomains, and 192.0.0.170 and 192.0.0.171 for <filename>ipv4only.arpa.</filename>.
+For any other query types, <command>walldns</command> responds with an empty resource record set.
+For empty resource record sets, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
+</para>
+
+<para>
+For any domain that has the form of a human-readable IP version 4 address, even a denormalized one with leading zeroes in the labels, <command>walldns</command> answers <code>A</code> queries with that IP address.
+<code>ANY</code> and <code>OPT</code> queries are answered with a single synthesized <code>HINFO</code> resource record set as before, and for any other query types, including <code>AAAA</code>, <command>walldns</command> responds with an empty resource record set.
+For empty resource record sets, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
+</para>
+
+<para>
+For the special-use domains <filename>ip6.arpa.</filename> and <filename>in-addr.arpa.</filename>, <command>walldns</command> answers <code>A</code>, <code>AAAA</code>, and <code>PTR</code> queries with data.
+<code>ANY</code> and <code>OPT</code> queries are answered with a single synthesized <code>HINFO</code> resource record set as before, and for any other query types <command>walldns</command> responds with an empty resource record set.
+For empty resource record sets, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
+</para>
+
+<para>
+It creates a bidirectional mapping with these two special-use domains that maps IP addresses to domain names that map back to those same IP addresses.
 </para>
 
 <itemizedlist>
 <listitem>
 <para>
-For IP version 4, reverse lookup domain names take the form <filename>d.c.b.a.in-addr.arpa</filename>, where <filename>a.b.c.d</filename> is the IP address being looked up.
+For IP version 4, reverse lookup domain names take the form <filename><replaceable>d</replaceable>.<replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.in-addr.arpa</filename>, where <filename><replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable></filename> is the IP address being looked up.
 <command>walldns</command> publishes <code>PTR</code> responses mapping the domain name back to itself.
-It publishes <code>A</code> responses mapping the domain name to the IP address <filename>a.b.c.d</filename>.
+It publishes <code>A</code> responses mapping the domain name to the IP address <filename><replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable></filename>.
+It returns "no such domain" errors for subdomains not in the standard form.
+For "no such domain" errors, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
 </para>
+<para>
+As special cases, reverse lookups for 127.0.0.1 map to <filename>localhost.</filename>, which is then mapped in the other direction as earlier, and reverse lookups for other 127.<replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable> IPv4 addresses map to <filename><replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.127.localhost.</filename>, which is then mapped in the other direction as earlier.
+</para>
+<note>
+It <emphasis>does not</emphasis> publish any <code>AAAA</code> data for any IP version 4 lookups.
+A "double reverse lookup" of an IP version 4 address will not end up at an IP version 6 address.
+</note>
 </listitem>
 <listitem>
 <para>
 For IP version 6, reverse lookup domain names take the form <filename>5.4.3.2.1.0.z.y.x.w.v.u.t.s.r.q.p.o.n.m.l.k.j.i.h.g.f.e.d.c.b.a.ip6.arpa</filename>, where <filename>abcd:efgh:ijkl:mnop:qrst:uvwx:yz01:2345</filename> is the IP address being looked up.
 <command>walldns</command> publishes <code>PTR</code> responses mapping the domain name back to itself.
 It publishes <code>AAAA</code> responses mapping the domain name to the IP address <filename>abcd:efgh:ijkl:mnop:qrst:uvwx:yz01:2345</filename>.
+It returns "no such domain" errors for subdomains not in the standard form.
+For "no such domain" errors, it includes a synthetic <code>SOA</code> resource record that carries the TTL.
 </para>
-</listitem>
-<listitem>
 <para>
-It <emphasis>does not</emphasis> publish <code>A</code> responses for any IP version 6 lookups, nor <code>AAAA</code> responses for any IP version 4 addresses, even for IP version 4 "mapped" IP version 6 addresses.
+As a special case, reverse lookups for ::1/128 map to <filename>localhost.</filename>, which is then mapped in the other direction as earlier.
 </para>
+<note>
+It <emphasis>does not</emphasis> publish any <code>A</code> data for any IP version 6 lookups, even for IP version 4 "mapped" IP version 6 addresses.
+A "double reverse lookup" of an IP version 6 address will not end up at an IP version 4 address.
+</note>
 </listitem>
 </itemizedlist>
+
+<para>
+<command>walldns</command> does not include any <code>NS</code> resource records in its responses; and uses TTLs of a fortnight for all synthetic resource records, including the <code>SOA</code> resource record that is the DNS protocol's way of giving a TTL to "no such domain" errors and empty resource record sets.
+Caches will normally cap this TTL and end up re-querying <command>walldns</command> more than once per fortnight for the same information.
+But apart from the special-use domains <filename>ip6.arpa.</filename> and <filename>in-addr.arpa.</filename> the TTLs of these invariant data are effectively measured in years.
+(Changes would have to pass IANA/IETF review processes.)
+A fortnight is actually a conservative value.
+</para>
+<note>
+Properly operating caches will not cache the <code>SOA</code> resource records, as they are a protocol bodge rather than actual record data.
+All of the other fields in the <code>SOA</code> resource record are effectively meaningless as they involve DNS databases that <command>walldns</command> does not have.
+They are set to sane values, but otherwise convey no information.
+</note>
+
+</refsection>
 
 </refsection>
 
@@ -89,9 +202,20 @@ It <emphasis>does not</emphasis> publish <code>A</code> responses for any IP ver
 <title>History</title>
 <para>
 <command>walldns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+None of the aforementioned RFCs existed at the time, and the invention of many of the "special-use domain names" was years in the future.
 </para>
 <para>
 <command>walldns</command> gained IP version 6 support in 2019.
+It does not use the <filename>ip6.int.</filename> superdomain and never has.
+The <filename>ip6.int.</filename> superdomain was deprecated by RFC3152 in 2001 and obsoleted by RFC4159 in 2005.
+It was removed from other tools in the toolset in 2016.
+</para>
+<para>
+Support for the "special-use domain names" other than <filename>ip6.arpa.</filename> and the original <filename>in-addr.arpa.</filename> was added in August 2025.
+</para>
+<para>
+Until 2025, <command>walldns</command> sent "Refused" error responses for domains that it did not handle.
+It now does not reply to such queries, intentionally mimicking what <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> would do.
 </para>
 </refsection>
 

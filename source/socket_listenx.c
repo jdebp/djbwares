@@ -5,8 +5,7 @@
 #include "error.h"
 #include "strerr.h"
 #include "scan.h"
-#include "ip4.h"
-#include "ip6.h"
+#include "ip.h"
 #include "env.h"
 #include "socket.h"
 #include "ndelay.h"
@@ -49,7 +48,7 @@ static void socket_listen_inherit_udp(int * udpfd)
   }
 }
 
-void socket_listen_get_udp4(const char * fatal, int * udpfd, int * do_udp_options, uint16 * port, char ip[4], uint16 defport)
+void socket_listen_get_udp(const char * fatal, int * udpfd, int * do_udp_options, uint16 * port, struct ip_address * ip, uint16 defport)
 {
   char * x;
 
@@ -57,9 +56,7 @@ void socket_listen_get_udp4(const char * fatal, int * udpfd, int * do_udp_option
   *do_udp_options = 1;
   socket_listen_inherit_udp(udpfd);
   if (-1 != *udpfd) {
-    if (!socket_is_udp4(*udpfd))
-      strerr_die2x(111,fatal,"listening UDP socket is not IP version 4");
-    if (0 > socket_local4(*udpfd,ip,port))
+    if (0 > socket_local(*udpfd,ip,port))
       strerr_die2sys(111,fatal,"unable to get local address from listening socket: ");
     *do_udp_options = 0;
     return;
@@ -68,44 +65,13 @@ void socket_listen_get_udp4(const char * fatal, int * udpfd, int * do_udp_option
   x = env_get("IP");
   if (!x)
     strerr_die2x(111,fatal,"$IP not set");
-  if (!ip4_scan(x,ip))
-    strerr_die3x(111,fatal,"unable to parse IP version 4 address ",x);
+  if (!ip_scan(x,ip,':'))
+    strerr_die3x(111,fatal,"unable to parse IP address ",x);
 
-  *udpfd = socket_udp4();
+  *udpfd = socket_udp(ip);
   if (*udpfd == -1)
     strerr_die2sys(111,fatal,"unable to create UDP socket: ");
-  if (socket_bind4_reuse(*udpfd,ip,defport) == -1)
-    strerr_die2sys(111,fatal,"unable to bind UDP socket: ");
-  *port = defport;
-  ndelay_off(*udpfd);
-}
-
-void socket_listen_get_udp6(const char * fatal, int * udpfd, int * do_udp_options, uint16 * port, char ip[20], uint16 defport)
-{
-  char * x;
-
-  *udpfd = -1;
-  *do_udp_options = 1;
-  socket_listen_inherit_udp(udpfd);
-  if (-1 != *udpfd) {
-    if (!socket_is_udp6(*udpfd))
-      strerr_die2x(111,fatal,"listening UDP socket is not IP version 6");
-    if (0 > socket_local6(*udpfd,ip,port))
-      strerr_die2sys(111,fatal,"unable to get local address from listening socket: ");
-    *do_udp_options = 0;
-    return;
-  }
-
-  x = env_get("IP");
-  if (!x)
-    strerr_die2x(111,fatal,"$IP not set");
-  if (!ip6_scan(x,ip,':'))
-    strerr_die3x(111,fatal,"unable to parse IP version 6 address ",x);
-
-  *udpfd = socket_udp6();
-  if (*udpfd == -1)
-    strerr_die2sys(111,fatal,"unable to create UDP socket: ");
-  if (socket_bind6_reuse(*udpfd,ip,defport) == -1)
+  if (socket_bind_reuse(*udpfd,ip,defport) == -1)
     strerr_die2sys(111,fatal,"unable to bind UDP socket: ");
   *port = defport;
   ndelay_off(*udpfd);
@@ -142,7 +108,7 @@ static void socket_listen_inherit_udptcp(int * udpfd, int * tcpfd)
   }
 }
 
-void socket_listen_get_udptcp4(const char * fatal, int * udpfd, int * tcpfd, int * do_listen, int * do_udp_options, uint16 * port, char ip[4], uint16 defport)
+void socket_listen_get_udptcp(const char * fatal, int * udpfd, int * tcpfd, int * do_listen, int * do_udp_options, uint16 * port, struct ip_address * ip, uint16 defport)
 {
   char * x;
 
@@ -150,11 +116,7 @@ void socket_listen_get_udptcp4(const char * fatal, int * udpfd, int * tcpfd, int
   *do_listen = *do_udp_options = 1;
   socket_listen_inherit_udptcp(udpfd,tcpfd);
   if (-1 != *udpfd && -1 != *tcpfd) {
-    if (!socket_is_udp4(*udpfd))
-      strerr_die2x(111,fatal,"listening UDP socket is not IP version 4");
-    if (!socket_is_tcp4(*tcpfd))
-      strerr_die2x(111,fatal,"listening TCP socket is not IP version 4");
-    if (0 > socket_local4(*udpfd,ip,port))
+    if (0 > socket_local(*udpfd,ip,port))
       strerr_die2sys(111,fatal,"unable to get local address from listening socket: ");
     *do_listen = *do_udp_options = 0;
     return;
@@ -163,25 +125,25 @@ void socket_listen_get_udptcp4(const char * fatal, int * udpfd, int * tcpfd, int
   x = env_get("IP");
   if (!x)
     strerr_die2x(111,fatal,"$IP not set");
-  if (!ip4_scan(x,ip))
-    strerr_die3x(111,fatal,"unable to parse IP version 4 address ",x);
+  if (!ip_scan(x,ip,':'))
+    strerr_die3x(111,fatal,"unable to parse IP address ",x);
   *port = defport;
 
   if (*udpfd == -1) {
-    *udpfd = socket_udp4();
+    *udpfd = socket_udp(ip);
     if (*udpfd == -1)
       strerr_die2sys(111,fatal,"unable to create UDP socket: ");
-    if (socket_bind4_reuse(*udpfd,ip,defport) == -1)
+    if (socket_bind_reuse(*udpfd,ip,defport) == -1)
       strerr_die2sys(111,fatal,"unable to bind UDP socket: ");
     ndelay_off(*udpfd);
   } else
     *do_udp_options = 0;
 
   if (*tcpfd == -1) {
-    *tcpfd = socket_tcp4();
+    *tcpfd = socket_tcp(ip);
     if (*tcpfd == -1)
       strerr_die2sys(111,fatal,"unable to create TCP socket: ");
-    if (socket_bind4_reuse(*tcpfd,ip,defport) == -1)
+    if (socket_bind_reuse(*tcpfd,ip,defport) == -1)
       strerr_die2sys(111,fatal,"unable to bind TCP socket: ");
   } else
     *do_listen = 0;

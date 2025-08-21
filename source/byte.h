@@ -9,6 +9,7 @@ extern void byte_copy(char *, unsigned int, const char *);
 extern void byte_copyr(char *, unsigned int, const char *);
 extern int byte_diff(const char *, unsigned int, const char *);
 extern void byte_zero(char *, unsigned int);
+extern void byte_reverse(char *, unsigned int);
 
 #define byte_equal(s,n,t) (!byte_diff((s),(n),(t)))
 

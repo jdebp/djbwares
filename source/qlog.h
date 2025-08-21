@@ -3,6 +3,7 @@
 
 #include "uint16.h"
 
-extern void qlog(const char *,uint16,const char *,const char *,const char *,const char *);
+struct ip_address;
+extern void qlog(const struct ip_address *,uint16,const char id[2],uint16,const char *,const char qtype[2],const char *);
 
 #endif

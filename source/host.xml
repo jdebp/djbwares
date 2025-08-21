@@ -38,14 +38,27 @@
 
 <para>
 <command>host</command> looks up resource records for <replaceable>n</replaceable>.
-If <replaceable>s</replaceable> is supplied it makes a Domain Name System request to a server at <replaceable>s</replaceable>, otherwise it makes a Domain Name System request to the configured local proxy DNS server(s).
 It prints the results in the same human-readable format as employed by <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+If <replaceable>s</replaceable> is supplied it makes a Domain Name System request to a server at <replaceable>s</replaceable>, otherwise it makes a Domain Name System request to the configured local proxy DNS server(s).
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, for name qualification, and for certain standard domain names that short-circuit DNS lookups to the proxy DNS server(s).
 </para>
 
 <para>
 If <replaceable>t</replaceable> is supplied, that is the type of resource record that it looks up.
 <replaceable>t</replaceable> can be numeric or symbolic, just as for <citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry> and <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
+
+<caution>
+<command>host</command> is a diagnostic tool, and thus permits using improper values of <replaceable>t</replaceable>.
+</caution>
+
+<note>
+<command>host</command> <arg choice='plain'>-t</arg> <arg choice='plain'>axfr</arg>, <command>host</command> <arg choice='plain'>-t</arg> <arg choice='plain'>any</arg>, and <command>host</command> <arg choice='plain'>-t</arg> <arg choice='plain'>opt</arg> simulate things that valid DNS clients will not actually do.
+See RFC 8482 for the particular case of <arg choice='plain'>any</arg> passing into desuetude, and RFC 6891 for why <arg choice='plain'>opt</arg> is never a valid client query type.
+</note>
 
 <para>
 The <arg choice='plain'>-a</arg> option is equivalent to <arg choice='plain'>-t any</arg>.
@@ -54,16 +67,16 @@ Note that "any" is not "all", and this is generally not useful (even before RFC8
 
 <orderedlist>
 <listitem><para>
-If the <arg choice='plain'>-6</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv4 address, <command>host</command> defaults <replaceable>t</replaceable> to "ptr" if it is not supplied and looks up the "a.b.c.d.in-addr.arpa." reverse-lookup domain corresponding to that IPv4 address.
+If the <arg choice='plain'>-6</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv4 address, <command>host</command> defaults <replaceable>t</replaceable> to <arg choice='plain'>ptr</arg> if it is not supplied and looks up the <filename><replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable>.in-addr.arpa.</filename> reverse-lookup domain corresponding to that IPv4 address.
 </para></listitem>
 <listitem><para>
-If the <arg choice='plain'>-4</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv6 address, <command>host</command> defaults <replaceable>t</replaceable> to "ptr" if it is not supplied and looks up the "a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.ip6.arpa." reverse-lookup domain corresponding to that IPv6 address.
+If the <arg choice='plain'>-4</arg> option is not used and <replaceable>n</replaceable> is a human-readable IPv6 address, <command>host</command> defaults <replaceable>t</replaceable> to <arg choice='plain'>ptr</arg> if it is not supplied and looks up the <filename><replaceable>a</replaceable>.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable>.<replaceable>e</replaceable>.<replaceable>f</replaceable>.<replaceable>g</replaceable>.<replaceable>h</replaceable>.<replaceable>i</replaceable>.<replaceable>j</replaceable>.<replaceable>k</replaceable>.<replaceable>l</replaceable>.<replaceable>m</replaceable>.<replaceable>n</replaceable>.<replaceable>o</replaceable>.<replaceable>p</replaceable>.ip6.arpa.</filename> reverse-lookup domain corresponding to that IPv6 address.
 </para></listitem>
 <listitem><para>
-If the <arg choice='plain'>-6</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to "a" if it is not supplied.
+If the <arg choice='plain'>-6</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to <arg choice='plain'>a</arg> if it is not supplied.
 </para></listitem>
 <listitem><para>
-If the <arg choice='plain'>-4</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to "aaaa" if it is not supplied.
+If the <arg choice='plain'>-4</arg> option is not used <command>host</command> feeds <replaceable>n</replaceable> through name qualification and defaults <replaceable>t</replaceable> to <arg choice='plain'>aaaa</arg> if it is not supplied.
 </para></listitem>
 </orderedlist>
 
@@ -105,7 +118,10 @@ It only employs one query type for any given invocation.
 <refsection>
 <title>History</title>
 <para>
-<command>host</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername>  <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname><surname>de Boyne Pollard</surname></personname>.
+<command>host</command> was an addition to <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+<para>
+The <filename>ip6.int.</filename> superdomain was deprecated by RFC3152 in 2001 and obsoleted by RFC4159 in 2005, years before this tool was written.
 </para>
 </refsection>
 

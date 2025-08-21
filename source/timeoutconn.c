@@ -3,14 +3,15 @@
 #include "iopause.h"
 #include "error.h"
 #include "timeoutconn.h"
+#include "ip.h"
 
-int timeoutconn(int s,char ip[4],uint16 port,unsigned int timeout)
+int timeoutconn(int s,const struct ip_address *ip,uint16 port,unsigned int timeout)
 {
   struct taia now;
   struct taia deadline;
   iopause_fd x;
 
-  if (socket_connect4(s,ip,port) == -1) {
+  if (socket_connect(s,ip,port) == -1) {
     if ((errno != error_wouldblock) && (errno != error_inprogress)) return -1;
     x.fd = s;
     x.events = IOPAUSE_WRITE;

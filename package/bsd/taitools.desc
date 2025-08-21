@@ -1,0 +1,6 @@
+ taitools contains various TAI10 utilities:
+ .
+ * nowutc: print the current TAI10 time in human-readable form
+ * easter: print the date and MJD for Easter in a given (proleptic) Gregorian year
+ * leapsecs: compile a new leapsecs.dat table
+ * yearcal: print a compact calendar for a given (proleptic) Gregorian year

@@ -130,3 +130,17 @@ ENOTDIR;
 #else
 -18;
 #endif
+
+int error_protocoltype =
+#ifdef EPROTOTYPE
+EPROTOTYPE;
+#else
+-19;
+#endif
+
+int error_loop =
+#ifdef ELOOP
+ELOOP;
+#else
+-20;
+#endif

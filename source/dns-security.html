@@ -1,0 +1,56 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>DNS security</title>
+<h1 class="Ruled">DNS security</h1>
+
+<h2 class="Ruled">Attacks</h2>
+
+<p>
+Expect any Internet-facing DNS service to be attacked immediately that it is up and running.
+</p>
+
+<p> <strong>Caution:</strong>
+There is no good reason to ever make an instance of <a href="commands/dnscache.xml"><code>dnscache</code></a> Internet-facing.
+Its back-end should be able to act as a <em>client</em> of content DNS servers on Internet, but its front-end should never <em>serve</em> clients from Internet.
+</p>
+
+<p>
+Common attacks that you may see take an extensive range of forms.
+Here are but a few:
+</p>
+<dl>
+<dt>"amplification" attacks</dt>
+<dd><p>
+You will generally see these logged as ANY (00FF) type queries, sent on DNS/UDP, with a large EDNS0 response buffer size (to get maximum benefit from the attack), using domain names that have a large amount of data, with the reply-to IP address and port set to those of the intended attack victim.
+It is also a secondary attack on the content DNS servers whose domain name is used.
+(For example, in 2025 the total amount of data served up by the Free Software Foundation's own DNS servers in response to an ANY query against <code>fsf.org.</code> was over 4KiB.)
+</p><p>
+Attackers rely upon DNS servers being vain wearing-all-the-hats-at-once servers that provide both proxy DNS and content DNS service, and that will thus <em>go and ask the Free Software Foundation's content DNS servers</em> and return with what they answer.
+This ends up with the proxy DNS servers sending over 4KiB of FSF data, unsolicited, over UDP to the attack target's IP address and port.
+djbdns has several defensive measures in place against this.
+</p><ul>
+<li><p>
+Its primary defence is that <a href="commands/tinydns.xml"><code>tinydns</code></a> from its original Bernstein version onwards has defaulted to simply not responding to queries about domain names that its database does not record it as authoritative for.
+Nothing is reflected back to the primary target.
+<strong> Note: </strong>
+Although it might seem that making <a href="commands/tinydns.xml"><code>tinydns</code></a> respond as BIND did, for every domain name, is a good idea &mdash; and asking how to do this was a particularly common question in the early years of djbdns &mdash; this is wrong-headed and should not be done.
+tinydns does and always did the right thing out of the box.
+</p></li>
+<li><p>
+Its secondary defence is that it does not vainly try to wear all of the hats at once.
+It <em>never</em> contacts other content DNS servers in response to incoming queries.
+That is simply not part of its architecture at all.
+</p></li>
+<li><p>
+A later tertiary defence, introduced in March 2019, is that it does not treat ANY queries as valid uses.
+Should an attacker use a domain name that is actually in the <code>data.cdb</code> database and within the designated-authoritative part of the namespace tree, ANY queries yield (small) synthesized error responses, pointing human readers of the response to RFC 8482.
+</p></li>
+</ul></dd>
+<dt>Well-known privacy holes in particular server softwares</dt>
+<dd><p>
+djbdns does not, and never has, supported the fingerprinting system whereby one can send ChaosNet-class DNS requests for special domain names such as <code>version.bind</code>, or <code>authors.bind</code> or <code>version.server</code> or several others and have the server report information about itself and the machine that it is running on to anyone in the world who just asks.
+</p></dd>
+<dt>Assuming that everything might be closet HTTP</dt>
+<dd><p>
+One of the sad things to watch is <a href="commands/axfrdns.xml"><code>axfrdns</code></a> report an overlength DNS request because someone has sent it an HTTP/1.0 GET command, but this is a regular occurrence as attackers target "stealth" HTTP servers where administrators think that merely using a different TCP port, and doing nothing else (sometimes not even putting into place the security measures that are on the standard port), provides a form of security.
+</dl>

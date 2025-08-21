@@ -3,8 +3,10 @@
 #include "uint16.h"
 #include "error.h"
 #include "byte.h"
-#include "dns.h"
+#include "dns_constants.h"
 #include "log.h"
+#include "ip.h"
+#include "dnscache.h"
 
 /* work around gcc 2.95.2 bug */
 #define number(x) ( (u64 = (x)), u64_print() )
@@ -51,30 +53,10 @@ static void space(void)
   string(" ");
 }
 
-static void ip4(const char *buf, unsigned int len)
+static void ip(const struct ip_address *ip)
 {
-  unsigned int i;
-
-  for (i = 0;i < 4;++i) {
-    if (i >= len)
-      string("?");
-    else
-      hex(buf[i]);
-  }
-}
-
-static void ip6(const char *buf, unsigned int len)
-{
-  unsigned int i;
-
-  for (i = 0;i < 16;++i) {
-    if (i >= len)
-      string("??");
-    else
-      hex(buf[i]);
-    if (i & 1 && i < 15)
-      character(':');
-  }
+  char buf[IP_FMT];
+  buffer_put(buffer_2,buf,ip_fmt(buf,ip,':'));
 }
 
 static void logid(const char id[2])
@@ -95,6 +77,9 @@ static void logtype(const char type[2])
   else if (byte_equal(type,2,DNS_T_SIG)) string("sig");
   else if (byte_equal(type,2,DNS_T_SRV)) string("srv");
   else if (byte_equal(type,2,DNS_T_LOC)) string("loc");
+  else if (byte_equal(type,2,DNS_T_OPT)) string("opt");
+  else if (byte_equal(type,2,DNS_T_HTTPS)) string("https");
+  else if (byte_equal(type,2,DNS_T_SVCB)) string("svcb");
   else {
     uint16 u;
 
@@ -151,12 +136,13 @@ void log_startup(void)
   line();
 }
 
-void log_query(uint64 *qnum,const char client[4],unsigned int port,const char id[2],const char *q,const char qtype[2])
+void log_query(uint64 *qnum,const struct ip_address * client,unsigned int port,const char id[2],const char *q,const char qtype[2],unsigned int max)
 {
   string("query "); number(*qnum); space();
-  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255);
-  string(":"); logid(id); space();
-  logtype(qtype); space(); name(q);
+  ip(client); space();
+  hex(port >> 8); hex(port & 255); string(":"); logid(id); string(":"); hex(max >> 8); hex(max & 255); space();
+  logtype(qtype); space();
+  name(q);
   line();
 }
 
@@ -176,87 +162,126 @@ void log_querydrop(uint64 *qnum)
   line();
 }
 
-void log_tcpopen(const char client[4],unsigned int port)
+void log_tcpopen(const struct ip_address *client,unsigned int port)
 {
   string("tcpopen ");
-  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255);
+  ip(client); string(":"); hex(port >> 8); hex(port & 255);
   line();
 }
 
-void log_tcpclose(const char client[4],unsigned int port)
+void log_tcpclose(const struct ip_address *client,unsigned int port)
 {
   const char *x = error_str(errno);
   string("tcpclose ");
-  ip4(client,4); string(":"); hex(port >> 8); hex(port & 255); space();
+  ip(client); string(":"); hex(port >> 8); hex(port & 255); space();
   string(x);
   line();
 }
 
-void log_tx(const char *q,const char qtype[2],const char *control,const char servers[64],unsigned int gluelessness)
+void log_tx(const char *q,const char qtype[2],const char *control,const struct ip_address servers[16],unsigned int gluelessness)
 {
   int i;
 
   string("tx "); number(gluelessness); space();
   logtype(qtype); space(); name(q); space();
   name(control);
-  for (i = 0;i < 64;i += 4)
-    if (byte_diff(servers + i,4,"\0\0\0\0")) {
+  for (i = 0;i < 16;i += 1)
+    if (!ip_is_unassigned(servers + i)) {
       space();
-      ip4(servers + i, 4);
+      ip(servers + i);
     }
   line();
 }
 
-void log_cachedanswer(const char *q,const char type[2])
+void log_root(const char *q,const char qtype[2],const char *control,unsigned int gluelessness)
 {
-  string("cached "); logtype(type); space();
-  name(q);
+  string("root "); number(gluelessness); space();
+  logtype(qtype); space(); name(q); space();
+  name(control);
   line();
 }
 
-void log_cachedcname(const char *dn,const char *dn2)
+void log_want(const char *q,const char type[2],unsigned int gluelessness,unsigned int loopcount)
 {
-  string("cached cname "); name(dn); space(); name(dn2);
+  string("want "); number(gluelessness); space(); number(loopcount); space();
+  logtype(type); space(); name(q);
   line();
 }
 
-void log_cachedns(const char *control,const char *ns)
+void log_synthetic(const char *q,const char type[2],unsigned int gluelessness,unsigned int ttl)
 {
-  string("cached ns "); name(control); space(); name(ns);
+  string("synthetic ");
+  number(gluelessness); space(); number(ttl); space(); logtype(type); space(); name(q);
   line();
 }
 
-void log_cachednxdomain(const char *dn)
+void log_cachedanswer(const char *q,const char type[2],unsigned int ttl)
 {
-  string("cached nxdomain "); name(dn);
+  string("cached ");
+  number(ttl); space(); logtype(type); space(); name(q);
   line();
 }
 
-void log_nxdomain(const char server[4],const char *q,unsigned int ttl)
+void log_cachedcname(const char *dn,const char *dn2,unsigned int ttl)
 {
-  string("nxdomain "); ip4(server,4); space(); number(ttl); space();
-  name(q);
+  string("cached cname ");
+  number(ttl); space(); name(dn); space(); name(dn2);
   line();
 }
 
-void log_nodata(const char server[4],const char *q,const char qtype[2],unsigned int ttl)
+void log_cachedns(const char *control,const char *ns,unsigned int ttl)
 {
-  string("nodata "); ip4(server,4); space(); number(ttl); space();
-  logtype(qtype); space(); name(q);
+  string("cached nameserver ");
+  number(ttl); space(); name(control); space(); name(ns);
   line();
 }
 
-void log_lame(const char server[4],const char *control,const char *referral)
+void log_cachedglue(const char *ns,const struct ip_address * a,unsigned int ttl)
 {
-  string("lame "); ip4(server,4); space();
+  string("cached address ");
+  number(ttl); space(); name(ns); space(); ip(a);
+  line();
+}
+
+void log_cachednxdomain(const char *dn,unsigned int ttl)
+{
+  string("cached nxdomain ");
+  number(ttl); space(); name(dn);
+  line();
+}
+
+void log_nxdomain(const struct ip_address *server,const char *q,unsigned int ttl)
+{
+  string("nxdomain ");
+  ip(server); space(); number(ttl); space(); name(q);
+  line();
+}
+
+void log_nodata(const struct ip_address *server,const char *q,const char qtype[2],unsigned int ttl)
+{
+  string("nodata ");
+  ip(server); space(); number(ttl); space(); logtype(qtype); space(); name(q);
+  line();
+}
+
+void log_lame(const struct ip_address *server,const char *control,const char *referral)
+{
+  string("lame "); ip(server); space();
   name(control); space(); name(referral);
   line();
 }
 
-void log_ignore_referral(const char server[4],const char * control, const char *referral)
+void log_ignore_referral(const struct ip_address *server,const char * control, const char *referral,unsigned int gluelessness)
 {
-  string("ignored referral "); ip4(server,4); space();
-  name(control); space(); name(referral);
+  string("ignored referral "); number(gluelessness); space();
+  ip(server); space(); name(control); space(); name(referral);
+  line();
+}
+
+void log_referral(const struct ip_address *server,const char * control, const char *referral,unsigned int gluelessness)
+{
+  string("referral "); number(gluelessness); space();
+  ip(server); space(); name(control); space(); name(referral);
   line();
 }
 
@@ -269,11 +294,17 @@ void log_servfail(const char *dn)
   line();
 }
 
-void log_rr(const char server[4],const char *q,const char type[2],const char *buf,unsigned int len,unsigned int ttl)
+void log_no_servers(const char *dn)
+{
+  string("noservers "); name(dn);
+  line();
+}
+
+void log_rr(const struct ip_address *server,const char *q,const char type[2],const char *buf,unsigned int len,unsigned int ttl)
 {
   unsigned int i;
 
-  string("rr "); ip4(server,4); space(); number(ttl); space();
+  string("rr "); ip(server); space(); number(ttl); space();
   logtype(type); space(); name(q); space();
 
   if (byte_equal(type,2,DNS_T_SRV)) {
@@ -282,9 +313,19 @@ void log_rr(const char server[4],const char *q,const char type[2],const char *bu
     u16p(buf,len,2); space();
     namep(buf,len,6);
   } else if (byte_equal(type,2,DNS_T_A)) {
-    ip4(buf, len);    
+    struct ip_address a;
+    char b[IP4_LEN] = {};
+    if (len < sizeof b) character('?');
+    byte_copy(b, len < sizeof b ? len : sizeof b, buf);
+    ip_make4(&a,b);
+    ip(&a);
   } else if (byte_equal(type,2,DNS_T_AAAA)) {
-    ip6(buf, len);
+    struct ip_address a;
+    char b[IP6_SANS_SCOPE_LEN] = {};
+    if (len < sizeof b) character('?');
+    byte_copy(b, len < sizeof b ? len : sizeof b, buf);
+    ip_make6(&a,b,0);
+    ip(&a);
   } else {
     for (i = 0;i < len;++i) {
       hex(buf[i]);
@@ -297,47 +338,47 @@ void log_rr(const char server[4],const char *q,const char type[2],const char *bu
   line();
 }
 
-void log_rrns(const char server[4],const char *q,const char *data,unsigned int ttl)
+void log_rrns(const struct ip_address *server,const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip4(server,4); space(); number(ttl);
+  string("rr "); ip(server); space(); number(ttl);
   string(" ns "); name(q); space();
   name(data);
   line();
 }
 
-void log_rrcname(const char server[4],const char *q,const char *data,unsigned int ttl)
+void log_rrcname(const struct ip_address *server,const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip4(server,4); space(); number(ttl);
+  string("rr "); ip(server); space(); number(ttl);
   string(" cname "); name(q); space();
   name(data);
   line();
 }
 
-void log_rrptr(const char server[4],const char *q,const char *data,unsigned int ttl)
+void log_rrptr(const struct ip_address *server,const char *q,const char *data,unsigned int ttl)
 {
-  string("rr "); ip4(server,4); space(); number(ttl);
+  string("rr "); ip(server); space(); number(ttl);
   string(" ptr "); name(q); space();
   name(data);
   line();
 }
 
-void log_rrmx(const char server[4],const char *q,const char *mx,const char pref[2],unsigned int ttl)
+void log_rrmx(const struct ip_address *server,const char *q,const char *mx,const char pref[2],unsigned int ttl)
 {
   uint16 u;
 
-  string("rr "); ip4(server,4); space(); number(ttl);
+  string("rr "); ip(server); space(); number(ttl);
   string(" mx "); name(q); space();
   uint16_unpack_big(pref,&u);
   number(u); space(); name(mx);
   line();
 }
 
-void log_rrsoa(const char server[4],const char *q,const char *n1,const char *n2,const char misc[20],unsigned int ttl)
+void log_rrsoa(const struct ip_address *server,const char *q,const char *n1,const char *n2,const char misc[20],unsigned int ttl)
 {
   uint32 u;
   int i;
 
-  string("rr "); ip4(server,4); space(); number(ttl);
+  string("rr "); ip(server); space(); number(ttl);
   string(" soa "); name(q); space();
   name(n1); space(); name(n2);
   for (i = 0;i < 20;i += 4) {
@@ -349,10 +390,6 @@ void log_rrsoa(const char server[4],const char *q,const char *n1,const char *n2,
 
 void log_stats(void)
 {
-  extern uint64 numqueries;
-  extern uint64 cache_motion;
-  extern int uactive;
-  extern int tactive;
 
   string("stats ");
   number(numqueries); space();

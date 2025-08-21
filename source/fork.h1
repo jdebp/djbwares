@@ -1,7 +1,7 @@
 #ifndef FORK_H
 #define FORK_H
 
-extern int fork();
+extern int fork(void);
 #define vfork fork
 
 #endif

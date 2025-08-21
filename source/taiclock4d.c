@@ -4,12 +4,14 @@
 #include "strerr.h"
 #include "uint16.h"
 #include "socket.h"
+#include "ip.h"
+#include "ip4.h"
 
 #define FATAL "taiclock4d: fatal: "
 
 static char packet[256];
-static char ip[4];
-static uint16 port;
+static struct ip_address iplocal = IP_ADDRESS_INIT;
+static uint16 portlocal;
 static struct taia ta;
 
 int main(int argc,char ** argv)
@@ -21,19 +23,21 @@ int main(int argc,char ** argv)
 
   udp = -1;
   do_udp_options = 1;
-  socket_listen_get_udp4(FATAL,&udp,&do_udp_options,&port,ip,4014);
+  socket_listen_get_udp(FATAL,&udp,&do_udp_options,&portlocal,&iplocal,portlocal);
 
   for (;;) {
     int r;
+    struct ip_address ipremote = IP_ADDRESS_INIT;
+    uint16 portremote;
 
-    r = socket_recv4(udp,packet,sizeof packet,ip,&port);
+    r = socket_recv(udp,packet,sizeof packet,&ipremote,&portremote);
     if (r < 0) continue;
     if (r >= 20)
       if (!byte_diff(packet,4,"ctai")) {
 	packet[0] = 's';
         taia_now(&ta);
         taia_pack(packet + 4,&ta);
-        socket_send4(udp,packet,r,ip,port);
+        socket_send(udp,packet,r,&ipremote,portremote);
         /* if it fails, bummer */
       }
   }

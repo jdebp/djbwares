@@ -48,7 +48,7 @@ If it encounters a temporary problem that prevents it from determining the list 
 
 <para>
 <command>dnsname</command> makes all DNS lookups using the locally configured DNS proxy server.
-See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found.
 </para>
 
 </refsection>

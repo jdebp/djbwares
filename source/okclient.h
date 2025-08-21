@@ -1,6 +1,7 @@
 #ifndef OKCLIENT_H
 #define OKCLIENT_H
 
-extern int okclient(char *);
+struct ip_address;
+extern int okclient(const struct ip_address *);
 
 #endif

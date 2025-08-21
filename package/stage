@@ -35,7 +35,7 @@ shrprefix="${usrprefix}"
 docprefix="${shrprefix}/share"
 
 # binaries and doco
-for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai leapsecs djbdns-host
+for i in publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai taitools leapsecs djbdns-host
 do
 	install -d -m 0755 "${dest}"/"$i"/
 

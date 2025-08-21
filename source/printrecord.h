@@ -3,7 +3,7 @@
 
 #include "stralloc.h"
 
-extern unsigned int printrecord_cat(stralloc *,const char *,unsigned int,unsigned int,const char *,const char *);
-extern unsigned int printrecord(stralloc *,const char *,unsigned int,unsigned int,const char *,const char *);
+extern unsigned int printrecord_cat(stralloc *,const char *,unsigned int,unsigned int,const char *,const char *,int);
+extern unsigned int printrecord(stralloc *,const char *,unsigned int,unsigned int,const char *,const char *,int);
 
 #endif

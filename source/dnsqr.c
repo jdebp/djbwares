@@ -8,7 +8,10 @@
 #include "iopause.h"
 #include "printpacket.h"
 #include "parsetype.h"
-#include "dns.h"
+#include "dns_transmit.h"
+#include "dns_resolve.h"
+#include "dns_random.h"
+#include "dns_domain.h"
 #include "exit.h"
 
 #define FATAL "dnsqr: fatal: "
@@ -52,7 +55,7 @@ int main(int argc,char **argv)
   if (!dns_domain_todot_cat(&out,q)) oops();
   if (!stralloc_cats(&out,":\n")) oops();
 
-  if (dns_resolve(q,type) == -1) {
+  if (dns_resolve_nospecials(q,type) == -1) {
     if (!stralloc_cats(&out,error_str(errno))) oops();
     if (!stralloc_cats(&out,"\n")) oops();
   }
@@ -64,5 +67,5 @@ int main(int argc,char **argv)
   }
 
   buffer_putflush(buffer_1,out.s,out.len);
-  _exit(0);
+  return 0;
 }

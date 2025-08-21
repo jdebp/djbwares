@@ -1,0 +1,21 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Publishing the time</title>
+<h1 class="Ruled">Publishing the time</h1>
+
+<p>
+One publishes the time with djbwares using <a href="commands/taiclockd.xml"><code>taiclockd</code></a>.
+</p>
+
+<p>
+The TAICLOCK protocol that it speaks was <a href="http://cr.yp.to/proto/taiclock.txt">documented by Bernstein in 1997</a> and its chosen UDP port number was <a href="https://iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=taiclock">belatedly recognized by IANA in 2018</a>.
+</p>
+
+<p>
+The protocol does not itself deal in strata for time servers and <a href="time-tai.html">has no complexities involving leap seconds</a>.
+Organizationally, it expects the same simple hierarchical star topology that SNTP does: a server acts as the time source for several subobordinate machines, which in turn may be sources for yet further subordinate machines; synchronizing from multiple sources is abnormal and the client's problem; and there must not be loops in the client-server graph.
+</p>
+
+<p>
+It is <em>not</em> a requirement that just because you may <a href="time-synchronization.html">synchronize with a time server using SNTP</a> (less of a mainstream thing than in 1997, now that GNSS has become a cheap-to-implement external time source possibility) that you cannot in turn publish the time to other machines using TAICLOCK.
+</p>

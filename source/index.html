@@ -13,9 +13,33 @@ Each command has a manual page, accessible through the normal <code>man</code> c
 <li><a href="commands.html">Command and tool list</a></li>
 <li><a href="non-commands.html">Non-command documentation list</a></li>
 <li><a href="building-from-source.html">Building the toolset from source</a></li>
-<li><a href="what-is-the-af.html">What is the "af"?</a></li>
+<li>Timekeeping
+	<ul>
+	<li><a href="time-tai.html">TAI-10 and UTC</a></li>
+	<li><a href="time-publication.html">Publishing the time</a></li>
+	<li><a href="time-synchronization.html">Synchronizing with other systems</a></li>
+	</ul>
+</li>
+<li>Internet publication
+	<ul>
+	<li><a href="publicfile-services.html">Conventional publicfile services to run</a></li>
+	<li><a href="publicfile-security.html">Security</a></li>
+	</ul>
+</li>
+<li>the Domain Name System:
+	<ul>
+	<li><a href="dns-services.html">Conventional DNS services to run</a></li>
+	<li><a href="dns-security.html">Security</a></li>
+	<li><a href="dns-private-root.html">Providing a private root content DNS server</a></li>
+	<li><a href="dns-public-root-list.html">Updating the public root content DNS server list</a></li>
+	<li><a href="dns-replication.html">Database replication</a></li>
+	<li><a href="dns-fqdn.html">Fully qualified domain names</a></li>
+	<li><a href="what-is-the-af.html">What is the "af"?</a></li>
+	</ul>
+</li>
 </ul>
 
+<h2 class="Ruled">Bernstein tutorials and caveats</h2>
 <p>
 There are also some tutorials accompanying a few of Bernstein's toolsets:
 </p>
@@ -35,7 +59,7 @@ Building the djbwares toolset from source, one can build something self-containe
 <li><p>
 The "how to start daemontools" how-to only covers <code>/etc/rc.local</code> (<a href="https://jdebp.uk/FGA/rc.local-is-history.html">obsolete in System 5 Unix in 1983, in FreeBSD in 1995, and in NetBSD in 2000</a>), van Smoorenburg <code>/etc/inittab</code> for Linux-based operating systems (not, as the page erroneously claims, Unix System 5 in the first place, which latter had even when daemontools was invented already switched to things like the <a href="https://jdebp.uk/FGA/unix-service-access-facility.html">Service Access Facility</a>, the System Resource Controller, and the Service Management Facility way back in the late 1980s and early 1990s), and several flavours of Upstart (discontinued by Canonical in 2015).
 </p><p>
-None of the systems that one will encounter in the real world in the 2020s (Mewburn rc on FreeBSD and NetBSD since 2000, OpenBSD's rc, OpenRC, BusyBox init, systemd, and others) are covered and the Bernstein how-to is long-since defunct.
+None of the systems that one will encounter in the real world in the 2020s (Mewburn rc on FreeBSD and NetBSD since 2000, OpenBSD's rc, OpenRC, BusyBox init, systemd, <a href="http://skarnet.org/software/s6-rc/">s6-rc</a>, <a href="https://jdebp.uk/Softwares/nosh/">nosh <code>service-manager</code></a>, and others) are covered and the Bernstein how-to is long-since defunct.
 <a href="https://jdebp.uk/FGA/inittab-is-history.html">Because <code>inittab</code> is history, a lot of more up-to-date how-tos have been written.</a>
 </p></li>
 <li><p>
@@ -44,3 +68,20 @@ These are in reality simple shell script wrappers around <a href="commands/tinyd
 Or write a shell function to do that.
 </p></li>
 </ul>
+
+<h2 class="Ruled">Other doco</h2>
+
+<ul>
+<li><a href="http://lifewithdjbdns.org"><i>Life With djbdns</i></a> by Henning Brauer</li>
+<li><a href="http://thedjbway.b0llix.net/daemontools.html">daemontools</a>, <i>the djb way</i>, by Wayne Marshall</li>
+<li><a href="http://thedjbway.b0llix.net/services.html">services, services!</a>, <i>the djb way</i>, by Wayne Marshall</li>
+<li><a href="http://thedjbway.b0llix.net/clockspeed.html">clockspeed</a>, <i>the djb way</i>, by Wayne Marshall</li>
+<li><a href="http://thedjbway.b0llix.net/clocksd.html">clockspeed service d&aelig;mons</a>, <i>the djb way</i>, by Wayne Marshall</li>
+<li><a href="http://thedjbway.b0llix.net/djbdns.html">djbdns</a>, <i>the djb way</i>, by Wayne Marshall</li>
+<li><a href="http://thedjbway.b0llix.net/publicfile.html">publicfile</a>, <i>the djb way</i>, by Wayne Marshall</li>
+</ul>
+
+<p>
+Brauer's <i>Life With djbdns</i> and Marshall's <i>the djb way</i> have mostly stood the test of time since 2005, although several <a href="changes.html">changes from the original Bernstein softwares</a> nowadays apply.
+Moreover, the leap seconds table supplied with djbwares is up-to-date and the caution given by Marshall in 2003 about Bernstein's 1998 data file does not apply.
+</p>

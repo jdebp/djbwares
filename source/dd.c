@@ -1,14 +1,17 @@
-#include "dns.h"
+#include "dns_domain.h"
 #include "dd.h"
+#include "ip.h"
+#include "ip4.h"
+#include "ip6.h"
 
-int dd4(const char *q,const char *base,char ip[4])
+int dd4(const char *q,const char *base,char ip[IP4_LEN])
 {
   int j;
   unsigned int x;
 
   for (j = 0;;++j) {
     if (dns_domain_equal(q,base)) return j;
-    if (j >= 4) return -1;
+    if (j >= IP4_LEN) return -1;
 
     if (*q <= 0) return -1;
     if (*q >= 4) return -1;
@@ -38,14 +41,14 @@ int dd4(const char *q,const char *base,char ip[4])
 
 static char hex[16] = "0123456789abcdef";
 
-int dd6(const char *q,const char *base,char ip[32])
+int dd6(const char *q,const char *base,char ip[IP6_SANS_SCOPE_LEN])
 {
   int j,k;
   unsigned int x;
 
   for (j = 0;;++j) {
     if (dns_domain_equal(q,base)) return j;
-    if (j >= 64) return -1;
+    if (j >= IP6_SANS_SCOPE_LEN * 2) return -1;
 
     if (*q != 1) return -1;
     for (k = 16;k--;) {

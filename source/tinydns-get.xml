@@ -49,6 +49,7 @@ Currently recognized names are:
 <code>txt</code>,
 <code>cname</code>,
 <code>soa</code>,
+<code>loc</code>,
 <code>hinfo</code>,
 <code>rp</code>,
 <code>sig</code>,
@@ -58,6 +59,15 @@ Currently recognized names are:
 <code>srv</code>.
 If <arg choice='plain'><replaceable>addr</replaceable></arg> is supplied <command>tinydns-get</command> simulates making a query from that location; this matters if <filename>data.cdb</filename> differentiates among clients in different locations.
 </para>
+
+<caution>
+<command>tinydns-get</command> is a diagnostic tool, and thus permits using improper values of <replaceable>t</replaceable>.
+</caution>
+
+<note>
+<command>tinydns-get</command> <arg choice='plain'>axfr</arg>, <command>tinydns-get</command> <arg choice='plain'>any</arg>, and <command>tinydns-get</command> <arg choice='plain'>opt</arg> simulate things that valid DNS clients will not actually do.
+See RFC 8482 for the particular case of <arg choice='plain'>any</arg> passing into desuetude, and RFC 6891 for why <arg choice='plain'>opt</arg> is never a valid client query type.
+</note>
 
 </refsection>
 

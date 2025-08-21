@@ -10,7 +10,7 @@
 #include "fmt.h"
 #include "scan.h"
 #include "str.h"
-#include "ip4.h"
+#include "ip.h"
 #include "uint16.h"
 #include "socket.h"
 #include "fd.h"
@@ -21,7 +21,8 @@
 #include "pathexec.h"
 #include "timeoutconn.h"
 #include "remoteinfo.h"
-#include "dns.h"
+#include "dns_resolve.h"
+#include "dns_random.h"
 
 #define FATAL "tcpclient: fatal: "
 #define CONNECT "tcpclient: unable to connect to "
@@ -49,11 +50,11 @@ static int flagremotehost = 1;
 static unsigned long itimeout = 26;
 static unsigned long ctimeout[2] = { 2, 58 };
 
-static char iplocal[4] = { 0,0,0,0 };
+static struct ip_address iplocal = IP_ADDRESS_INIT;
 static uint16 portlocal = 0;
 static const char *forcelocal = 0;
 
-static char ipremote[4];
+static struct ip_address ipremote = IP_ADDRESS_INIT;
 static uint16 portremote;
 
 static const char *hostname;
@@ -63,7 +64,7 @@ static stralloc moreaddresses;
 static stralloc tmp;
 static stralloc fqdn;
 static char strnum[FMT_ULONG];
-static char ipstr[IP4_FMT];
+static char ipstr[IP_FMT];
 
 static char seed[128];
 
@@ -115,7 +116,7 @@ main(int argc,char **argv)
 		} else 
 		  if (0 == j || optarg[j]) strerr_die3x(111,FATAL, optarg, " is not a number");
 		break;
-      case 'i': j = ip4_scan(optarg,iplocal); 
+      case 'i': j = ip_scan(optarg,&iplocal,':'); 
 		if (0 == j || optarg[j]) strerr_die3x(111,FATAL, optarg, " is not an IP address");
 		break;
       case 'p': optarg_num(&u); portlocal = u; break;
@@ -147,33 +148,44 @@ main(int argc,char **argv)
   if (!*++argv) usage();
 
   if (!stralloc_copys(&tmp,hostname)) nomem();
-  if (dns_ip4_qualify(&addresses,&fqdn,&tmp) == -1)
+  if (dns_ip_qualify(&addresses,&fqdn,&tmp) == -1)
     strerr_die4sys(111,FATAL,"temporarily unable to figure out IP address for ",hostname,": ");
-  if (addresses.len < 4)
+  if (addresses.len < sizeof(struct ip_address))
     strerr_die3x(111,FATAL,"no IP address for ",hostname);
 
-  if (addresses.len == 4) {
+  if (addresses.len == sizeof(struct ip_address)) {
     ctimeout[0] += ctimeout[1];
     ctimeout[1] = 0;
   }
 
   for (cloop = 0;cloop < 2;++cloop) {
     if (!stralloc_copys(&moreaddresses,"")) nomem();
-    for (j = 0;j + 4 <= addresses.len;j += 4) {
-      s = socket_tcp4();
+    for (j = 0;j + sizeof(struct ip_address) <= addresses.len;j += sizeof(struct ip_address)) {
+      struct ip_address ipzero = IP_ADDRESS_INIT;
+      const struct ip_address * ipremote0 = addresses.s + j;
+      const struct ip_address * iplocal0 = &ipzero;
+      if (ip_is_unassigned(&iplocal)) {
+	/* Copy the transport protocol. */
+	ipzero = *ipremote0;
+	if (ip_make_zero(&ipzero) < 0)
+	  strerr_die2sys(111,FATAL,"unable to determine IP version: ");
+      } else
+	/* Transport protocol is forced. */
+	iplocal0 = &iplocal;
+      s = socket_tcp(iplocal0);
       if (s == -1)
         strerr_die2sys(111,FATAL,"unable to create socket: ");
-      if (socket_bind4(s,iplocal,portlocal) == -1)
+      if (socket_bind(s,iplocal0,portlocal) == -1)
         strerr_die2sys(111,FATAL,"unable to bind socket: ");
-      if (timeoutconn(s,addresses.s + j,portremote,ctimeout[cloop]) == 0)
+      if (timeoutconn(s,ipremote0,portremote,ctimeout[cloop]) == 0)
         goto CONNECTED;
       close(s);
       if (!cloop && ctimeout[1] && (errno == error_timeout)) {
-	if (!stralloc_catb(&moreaddresses,addresses.s + j,4)) nomem();
+	if (!stralloc_catb(&moreaddresses,ipremote0,sizeof *ipremote0)) nomem();
       }
       else {
         strnum[fmt_ulong(strnum,portremote)] = 0;
-        ipstr[ip4_fmt(ipstr,addresses.s + j)] = 0;
+        ipstr[ip_fmt(ipstr,ipremote0,':')] = 0;
         strerr_warn5(CONNECT,ipstr," port ",strnum,": ",&strerr_sys);
       }
     }
@@ -191,35 +203,35 @@ main(int argc,char **argv)
 
   if (!pathexec_env("PROTO","TCP")) nomem();
 
-  if (socket_local4(s,iplocal,&portlocal) == -1)
+  if (socket_local(s,&iplocal,&portlocal) == -1)
     strerr_die2sys(111,FATAL,"unable to get local address: ");
 
   strnum[fmt_ulong(strnum,portlocal)] = 0;
   if (!pathexec_env("TCPLOCALPORT",strnum)) nomem();
-  ipstr[ip4_fmt(ipstr,iplocal)] = 0;
+  ipstr[ip_fmt(ipstr,&iplocal,':')] = 0;
   if (!pathexec_env("TCPLOCALIP",ipstr)) nomem();
 
   x = forcelocal;
   if (!x)
-    if (dns_name4(&tmp,iplocal) == 0) {
+    if (dns_name(&tmp,&iplocal) == 0) {
       if (!stralloc_0(&tmp)) nomem();
       x = tmp.s;
     }
   if (!pathexec_env("TCPLOCALHOST",x)) nomem();
 
-  if (socket_remote4(s,ipremote,&portremote) == -1)
+  if (socket_remote(s,&ipremote,&portremote) == -1)
     strerr_die2sys(111,FATAL,"unable to get remote address: ");
 
   strnum[fmt_ulong(strnum,portremote)] = 0;
   if (!pathexec_env("TCPREMOTEPORT",strnum)) nomem();
-  ipstr[ip4_fmt(ipstr,ipremote)] = 0;
+  ipstr[ip_fmt(ipstr,&ipremote,':')] = 0;
   if (!pathexec_env("TCPREMOTEIP",ipstr)) nomem();
   if (verbosity >= 2)
     strerr_warn4("tcpclient: connected to ",ipstr," port ",strnum,0);
 
   x = 0;
   if (flagremotehost)
-    if (dns_name4(&tmp,ipremote) == 0) {
+    if (dns_name(&tmp,&ipremote) == 0) {
       if (!stralloc_0(&tmp)) nomem();
       x = tmp.s;
     }
@@ -227,7 +239,7 @@ main(int argc,char **argv)
 
   x = 0;
   if (flagremoteinfo)
-    if (remoteinfo(&tmp,ipremote,portremote,iplocal,portlocal,itimeout) == 0) {
+    if (remoteinfo(&tmp,&ipremote,portremote,&iplocal,portlocal,itimeout) == 0) {
       if (!stralloc_0(&tmp)) nomem();
       x = tmp.s;
     }

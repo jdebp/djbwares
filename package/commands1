@@ -19,12 +19,14 @@ dnsipq
 dnsmx
 dnsname
 dnsnamex
+dnsns
 dnsq
 dnsqr
 dnsqrx
 dnstrace
 dnstracesort
 dnstxt
+dnsqual
 easter
 envdir
 envuidgid
@@ -46,9 +48,6 @@ multilog
 nobuf
 nowutc
 pgrphack
-pickdns
-pickdns-conf
-pickdns-data
 ptybandage
 ptyrun
 random-ip

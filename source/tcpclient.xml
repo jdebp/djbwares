@@ -47,7 +47,7 @@ It also sets up several environment variables (see <citerefentry><refentrytitle>
 <para>
 The server's address is given by <replaceable>host</replaceable> and <replaceable>port</replaceable>.
 <replaceable>port</replaceable> may be a name from the <filename>/etc/services</filename> table or a number.
-<replaceable>host</replaceable> may be 0, referring to the local machine, or a dotted-decimal IP address, or a host name; it is fed through qualification using <function>dns_ip4_qualify</function>.
+<replaceable>host</replaceable> may be 0, referring to the local machine, or a dotted-decimal IP address, or a host name; it is fed through name qualification and looked up using the configured local proxy DNS server(s) (see <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry>).
 </para>
 
 <para>
@@ -212,7 +212,7 @@ Default: 26.
 <title>Author</title>
 <para>
 Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
-Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname> <surname>Pape</surname></personname> in 2000, 2001, and 2002. 
 Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>

@@ -78,7 +78,11 @@ Some modifications may look like mine, but aren't.
 For example: timeoutread.c from publicfile-0.52 differs from the timeoutread.c here.
 That's a Daniel J. Bernstein modification to his own code, though, where he updated one library to use a newly invented other library (iopause in this particular case — an improvement that was on publicfile-0.52's own TODO list).
 
-I've done some fairly minor modifications here and there to Daniel J. Bernstein's code.
+I'm not convinced that the law of my country permits donation to the public domain.
+The best that I can do is either waive my undiscardable rights on derived works and supply a copyright licence for new stuff.
+(This is a complex subject that is too long to address here; so I'll say no more than that.)
+
+I've done some modifications here and there to Daniel J. Bernstein's code.
 These modifications I waive my copyright rights on, in order to not complicate the copyright status of the existing code.
 
 The same goes for my conversions of and updates to the Bernstein manual pages.
@@ -87,8 +91,6 @@ I've also added a build and packaging system.
 All of the *.do files are mine, for instance, as is everything in package/ .
 Although daemontools-0.76 had things like package/compile and ptyget-0.50 had *.do files, all of mine are ground-up reimplementations (with reference to an old WWW page by Laurent Bercot in the case of package/compile et al.).
 
-I'm not convinced that the law of my country permits donation to the public domain.
-(This is a complex subject that is too long to address here; so I'll say no more than that.)
 So consider my build and packaging additions to be copyright licenced under the terms of any of:
 * The ISC licence.
 * The Simplified (2 clause) BSD licence.

@@ -3,8 +3,10 @@
 #include "buffer.h"
 #include "stralloc.h"
 #include "alloc.h"
-#include "dns.h"
-#include "ip4.h"
+#include "dns_nd.h"
+#include "dns_transmit.h"
+#include "dns_resolve.h"
+#include "ip.h"
 #include "byte.h"
 #include "scan.h"
 #include "taia.h"
@@ -44,9 +46,11 @@ static int flag0 = 1;
 static iopause_fd *io;
 static int iolen;
 
-static char servers[64];
-static char ip[4];
-static char name[DNS_NAME4_DOMAIN];
+static unsigned int server_count, port;
+static struct ip_address server_list[16];
+static struct ip_address ip;
+static struct ip_address iplocal = IP_ADDRESS_INIT;
+static char name[DNS_NAME_DOMAIN];
 
 void errout(int i)
 {
@@ -95,7 +99,6 @@ int main(int argc,char **argv)
   if (!io) nomem();
 
   if (!stralloc_copys(&partial,"")) nomem();
-
 
   while (flag0 || inbuflen || partial.len || xnum) {
     taia_now(&stamp);
@@ -187,11 +190,11 @@ int main(int argc,char **argv)
   
 	    partial.len = i;
 	    if (!stralloc_0(&partial)) nomem();
-	    if (ip4_scan(partial.s,ip)) {
-	      dns_name4_domain(name,ip);
-	      if (dns_resolvconfip(servers) == -1)
+	    if (ip_scan(partial.s,&ip,':')) {
+	      dns_name_domain(name,&ip);
+	      if (dns_resolvconfip(name,server_list,sizeof server_list/sizeof *server_list,&server_count,&port) == -1)
 	        strerr_die2sys(111,FATAL,"unable to read /etc/resolv.conf: ");
-	      if (dns_transmit_start(&x[xnum].dt,servers,1,name,DNS_T_PTR,"\0\0\0\0") == -1)
+	      if (dns_transmit_start(&x[xnum].dt,server_list,server_count,port,1,name,DNS_T_PTR,&iplocal) == -1)
 	        errout(xnum);
 	      else {
 	        x[xnum].flagactive = 1;

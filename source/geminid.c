@@ -18,6 +18,7 @@
 #include "ucspi.h"
 #include "subfd.h"
 #include "env.h"
+#include "conf.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -158,10 +159,11 @@ void readline(void)
 
 void doit()
 {
-  unsigned int i;
+  unsigned int i, maxlen;
 
   if (env_get("LOGUNSUPPORTED"))
     flaglogunsupported = 1;
+  maxlen = conf_path_max();
 
   sig_ignore(sig_pipe);
 
@@ -172,6 +174,9 @@ void doit()
   // This is a MUST in the specification, even though we don't have a limit other than memory.
   if (line.len >= 1024)
     barf("59 ","GEMINI requests must be less than 1024 characters.");
+  // This is analogous, but not required by the specification.
+  if (line.len >= maxlen)
+    barf("59 ","That GEMINI request is too long for this system.");
 
   if (!stralloc_copys(&host,"")) _exit(21);
   if (!stralloc_copys(&path,"")) _exit(21);
@@ -202,6 +207,10 @@ void doit()
   i = byte_chr(path.s,path.len,'#');
   if (i != path.len)
     barf("59 ","GEMINI requests may not have a fragment part.");
+  // By analogy, albeit not a specification requirement, this rule; a sensible-enough restriction for static content.
+  i = byte_chr(path.s,path.len,'?');
+  if (i != path.len)
+    barf("59 ","GEMINI requests may not have a query part.");
 
   // Just strip the port.
   i = byte_chr(host.s,host.len,':');

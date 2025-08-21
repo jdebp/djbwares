@@ -26,6 +26,8 @@ const char *error_str(int i)
   X(error_isdir,"is a directory")
   X(error_connrefused,"connection refused")
   X(error_notdir,"not a directory")
+  X(error_protocoltype,"wrong protocol type for socket")
+  X(error_loop,"too many loops encountered")
 #ifdef ESRCH
   X(ESRCH,"no such process")
 #endif

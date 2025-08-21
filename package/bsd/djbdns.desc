@@ -6,6 +6,6 @@
  .
  walldns and rbldns are special purpose servers, with ancillary tols walldns-data and rbldns-data.
  .
- dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnstrace, and dnstracesort are various tools for diagnosing DNS problems and for performing various DNS queries.
+ dnsq, dnsqr, dnsqrx, dnsname, dnsnamex, dnsip, dnsmx, dnsns, dnstrace, and dnstracesort are various tools for diagnosing DNS problems and for performing various DNS queries.
  .
  axfrdns is a UCSPI-TCP server program.  dnscache, tinydns, walldns, and rbldns all understand the LISTEN_FDS protocol and can be run with their listening sockets passed to them by nosh tools or systemd.

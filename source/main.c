@@ -9,9 +9,9 @@ extern void doit(void);
 
 int main(int argc,char **argv)
 {
-  (void)argc;	/* Silence a compiler warning. */
   char *x;
   unsigned long id;
+  (void)argc;	/* Silence a compiler warning. */
 
   // This saves having to have the leapsecs.dat file in every chroot environment.
   leapsecs_init();

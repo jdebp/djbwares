@@ -19,6 +19,7 @@
 #include "ucspi.h"
 #include "subfd.h"
 #include "env.h"
+#include "conf.h"
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -236,7 +237,7 @@ void readline(void)
 
 void doit()
 {
-  unsigned int i;
+  unsigned int i, maxlen;
   int spaces;
   const char *localhost;
   int done_host;
@@ -248,6 +249,7 @@ void doit()
     flagoldprotocol = 1;
   if (env_get("LOGUNSUPPORTED"))
     flaglogunsupported = 1;
+  maxlen = conf_path_max();
 
   sig_ignore(sig_pipe);
 
@@ -255,6 +257,10 @@ void doit()
     readline();
 
     if (!line.len) continue;
+
+    // Albeit not a GEMINI requirement, either; a sensible-enough restriction for content served from the filesystem.
+    if (line.len >= maxlen)
+      barf("414 ","That HTTP request is too long for this system.");
 
     if (!stralloc_copys(&method,"")) _exit(21);
     if (!stralloc_copys(&url,"")) _exit(21);
@@ -294,14 +300,14 @@ void doit()
         protocolnum = 1; /* if client uses http/001.00, tough luck */
     }
     if (!flagoldprotocol && protocolnum < 2)
-      barf("426 ","please use HTTP/1.1");
+      barf("426 ","Please use HTTP/1.1.");
 
     if (!stralloc_0(&method)) _exit(21);
     flagbody = 1;
     if (str_equal(method.s,"HEAD"))
       flagbody = 0;
     else if (!str_equal(method.s,"GET"))
-      barf("501 ","method not implemented");
+      barf("405 ","That method is not implemented.");
 
     if (case_startb(url.s,url.len,"http://")) {
       if (!stralloc_copyb(&host,url.s + 7,url.len - 7)) _exit(21);
@@ -319,17 +325,17 @@ void doit()
         readline();
         if (!line.len || ((line.s[0] != ' ') && (line.s[0] != '\t'))) {
           if (case_startb(field.s,field.len,"content-length:"))
-            barf("501 ","I do not accept messages");
+            barf("413 ","I do not accept messages.");
           if (case_startb(field.s,field.len,"transfer-encoding:"))
-            barf("501 ","I do not accept messages");
+            barf("413 ","I do not accept messages.");
           if (case_startb(field.s,field.len,"expect:"))
-            barf("417 ","I do not accept Expect");
+            barf("417 ","I do not accept Expect.");
           if (case_startb(field.s,field.len,"if-match:"))
-            barf("412 ","I do not accept If-Match");
+            barf("412 ","I do not accept If-Match.");
           if (case_startb(field.s,field.len,"if-none-match:"))
-            barf("412 ","I do not accept If-None-Match");
+            barf("412 ","I do not accept If-None-Match.");
           if (case_startb(field.s,field.len,"if-unmodified-since:"))
-            barf("412 ","I do not accept If-Unmodified-Since");
+            barf("412 ","I do not accept If-Unmodified-Since.");
           if (case_startb(field.s,field.len,"host:"))
             if (!done_host) {
               host.len = 0;
@@ -351,14 +357,18 @@ void doit()
     // This rule borrowed from GEMINI; a sensible-enough restriction for anonymous service.
     i = byte_chr(host.s,host.len,'@');
     if (i != host.len)
-      barf("501 ","HTTP requests may not have a user part.");
+      barf("400 ","HTTP requests may not have a user part.");
     // This rule borrowed from GEMINI, also.
     if (!path.len)
       if (!stralloc_cats(&path,"/")) _exit(21);
     // This rule borrowed from GEMINI, also.
     i = byte_chr(path.s,path.len,'#');
     if (i != path.len)
-      barf("501 ","HTTP requests may not have a fragment part.");
+      barf("400 ","HTTP requests may not have a fragment part.");
+    // By analogy, albeit not a GEMINI requirement, this rule; a sensible-enough restriction for static content.
+    i = byte_chr(path.s,path.len,'?');
+    if (i != path.len)
+      barf("400 ","HTTP requests may not have a query part.");
 
     // Just strip the port.
     i = byte_chr(host.s,host.len,':');

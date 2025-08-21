@@ -29,10 +29,10 @@
 <refsection>
 <title>Warning</title>
 
-<para>
+<caution>
 <command>pickdns</command> is obsolete.
 Its functionality was rolled into <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> in 2001.
-</para>
+</caution>
 
 </refsection>
 
@@ -40,7 +40,7 @@ Its functionality was rolled into <citerefentry><refentrytitle>tinydns</refentry
 <title>Description</title>
 
 <para>
-<command>pickdns</command> is a content DNS server that speaks the DNS/UDP protocol.
+<command>pickdns</command> is an obsolete content DNS server that speaks the DNS/UDP protocol.
 It accepts DNS queries from hosts around the Internet, and responds with locally configured information.
 </para>
 

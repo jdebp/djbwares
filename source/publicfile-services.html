@@ -1,0 +1,54 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>The conventional publicfile services to run</title>
+<h1 class="Ruled">The conventional publicfile services to run</h1>
+
+<h2 class="Ruled">What services one runs</h2>
+
+<p>
+Conventionally in a modern scenario one needs not run <em>any</em> of the <a href="index.html">djbwares toolset's</a> publicfile services.
+</p>
+
+<p>
+Exactly <em>how</em> one runs <a href="commands/httpd.xml"><code>httpd</code></a>, <a href="commands/gopherd.xml"><code>gopherd</code></a>, <a href="commands/geminid.xml"><code>geminid</code></a>, and <a href="commands/ftpd.xml"><code>ftpd</code></a> as services is beyond the scope of this Guide.
+The configure utility of the original publicfile is long-since obsolete, and service definitions/bundles for specific service management systems (from daemontools through runit to nosh) have become available elsewhere over the years.
+</p>
+
+<h3 class="Ruled">GEMINI as NICNAME and FINGER</h3>
+
+<p>
+<a href="commands/geminid.xml"><code>geminid</code></a> is the only one of the services that requires things that do not come in the box with djbwares.
+A GEMINI server is required to use SSL (a.k.a. TLS) rather than speak plaintext, and there are no UCSPI-SSL tools in the djbwares toolkit.
+</p>
+
+<p>
+However, one alternative use for <a href="commands/geminid.xml"><code>geminid</code></a> is to provide a form of FINGER and NICNAME (a.k.a. WHOIS) services.
+The FINGER and NICNAME protocols are flexible enough that a valid unencrypted GEMINI request is a subset of both FINGER and NICNAME requests.
+</p>
+
+<p>
+For <a href="publicfile-security.html">security and privacy reasons</a> one must not provide either the original or later forms of NICNAME, nor provide the original FINGER.
+<a href="commands/geminid.xml"><code>geminid</code></a> provides a novelty alternative that can be accessed by old clients:
+</p>
+<div class="command-window"><span class="command-prompt">~ %</span><span class="user-input">finger //example.org/index.html@www.example.org</span>
+</div>
+<div class="command-window"><span class="command-prompt">~ %</span><span class="user-input">whois -h www.example.org //example.org/index.html</span>
+</div>
+<p>
+<a href="commands/geminid.xml"><code>geminid</code></a> supports schema-less URLs as a protocol extension, in order to enable this.
+</p>
+
+<h2 class="Ruled">How the services are conventionally configured</h2>
+
+<p>
+The Bernstein convention is for publicfile services to all share a single directory tree, conventionally with its root at the directory <code>/public/file</code>.
+However, a convention deployed by <a href="https://jdebp.uk/Softwares/nosh/">the nosh toolset</a> is the existence of a <code>publicfile</code> user, with the publicfile services serving up files from that account's <code>~publicfile/public</code> directory.
+There is nothing stopping <code>/public/file</code> being a symbolic link to this.
+All of the publicfile services run as this account.
+</p>
+
+<p>
+Every subdirectory of this root is a virtual host.
+Another Bernstein convention is that <code>0</code> is the default virtual host, stemming both from <a href="commands/httpd.xml"><code>httpd</code></a>'s default in the face of HTTP/0.9 and HTTP/1.0 and a common choice for <a href="commands/tcpserver.xml"><code>tcpserver</code></a> <code>-l</code> option.
+For <a href="publicfile-security.html">security reasons</a> this is nowadays not recommended.
+</p>

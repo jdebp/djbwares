@@ -15,7 +15,7 @@ base_plus_version="`basename \"${cwd}\"`"
 base="`echo "${base_plus_version}" | sed ${extended_regexp} 's/-[[:digit:]][[:alnum:].]*$//'`"
 if [ "${base}" != "${base_plus_version}" ]
 then
-	for target in ptyget publicfile daemontools djbdns ucspi-tcp clockspeed libtai "${base}"
+	for target in ptyget publicfile daemontools djbdns ucspi-tcp clockspeed libtai taitools "${base}"
 	do
 		echo "Creating symlink ${target} -> ${base_plus_version}."
 		case "`uname`" in

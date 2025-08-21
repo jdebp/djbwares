@@ -1,7 +1,13 @@
 #include <unistd.h>
 #include "byte.h"
 #include "case.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_server.h"
+#include "dns_random.h"
+#include "dns_domain.h"
+#include "dns_sortip.h"
+#include "ip.h"
+#include "ip4.h"
 #include "open.h"
 #include "cdb.h"
 #include "response.h"
@@ -20,9 +26,9 @@ static struct cdb c;
 static char key[258];
 static char data[512];
 
-static int doit(char *q,char qtype[2],char ip[4])
+static int doit(const char *q,const char qtype[2],const struct ip_address *ip)
 {
-  int r;
+  int r = -1;
   uint32 dlen;
   unsigned int qlen;
   int flaga;
@@ -32,19 +38,29 @@ static int doit(char *q,char qtype[2],char ip[4])
   qlen = dns_domain_length(q);
   if (qlen > 255) return 0; /* impossible */
 
+  if (byte_equal(qtype,2,DNS_T_ANY)) {
+    if (!response_noany(q)) return 0;
+    return 1;
+  } else
+  if (byte_equal(qtype,2,DNS_T_OPT)) {
+    if (!response_noopt(q)) return 0;
+    return 1;
+  }
+
   flaga = byte_equal(qtype,2,DNS_T_A);
   flagaaaa = byte_equal(qtype,2,DNS_T_AAAA);
   flagmx = byte_equal(qtype,2,DNS_T_MX);
-  if (byte_equal(qtype,2,DNS_T_ANY)) goto NO_ANY;
   if (!flaga && !flagaaaa && !flagmx) goto REFUSE;
 
-  key[0] = '%';
-  byte_copy(key + 1,4,ip);
+  if (ip_is4(ip)) {
+    key[0] = '%';
+    byte_copy(key + 1,4,ip->d4);
 
-  r = cdb_find(&c,key,5);
-  if (!r) r = cdb_find(&c,key,4);
-  if (!r) r = cdb_find(&c,key,3);
-  if (!r) r = cdb_find(&c,key,2);
+    r = cdb_find(&c,key,5);
+    if (!r) r = cdb_find(&c,key,4);
+    if (!r) r = cdb_find(&c,key,3);
+    if (!r) r = cdb_find(&c,key,2);
+  }
   if (r == -1) return 0;
 
   key[0] = '+';
@@ -68,40 +84,36 @@ static int doit(char *q,char qtype[2],char ip[4])
   if (cdb_read(&c,data,dlen,cdb_datapos(&c)) == -1) return 0;
 
   if (flaga) {
-    dns_sortip(data,dlen);
-    if (dlen > 12) dlen = 12;
-    while (dlen >= 4) {
-      dlen -= 4;
+    dns_sortip(data,dlen / sizeof(struct ip_address));
+    if (dlen > sizeof(struct ip_address) * 3) dlen = sizeof(struct ip_address) * 3;
+    while (dlen >= sizeof(struct ip_address)) {
+      dlen -= sizeof(struct ip_address);
+      if (!ip_is4(data + dlen)) continue;
       if (!response_rstart(q,DNS_T_A,5)) return 0;
-      if (!response_addbytes(data + dlen,4)) return 0;
+      if (!response_addbytes(((const struct ip_address *)data + dlen)->d4,4)) return 0;
       response_rfinish(RESPONSE_ANSWER);
     }
   }
   if (flagaaaa) {
-//    dns_sortip6(data,dlen);
-    if (dlen > 48) dlen = 48;
-    while (dlen >= 16) {
-      dlen -= 16;
+    dns_sortip(data,dlen / sizeof(struct ip_address));
+    if (dlen > sizeof(struct ip_address) * 3) dlen = sizeof(struct ip_address) * 3;
+    while (dlen >= sizeof(struct ip_address)) {
+      dlen -= sizeof(struct ip_address);
+      if (!ip_is6(data + dlen)) continue;
       if (!response_rstart(q,DNS_T_AAAA,5)) return 0;
-      if (!response_addbytes(data + dlen,16)) return 0;
+      if (!response_addbytes(((const struct ip_address *)data + dlen)->d6,IP6_SANS_SCOPE_LEN)) return 0;
       response_rfinish(RESPONSE_ANSWER);
     }
   }
 
   return 1;
 
-NO_ANY:
-  if (!response_noany(q)) return 0;
-  return 1;
-
   REFUSE:
-  response[2] &= ~4;
-  response[3] &= ~15;
-  response[3] |= 5;
+  response_refuse();
   return 1;
 }
 
-int respond(char *q,char qtype[2],char ip[4])
+int respond(const char *q,const char qtype[2],const struct ip_address *ip)
 {
   int fd;
   int result;

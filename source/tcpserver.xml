@@ -48,7 +48,7 @@ It also sets up several environment variables.
 The server's address is given by <replaceable>host</replaceable> and <replaceable>port</replaceable>.
 <replaceable>port</replaceable> may be a name from <filename>/etc/services</filename> or a number; if it is 0, <command>tcpserver</command> will choose a free TCP port.
 <replaceable>host</replaceable> may be 0, allowing connections to any local IP address; or a dotted-decimal IP address, allowing connections only to that address; or a host name, allowing connections to the first IP address for that host.
-Host names are fed through qualification using dns_ip4_qualify.
+Host names are fed through name qualification (see <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry>).
 </para>
 
 <para>
@@ -284,7 +284,7 @@ Default: 26.
 <title>Author</title>
 <para>
 Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
-Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname> <surname>Pape</surname></personname> in 2000, 2001, and 2002. 
 Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>

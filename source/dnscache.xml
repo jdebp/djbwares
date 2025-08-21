@@ -73,14 +73,14 @@ This access control mechanism will change in a non-backwards compatible way when
 
 <para>
 <command>dnscache</command>'s responses are generally much smaller than BIND's responses. 
-They do not include authority records (NS records of the source name servers and SOA records for negative answers) or additional records (A records relevant to NS or MX records). 
+They do not include authority records (NS records of the source name servers and <code>SOA</code> records for negative answers) or additional records (A records relevant to NS or MX records). 
 When the answer section is truncated by UDP length limits, it is eliminated entirely.
 </para>
 
 <para>
 <command>dnscache</command> tries to prevent local users from snooping on other local users. 
 It discards non-recursive queries; it discards inverse queries; and it discards zone-transfer requests. 
-It responds to ANY queries with a single synthesized HINFO resource record set.
+It responds to <code>ANY</code> and <code>OPT</code> queries with a single synthesized <code>HINFO</code>  resource record set.
 If the <envar>HIDETTL</envar> environment variable is set, <command>dnscache</command> always uses a TTL of 0 in its responses.
 Normally, it preserves the (current remaining) TTL, so that other proxies can use it as an upstream server.
 </para>
@@ -171,13 +171,13 @@ In particular, it will not use glue outside the server's bailiwick, or glue with
 </para>
 
 <para>
-<command>dnscache</command> caches records for at most a week.
+<command>dnscache</command> caches records for at most a fortnight.
 It interprets TTLs above 2147483647 as 0, on the grounds that such excessive values are the results of unsigned arithmetic underflow.
 </para>
 
 <para>
-<command>dnscache</command> does not cache SOA records. 
-However, it does use SOA TTLs to determine cache times (up to an hour) for zero-record responses and nonexistent domains.
+<command>dnscache</command> does not cache <code>SOA</code> resource records when they are TTL carriers for the DNS protocol, although it will cache them if they are actual answers to queries.
+It instead uses the TTL-carrying <code>SOA</code> record records to determine cache times (up to an hour) for zero-record responses and nonexistent domains.
 </para>
 
 <para>
@@ -190,37 +190,95 @@ Responses from "lame" servers are logged, and what useful information they may c
 <title>Special names</title>
 
 <para>
-<command>dnscache</command> handles several things internally, synthesizing data for them directly instead of issuing back-end transactions:
+<command>dnscache</command> handles several things internally, synthesizing data for them directly instead of issuing back-end transactions.
 </para>
+
+<note>
+<citerefentry><refentrytitle>walldns</refentrytitle><manvolnum>1</manvolnum></citerefentry> <emphasis>also</emphasis> synthesizes data for some of these domain names, and some domain names are handled internally by the DNS client library (see <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry>).
+But what answers a proxy DNS server can synthesize are different to what answers a content DNS server can synthesize and different to what answers a DNS client library can synthesize.
+Many "special-use domain names" have different rules for all three.
+</note>
+
+<para>
+Several well-known domain names such as <filename>test.</filename> and <filename>home.arpa.</filename> and <filename>10.in-addr.arpa.</filename> are <emphasis>not</emphasis> answered synthetically.
+These domain names are supposed to be prune-and-graft points handled by the the IP address selection mechanisms in the <filename>servers/test</filename> and <filename>servers/home.arpa</filename> and <filename>servers/10.in-addr.arpa</filename> files discussed later, switchable amongst <citerefentry><refentrytitle>walldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, or a forwarded-to proxy DNS server.
+</para>
+
+<refsection>
+<title>bare minima for loopback and link-local networking</title>
+
+<para>
+<command>dnscache</command> provides bare minima for loopback and link-local networking with fixed well-known and universal values, in line with RFC 6761 and RFC 6762.
+</para>
+
 <variablelist>
 <varlistentry>
-<term><code>localhost</code></term>
+<term><filename>localhost.</filename> and its subdomains</term>
 <listitem><para>
-It gives this an A record of 127.0.0.1 and an AAAA record of ::1.
+It gives <filename>localhost.</filename> itself an <code>A</code> record of 127.0.0.1 and an <code>AAAA</code> record of ::1.
+All other types of resource record set are empty sets.
+</para><para>
+Its subdomains are treated likewise with the exception of subdomains of the form <filename><replaceable>d</replaceable>.<replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>127</replaceable>.localhost.</filename>.
+It gives these an <code>A</code> record of 127.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable>, and an <code>AAAA</code> record of ::FFFF:127.<replaceable>b</replaceable>.<replaceable>c</replaceable>.<replaceable>d</replaceable>.
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><code>1.0.0.127.in-addr.arpa</code></term>
+<term><filename>127.in-addr.arpa.</filename> subdomains</term>
 <listitem><para>
-It gives this a PTR record of <code>localhost</code>.
+To subdomains of the form <filename><replaceable>d</replaceable>.<replaceable>c</replaceable>.<replaceable>b</replaceable>.127.in-addr.arpa.</filename> it gives a <code>PTR</code> record of <filename><replaceable>d</replaceable>.<replaceable>c</replaceable>.<replaceable>b</replaceable>.127.localhost.</filename>, with the exception of the 127.0.0.1 reverse mapping.
+It gives all other subdomains, including the 127.0.0.1 reverse mapping, a <code>PTR</code> record of <filename>localhost.</filename>.
+All other types of resource record set are empty sets.
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term><code>1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa</code></term>
+<term><filename>254.169.in-addr.arpa.</filename>, <filename>8.e.f.ip6.arpa.</filename>, and <filename>9.e.f.ip6.arpa.</filename> subdomains</term>
 <listitem><para>
-It gives this a PTR record of <code>localhost</code>.
+To subdomains of the form <filename><replaceable>c</replaceable>.<replaceable>b</replaceable>.254.169.in-addr.arpa.</filename>, <filename><replaceable>29hexlabels</replaceable>.8.e.f.ip6.arpa.</filename>, or <filename><replaceable>29hexlabels</replaceable>.9.e.f.ip6.arpa.</filename>, which are the reverse lookup names used to map link-local IP addresses, it gives all query types empty resource record sets.
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term>dotted-decimal domain names</term>
+<term><filename>1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa.</filename></term>
 <listitem><para>
-It gives these an A record corresponding to the IP address whose human-readable form is the domain name (e.g. <code>192.48.96.2</code> is given an A record of 192.48.96.2).
+It gives this a <code>PTR</code> record of <filename>localhost.</filename>.
+All other types of resource record set are empty sets.
 </para></listitem>
 </varlistentry>
 </variablelist>
 
+</refsection>
+
+<refsection>
+<title>common mis-use of IP address strings</title>
+
 <para>
-For the subdomains <code><replaceable>something</replaceable>.localhost.</code>, use the <filename>servers/localhost</filename> file to point to a content DNS server running <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<command>dnscache</command> handles a common error where an application expects a domain name but its user supplies it with a human-readable form of an IPv4 address, and this is not caught by a DNS client library and handled internally but a request has reached <command>dnscache</command>; or where a content DNS server has erroneously entered an IP address instead of a domain name in an <code>NS</code> resource record in a content DNS server's database.
+</para>
+
+<para>
+It gives dotted-decimal domain names an <code>A</code> record corresponding to the IP address whose human-readable form is the domain name (e.g. <filename>192.48.96.2.</filename> is given an <code>A</code> record of 192.48.96.2) and an <code>AAAA</code> record corresponding to the IPv4-mapped IPv6 equivalent address.
+All other types of resource record set are empty sets.
+</para>
+
+<note>
+For opaque and bijective address-to-name-to-address mapping where, rather, the proper mechanisms are employed by applications, use the <filename>servers/in-addr.arpa</filename> and <filename>servers/ip6.arpa</filename> files to point to a content DNS server running <citerefentry><refentrytitle>walldns</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</note>
+
+</refsection>
+
+<refsection>
+<title>Non-existent domains</title>
+
+<para>
+RFCs 6761, 7686, 8880, 9462, and 9476 specify that <filename>invalid.</filename>, <filename>alt.</filename>, <filename>onion.</filename>, <filename>local.</filename>, <filename>resolver.arpa.</filename>, and their subdomains, should not query content DNS servers.
+They are either looked up via other mechanisms, if they are looked up at all, and queries for them should never have reached <command>dnscache</command>, or they are by their natures non-existent as far as the global DNS is concerned.
+For these, <command>dnscache</command> returns a "no such domain" error response.
+</para>
+
+</refsection>
+
+<para>
+For empty resource record sets and "no such domain" errors, <command>dnscache</command> includes a synthetic <code>SOA</code> resource record that carries the TTL.
+As <command>dnscache</command> does not cache such <code>SOA</code> resource records when they are TTL carriers for the DNS protocol, properly operating caches in front of <command>dnscache</command> will not cache these records.
 </para>
 
 </refsection>
@@ -235,7 +293,7 @@ For the subdomains <code><replaceable>something</replaceable>.localhost.</code>,
 
 <para>
 <command>dnscache</command> sends outgoing requests from high ports of the IP address given by the value of the <envar>IPSEND</envar> environment variable. 
-Typically <envar>IPSEND</envar> is 0.0.0.0, meaning the machine's primary IP address.
+If <envar>IPSEND</envar> is not set then the default is either 0.0.0.0 or 0:0:0:0:0:0:0:0, allowing the operating system to pick an IP version 4 or version 6 address suitable for reaching the target servers.
 The ports are picked at random, as are the message IDs in the requests.
 The random number generator is seeded from a seed value, up to 128 bytes, that <command>dnscache</command> reads from its standard input at startup.
 The seed does not need to be preserved across successive incarnations of <command>dnscache</command>, and merely needs to be unknown and unpredictable outwith the <command>dnscache</command> process.
@@ -249,6 +307,11 @@ If there are addresses listed in <filename>servers/moon.af.example</filename>, f
 The list is capped at 16 IP addresses; the 17th and subsequent IP addresses being read, but discarded.
 </para>
 
+<caution>
+If the <filename>servers/test</filename> and <filename>servers/home.arpa</filename> and <filename>servers/10.in-addr.arpa</filename> (and similar) files are missing, and it is not in forward-first or forward-only mode (more on which later) or those prune-and-graft points are not in turn handled by the forwarded-to proxy DNS servers <emphasis>either</emphasis>, <command>dnscache</command> is not correctly configured.
+This is not a condition that is detectable by the software unaided.
+</caution>
+
 </refsection>
 
 <refsection>
@@ -256,7 +319,7 @@ The list is capped at 16 IP addresses; the 17th and subsequent IP addresses bein
 
 <para>
 If the <envar>FORWARDONLY</envar> environment variable is set, <command>dnscache</command> treats <filename>servers/@</filename> as a list of IP addresses for other caching proxies, not for content servers. 
-It forwards queries to those caches the same way that a client does, rather than contacting a chain of servers according to NS records.
+It forwards queries to those caches the same way that a client does, rather than contacting a chain of servers according to <code>NS</code> records.
 In this mode, it ignores referral responses, which it should never receive from a caching proxy in the first place and which the world at large has an unfortunate habit of making refer to IP addresses such as 127.0.0.1, which would cause a proxy loop if they were to be followed.
 It logs such occurrences.
 </para>
@@ -278,7 +341,7 @@ For similar reasons, for correct operation the list in a <filename>servers/<repl
 <para>
 If the <envar>FORWARDFIRST</envar> environment variable is set, <command>dnscache</command> permits back-end services that it contacts to be either caching proxies or content servers. 
 It behaves exactly as in normal mode, except that back-end queries have the "recursion desired" bit set to on instead of to off.
-This causes caching proxies to respond with fully resolved responses, whilst still performing query resolution locally if they do not.
+This causes caching proxies to respond with fully resolved responses, whilst still performing query resolution locally if they are content servers.
 </para>
 
 <para>
@@ -318,6 +381,14 @@ This bug is the most common reason for users to see repeated IP addresses from <
 <title>History</title>
 <para>
 <command>dnscache</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+<para>
+Special handling of <filename>localhost.</filename>, reverse lookup of 127.0.0.1, and dotted-decimal domain names were in the Bernstein original.
+This special handling was significantly expanded in 2025.
+</para>
+<para>
+<command>dnscache</command> ceased special-casing the <filename>ip6.int.</filename> superdomain in 2016.
+The <filename>ip6.int.</filename> superdomain was deprecated by RFC3152 in 2001 and obsoleted by RFC4159 in 2005.
 </para>
 </refsection>
 

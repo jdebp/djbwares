@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange trysgprm.c compile link
 if ( ./compile trysgprm.o trysgprm.c trysgprm.d && ./link trysgprm trysgprm.o ) >/dev/null 2>&1 

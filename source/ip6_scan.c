@@ -1,8 +1,9 @@
 #include "scan.h"
 #include "uint16.h"
+#include "ip.h"
 #include "ip6.h"
 
-unsigned int ip6_scan(const char *s,char ip[16],char sep)
+unsigned int ip6_scan(const char *s,char ip[IP6_LEN],char sep)
 {
   unsigned int i;
   unsigned int len;

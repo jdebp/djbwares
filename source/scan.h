@@ -13,7 +13,9 @@ extern unsigned int scan_xshort(const char *,unsigned short *);
 #if 0 // No known implementation or doco.
 extern unsigned int scan_nbbshort(const char *,unsigned int,unsigned int,unsigned int,unsigned short *);
 #endif
+extern unsigned int scan_ulong_n(const char *,unsigned int,unsigned long *);
 extern unsigned int scan_ulong(const char *,unsigned long *);
+extern unsigned int scan_xlong_n(const char *,unsigned int,unsigned long *);
 extern unsigned int scan_xlong(const char *,unsigned long *);
 #if 0 // No known implementation or doco.
 extern unsigned int scan_nbblong(const char *,unsigned int,unsigned int,unsigned int,unsigned long *);

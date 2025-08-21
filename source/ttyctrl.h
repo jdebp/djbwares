@@ -1,6 +1,6 @@
 #ifndef TTYCTRL_H
 #define TTYCTRL_H
 
-extern int ttyctrl();
+extern int ttyctrl(void);
 
 #endif

@@ -2,7 +2,13 @@
 #include "alloc.h"
 #include "case.h"
 #include "byte.h"
-#include "dns.h"
+#include "dns_domain.h"
+
+/* The only two sources of wire-format domain names are:
+** 1. packets read off the wire, and validated by the dns_packet library; and
+** 2. packets encoded from human-readable form by dns_domain_fromdot() and validated there.
+** So we have no failure modes in these functions if, say, a label is larger than the legal maximum length.
+*/
 
 unsigned int dns_domain_length(const char *dn)
 {

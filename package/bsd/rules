@@ -4,7 +4,7 @@
 
 .PHONY: build binary stage control clean
 
-BINARY_PACKAGES=djbwares-guide publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai djbdns-host leapsecs
+BINARY_PACKAGES=djbwares-guide publicfile djbdns clockspeed ptyget ucspi-tcp daemontools multilog taiclockd libtai taitools djbdns-host leapsecs
 
 # Target this in order to make the package contents.
 build:

@@ -4,14 +4,15 @@
 #include <netinet/in.h>
 #include "byte.h"
 #include "socket.h"
+#include "ip.h"
 
-int socket_local4(int s,char ip[4],uint16 *port)
+extern int ip_make(struct ip_address * ip,const struct sockaddr_storage * ss,uint16 *port);
+
+int socket_local(int s,struct ip_address * ip,uint16 *port)
 {
-	struct sockaddr_in sa;
-	socklen_t dummy = sizeof sa;
+  struct sockaddr_storage ss;
+  socklen_t dummy = sizeof ss;
 
-	if (getsockname(s,(struct sockaddr *) &sa,&dummy) == -1) return -1;
-	byte_copy(ip,4,&sa.sin_addr);
-	uint16_unpack_big((char *) &sa.sin_port,port);
-	return 0;
+  if (getsockname(s,(struct sockaddr *) &ss,&dummy) == -1) return -1;
+  return ip_make(ip,&ss,port);
 }

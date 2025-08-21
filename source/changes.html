@@ -43,7 +43,7 @@ Some code, such as the old "sig" APIs for catching/ignoring signals, has been re
 </p></li>
 
 <li><p>
-There are some patches.
+Some well-known patches are pre-applied.
 </p>
 <ul>
 <li><p>
@@ -64,7 +64,7 @@ Some new tools have been added
 </p>
 <p>
 <a href="commands/geminid.xml"><code>geminid</code></a> requires UCSPI-SSL tooling that Bernstein's UCSPI-TCP does not cover, and the toolset is not capable of a full GEMINI server without third-party help.
-However, it can also be used, since the protocol is largely compatible, as a UCSPI-TCP server for FINGER and NICNAME/WHOIS services.
+However, it can also be used, since the protocol is largely compatible, <a href="publicfile-services.html">as a UCSPI-TCP server for FINGER and NICNAME/WHOIS services</a>.
 This allows one to serve up FINGER and NICNAME without revealing any information from the system account database, as all served content is entirely in the publicfile subdirectory tree.
 </p></li>
 <li><p>
@@ -73,18 +73,27 @@ A simple standalone <a href="commands/host.xml"><code>host</code></a> tool has b
 </ul>
 
 <li><p>
-Some IPv6 support has been added and general DNS support has been modernized.
+Taking a leaf out of the GEMINI book, <a href="commands/httpd.xml"><code>httpd</code></a> no longer accepts URLs that contain fragment identifiers or query parameter strings.
+</p></li>
+
+<li><p>
+Some IPv6 support has been added.
 </p>
 <ul>
 <li><p>
-All DNS servers now synthesize <code>HINFO</code> responses to <code>ANY</code> queries, in line with RFC 8482.
-Likewise, the <code>ANY</code> query <em>class</em> (rather than type) is no longer supported.
-</p></li>
-<li><p>
-The easy-syntax <code>SRV</code> resource record support has been added to <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> (as well as comcomitation changes to <a href="commands/tinydns-get.xml"><code>tinydns-get</code></a> and <a href="commands/dnsq.xml"><code>dnsq</code></a>).
-</p></li>
-<li><p>
 Easy-syntax <code>AAAA</code> resource record support has been added.
+</p></li>
+<li><p>
+<a href="commands/dnsip.xml"><code>dnsip</code></a> and <a href="commands/dnsipq.xml"><code>dnsipq</code></a> will now look up and display IPv6 addresses.
+</p></li>
+<li><p>
+IPv6 addresses can be supplied as the server name to <a href="commands/dnsq.xml"><code>dnsq</code></a>.
+</p></li>
+<li><p>
+<a href="commands/dnscache.xml"><code>dnscache</code></a>, <a href="commands/axfrdns.xml"><code>axfrdns</code></a>, <a href="commands/tinydns.xml"><code>tinydns</code></a>, <a href="commands/walldns.xml"><code>walldns</code></a>, and <a href="commands/rbldns.xml"><code>rbldns</code></a> can all listen on IPv6 addresses.
+</p></li>
+<li><p>
+There is some preliminary support for <a href="commands/dnscache.xml"><code>dnscache</code></a> to talk to other DNS servers that are on IPv6 addresses.
 </p></li>
 <li><p>
 The original TAICLOCK server that only worked over IPv4 is now named <a href="commands/taiclock4d.xml"><code>taiclock4d</code></a>, and <a href="commands/taiclockd.xml"><code>taiclockd</code></a> is now an IPv6 tool that can operate IPv6 only or use a combined IPv6 and IPv4 stack.
@@ -92,14 +101,45 @@ The original TAICLOCK server that only worked over IPv4 is now named <a href="co
 </ul>
 
 <li><p>
-Several tools are now more easily used with UCSPI-TCP maning their sockets for them.
+General DNS support has been modernized.
+</p>
+<ul>
+<li><p>
+All DNS servers now synthesize <code>HINFO</code> responses to <code>ANY</code> queries, in line with RFC 8482.
+Likewise, the <code>ANY</code> query <em>class</em> (rather than type) is no longer supported.
+</p></li>
+<li><p>
+The easy-syntax <code>SRV</code> resource record support has been added to <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> (as well as concomitant changes to <a href="commands/tinydns-get.xml"><code>tinydns-get</code></a> and <a href="commands/dnsq.xml"><code>dnsq</code></a>).
+</p></li>
+<li><p>
+<a href="commands/walldns.xml"><code>walldns</code></a> has been extensively augmented, as have <a href="commands/dnscache.xml"><code>dnscache</code></a> and the <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> library that the utilities use, to deal with many "special-use domain names" that had not been standardized, and often not even invented, when the final version of Bernstein djbdns was released.
+</p></li>
+<li><p>
+The <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> library contains mechanism for accommodating different DNS servers for use with <code>onion.</code>, multicast DNS, and DNS Service Discovery.
+With the <code>DNSCACHEIP_ONION</code> environment variable set, for example <a href="commands/dnsip.xml"><code>dnsip</code></a> will automatically route <code>*.onion.</code> lookups to the correct DNS server.
+</p></li>
+</ul>
+
+<li><p>
+Several tools are now more easily used with UCSPI-TCP managing their sockets for them.
 The content DNS and TAICLOCK servers have been changed to enable them to inherit already-open sockets, using the systemd <code>LISTEN_FDS</code> mechanism.
 So has <code>dnscache</code>, which requires <em>two</em> already-open sockets, of the right kinds.
 </p></li>
 
 <li><p>
+Several obsolete things have been removed or otherwise dealt with.
+</p>
+<ul>
+<li><p>
+<code>pickdns</code>, obsolete for 24 years, has been removed from the toolset.
+</p></li>
+<li><p>
 <a href="commands/rblsmtpd.xml"><code>rblsmtpd</code></a> no longer defaults to a blacklist that has been defunct for over a decade.
 </p></li>
+<li><p>
+<code>/etc/dnsroots.global</code> is no longer packaged nor used by any tool, in favour of <a href="dns-public-root-list.html">just querying the DNS for a current list</a> if one is using them.
+</p></li>
+</ul>
 
 <li><p>
 <a href="commands/ftpd.xml"><code>ftpd</code></a> now copes with <a href="https://jdebp.uk/FGA/web-browser-ftp-hall-of-shame.html">various poor and standards-violating practices in modern WWW browsers</a> whose support for FTP is no longer as good as it was when publicfile was originally written.

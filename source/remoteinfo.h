@@ -4,6 +4,7 @@
 #include "stralloc.h"
 #include "uint16.h"
 
-extern int remoteinfo(stralloc *,char *,uint16,char *,uint16,unsigned int);
+struct ip_address;
+extern int remoteinfo(stralloc *,const struct ip_address *,uint16,const struct ip_address *,uint16,unsigned int);
 
 #endif

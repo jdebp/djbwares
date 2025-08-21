@@ -4,7 +4,7 @@
 #include <termios.h>
 #include "ttyctrl.h"
 
-int ttyctrl()
+int ttyctrl(void)
 {
   int fd;
 

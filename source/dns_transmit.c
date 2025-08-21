@@ -6,23 +6,34 @@
 #include "error.h"
 #include "byte.h"
 #include "uint16.h"
-#include "dns.h"
+#include "dns_transmit.h"
+#include "dns_random.h"
+#include "dns_packet.h"
+#include "dns_domain.h"
+#include "ip.h"
+
+/* This is aggressive, a far more agressive choice than the more conservative and common 1232 (0x04D0).
+** In practice, the limit is a combination of both client and server choices.
+** This ensures that it is the server end that imposes maxima, and that this client is not restricting things.
+** The reality is that UDP/IP fragmentation is a bit of a bogeyman, as servers rarely generate (in response to *this* client, in practice, which does not reqest DNSSEC and whatnot) answers anywhere near long enough for that.
+*/
+#define MAX_RESOLVE_RESPONSE 65535
 
 static int serverwantstcp(const char *buf,unsigned int len)
 {
-  char out[12];
+  char out[HEADER_SIZE];
 
-  if (!dns_packet_copy(buf,len,0,out,12)) return 1;
+  if (!dns_packet_copy(buf,len,0,out,HEADER_SIZE)) return 1;
   if (out[2] & 2) return 1;
   return 0;
 }
 
 static int serverfailed(const char *buf,unsigned int len)
 {
-  char out[12];
+  char out[HEADER_SIZE];
   unsigned int rcode;
 
-  if (!dns_packet_copy(buf,len,0,out,12)) return 1;
+  if (!dns_packet_copy(buf,len,0,out,HEADER_SIZE)) return 1;
   rcode = out[3];
   rcode &= 15;
   if (rcode && (rcode != 3)) { errno = error_again; return 1; }
@@ -31,14 +42,15 @@ static int serverfailed(const char *buf,unsigned int len)
 
 static int irrelevant(const struct dns_transmit *d,const char *buf,unsigned int len)
 {
-  char out[12];
+  char out[HEADER_SIZE];
   char *dn;
   unsigned int pos;
+  uint16 numqueries;
 
-  pos = dns_packet_copy(buf,len,0,out,12); if (!pos) return 1;
-  if (byte_diff(out,2,d->query + 2)) return 1;
-  if (out[4] != 0) return 1;
-  if (out[5] != 1) return 1;
+  pos = dns_packet_copy(buf,len,0,out,HEADER_SIZE); if (!pos) return 1;
+  if (byte_diff(out + HEADER_ID,2,d->query + 2 + HEADER_ID)) return 1;
+  uint16_unpack_big(out + HEADER_QUERY,&numqueries);
+  if (1 != numqueries) return 1;
 
   dn = 0;
   pos = dns_packet_getname(buf,len,pos,&dn); if (!pos) return 1;
@@ -80,14 +92,21 @@ void dns_transmit_free(struct dns_transmit *d)
   packetfree(d);
 }
 
-static int randombind(struct dns_transmit *d)
+static int randombind(struct dns_transmit *d,const struct ip_address * remote)
 {
   int j;
+  struct ip_address iplocal;
+
+  if (ip_is_unassigned(&d->localip)) {
+    iplocal = *remote;
+    ip_make_zero(&iplocal);
+  } else
+    iplocal = d->localip;
 
   for (j = 0;j < 10;++j)
-    if (socket_bind4(d->s1 - 1,d->localip,1025 + dns_random(64510)) == 0)
+    if (socket_bind(d->s1 - 1,&iplocal,1025 + dns_random(64510)) == 0)
       return 0;
-  if (socket_bind4(d->s1 - 1,d->localip,0) == 0)
+  if (socket_bind(d->s1 - 1,&iplocal,0) == 0)
     return 0;
   return -1;
 }
@@ -96,37 +115,36 @@ static const int timeouts[4] = { 1, 3, 11, 45 };
 
 static int thisudp(struct dns_transmit *d)
 {
-  const char *ip;
-
   socketfree(d);
 
   while (d->udploop < 4) {
-    for (;d->curserver < 16;++d->curserver) {
-      ip = d->servers + 4 * d->curserver;
-      if (byte_diff(ip,4,"\0\0\0\0")) {
+    for (;d->current_server < d->server_count;++d->current_server) {
+      const struct ip_address * ip;
+
+      ip = d->server_addresses + d->current_server;
+      if (!ip_is_unassigned(ip)) {
 	d->query[2] = dns_random(256);
 	d->query[3] = dns_random(256);
   
-        d->s1 = 1 + socket_udp4();
+        d->s1 = 1 + socket_udp(ip);
         if (!d->s1) { dns_transmit_free(d); return -1; }
-	if (randombind(d) == -1) { dns_transmit_free(d); return -1; }
-
-        if (socket_connect4(d->s1 - 1,ip,53) == 0)
-          if (send(d->s1 - 1,d->query + 2,d->querylen - 2,0) == d->querylen - 2) {
-            struct taia now;
-            taia_now(&now);
-            taia_uint(&d->deadline,timeouts[d->udploop]);
-            taia_add(&d->deadline,&d->deadline,&now);
-            d->tcpstate = 0;
-            return 0;
-          }
+	if (randombind(d,ip) == 0)
+          if (socket_connect(d->s1 - 1,ip,d->port) == 0)
+            if (send(d->s1 - 1,d->query + 2,d->querylen - 2,0) == d->querylen - 2) {
+              struct taia now;
+              taia_now(&now);
+              taia_uint(&d->deadline,timeouts[d->udploop]);
+              taia_add(&d->deadline,&d->deadline,&now);
+              d->tcpstate = 0;
+              return 0;
+            }
   
         socketfree(d);
       }
     }
 
     ++d->udploop;
-    d->curserver = 0;
+    d->current_server = 0;
   }
 
   dns_transmit_free(d); return -1;
@@ -134,38 +152,39 @@ static int thisudp(struct dns_transmit *d)
 
 static int firstudp(struct dns_transmit *d)
 {
-  d->curserver = 0;
+  d->current_server = 0;
   return thisudp(d);
 }
 
 static int nextudp(struct dns_transmit *d)
 {
-  ++d->curserver;
+  ++d->current_server;
   return thisudp(d);
 }
 
 static int thistcp(struct dns_transmit *d)
 {
   struct taia now;
-  const char *ip;
 
   socketfree(d);
   packetfree(d);
 
-  for (;d->curserver < 16;++d->curserver) {
-    ip = d->servers + 4 * d->curserver;
-    if (byte_diff(ip,4,"\0\0\0\0")) {
+  for (;d->current_server < d->server_count;++d->current_server) {
+    const struct ip_address * ip;
+
+    ip = d->server_addresses + d->current_server;
+    if (!ip_is_unassigned(ip)) {
       d->query[2] = dns_random(256);
       d->query[3] = dns_random(256);
 
-      d->s1 = 1 + socket_tcp4();
+      d->s1 = 1 + socket_tcp(ip);
       if (!d->s1) { dns_transmit_free(d); return -1; }
-      if (randombind(d) == -1) { dns_transmit_free(d); return -1; }
+      if (randombind(d,ip) == -1) { dns_transmit_free(d); return -1; }
   
       taia_now(&now);
       taia_uint(&d->deadline,10);
       taia_add(&d->deadline,&d->deadline,&now);
-      if (socket_connect4(d->s1 - 1,ip,53) == 0) {
+      if (socket_connect(d->s1 - 1,ip,d->port) == 0) {
         d->tcpstate = 2;
         return 0;
       }
@@ -183,41 +202,59 @@ static int thistcp(struct dns_transmit *d)
 
 static int firsttcp(struct dns_transmit *d)
 {
-  d->curserver = 0;
+  d->current_server = 0;
   return thistcp(d);
 }
 
 static int nexttcp(struct dns_transmit *d)
 {
-  ++d->curserver;
+  ++d->current_server;
   return thistcp(d);
 }
 
-int dns_transmit_start(struct dns_transmit *d,const char servers[64],int flagrecursive,const char *q,const char qtype[2],const char localip[4])
+int dns_transmit_start(struct dns_transmit *d,const struct ip_address server_addresses[],unsigned int server_count,unsigned int port,int flagrecursive,const char *q,const char qtype[2],const struct ip_address * localip)
 {
   unsigned int len;
+  char *p, *header;
+
+  /* There is no restriction on the qtype at this layer; as one could be using unusual qtypes for debugging purposes.
+  ** The qtype restrictions are in the various dns_xx() libraries and in the dnscache back-end.
+  ** The latter is explicit; the former simply only send specific query types in the first place.
+  */
 
   dns_transmit_free(d);
   errno = error_io;
 
   len = dns_domain_length(q);
-  d->querylen = len + 18;
+  d->querylen = 2 + HEADER_SIZE + 4 + RRFIXED_SIZE + 1 + len;
   d->query = alloc(d->querylen);
   if (!d->query) return -1;
 
-  uint16_pack_big(d->query,len + 16);
-  byte_copy(d->query + 2,12,flagrecursive ? "\0\0\1\0\0\1\0\0\0\0\0\0" : "\0\0\0\0\0\1\0\0\0\0\0\0gcc-bug-workaround");
-  byte_copy(d->query + 14,len,q);
-  byte_copy(d->query + 14 + len,2,qtype);
-  byte_copy(d->query + 16 + len,2,DNS_C_IN);
+  p = d->query;
+  uint16_pack_big(p,d->querylen - 2); p += 2;
+  header = p;
+  byte_zero(p,HEADER_SIZE); p += HEADER_SIZE;
+  if (flagrecursive) header[2] |= 1;
+  uint16_pack_big(header + HEADER_QUERY, 1);
+  uint16_pack_big(header + HEADER_ADDITIONAL, 1);
+  byte_copy(p,len,q); p += len;
+  byte_copy(p,2,qtype); p += 2;
+  byte_copy(p,2,DNS_C_IN); p += 2;
+  byte_copy(p,1,"\0"); p += 1;
+  byte_copy(p,2,DNS_T_OPT); p += 2;
+  uint16_pack_big(p,MAX_RESOLVE_RESPONSE); p += 2;
+  uint32_pack_big(p,0); p += 4;
+  uint16_pack_big(p,0); p += 2;
 
   byte_copy(d->qtype,2,qtype);
-  d->servers = servers;
-  byte_copy(d->localip,4,localip);
+  d->server_addresses = server_addresses;
+  d->server_count = server_count;
+  d->port = port;
+  d->localip = *localip;
 
   d->udploop = flagrecursive ? 1 : 0;
 
-  if (len + 16 > 512) return firsttcp(d);
+  if (d->querylen > 514) return firsttcp(d);
   return firstudp(d);
 }
 
@@ -238,9 +275,19 @@ void dns_transmit_io(struct dns_transmit *d,iopause_fd *x,struct taia *deadline)
     *deadline = d->deadline;
 }
 
+int dns_transmit_set(struct dns_transmit *d,const char buf[],unsigned int len)
+{
+  d->packetlen = len;
+  d->packet = alloc(d->packetlen);
+  if (!d->packet) { dns_transmit_free(d); return -1; }
+  byte_copy(d->packet,d->packetlen,buf);
+  queryfree(d);
+  return 1;
+}
+
 int dns_transmit_get(struct dns_transmit *d,const iopause_fd *x,const struct taia *when)
 {
-  char udpbuf[513];
+  char udpbuf[MAX_RESOLVE_RESPONSE];
   unsigned char ch;
   int r;
   int fd;
@@ -275,12 +322,7 @@ have sent query to curserver on UDP socket s
     }
     socketfree(d);
 
-    d->packetlen = r;
-    d->packet = alloc(d->packetlen);
-    if (!d->packet) { dns_transmit_free(d); return -1; }
-    byte_copy(d->packet,d->packetlen,udpbuf);
-    queryfree(d);
-    return 1;
+    return dns_transmit_set(d,udpbuf,r);
   }
 
   if (d->tcpstate == 1) {

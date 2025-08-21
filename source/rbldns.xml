@@ -32,7 +32,7 @@
 <para>
 <command>rbldns</command> is a content DNS server that speaks the DNS/UDP protocol.
 It accepts DNS queries from hosts around the Internet, and responds with locally configured information.
-The queries ask about various IP addresses, taking the form of a reverse lookup, and responses show whether the addresses are on an RBL blacklist or whitelist.
+The queries ask about various IP addresses, taking the form of a reverse lookup, and responses show whether the addresses are on an RBL allow-list or deny-list.
 </para>
 
 <para>
@@ -53,11 +53,11 @@ It does not handle DNS/TCP.
 </para>
 
 <para>
-ANY queries are answered with a single synthesized HINFO resource record set.
+<code>ANY</code> and <code>OPT</code> queries are answered with a single synthesized <code>HINFO</code> resource record set.
 <command>rbldns</command> otherwise answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>rbldns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The reverse lookup domain names take the form <filename>d.c.b.a.<replaceable>base</replaceable></filename>, where <filename>a.b.c.d</filename> is the IP address being looked up and <replaceable>base</replaceable> is as aforementioned.
-A queries are answered with the IP address given in the file.
-TXT queries are answered with the message given in the file; replacing a final <code>$</code> in the message, if one is present, with the IP address being asked about.
+<code>A</code> queries are answered with the IP address given in the file.
+<code>TXT</code> queries are answered with the message given in the file; replacing a final <code>$</code> in the message, if one is present, with the IP address being asked about.
 </para>
 
 </refsection>

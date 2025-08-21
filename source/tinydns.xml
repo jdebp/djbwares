@@ -31,23 +31,32 @@
 
 <para>
 <command>tinydns</command> is a content DNS server that speaks the DNS/UDP protocol.
-It accepts DNS queries from hosts around the Internet, and responds with locally configured information.
+It accepts DNS queries from hosts around the Internet, and responds with locally configured information from a static database.
+It runs in a system-secured environment and requires no privileges nor any filesystem access other than read access to its static database.
+It logs a record of its operation simply to its standard error.
 </para>
 
 <para>
-When it starts <command>tinydns</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
-The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<command>tinydns</command> respects a location code system encoded in its database and differentiates amongst requesting clients according to their locations, determined by their IP addresses.
+It is designed to be Internet-facing; and its normal use is for answering Internet DNS queries from hosts around the Internet.
+It can also be employed locally on a LAN, or even locally within a single machine, for providing information to hosts on an intranet.
 </para>
 
 <para>
-Normally <command>tinydns</command> is run via a server program such as <command>udp-socket-listen</command> to listen for DNS/UDP queries from hosts around the Internet.
+It is possible to run multiple entirely isolated instances on a single machine, each with their own static databases and listening on particular IP addresses for different purposes.
+It is conversely possible to run multiple instances on a single machine, each listening on particular IP addresses, all sharing a single database.
+</para>
+
+<para>
+Normally <command>tinydns</command> is run via a server program such as <command>udp-socket-listen</command> to listen for DNS/UDP queries.
 It understands the <envar>LISTEN_PID</envar> and <envar>LISTEN_FDS</envar> environment variable convention for having an already-listening socket passed to it by such a program, and uses the last open file descriptor in the list that refers to a UDP/IPv4 socket.
 If no such open file descriptor is provided it falls back to opening its own UDP/IPv4 socket, bound to port 53 of the IP address given by the value of the <envar>IP</envar> environment variable. 
 It does not handle DNS/TCP.
 </para>
 
 <para>
-<command>tinydns</command> rejects zone-transfer requests, inverse queries, non-Internet-class queries, truncated packets, and packets that contain anything other than a single query.
+<command>tinydns</command> rejects (sending a reply with an error code) zone-transfer requests, inverse queries, and packets that contain anything other than a single query.
+It does not answer (single) non-Internet-class queries, or truncated packets.
 </para>
 
 <refsection>
@@ -55,12 +64,18 @@ It does not handle DNS/TCP.
 
 <para>
 <command>tinydns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+It does not write to this file, or attempt to create it.
 </para>
 
 <para>
-<command>tinydns</command> includes NS records with answers to most queries. 
+<command>tinydns</command> supports clients that negotiate large DNS/UDP response packet sizes with EDNS0.
+When it has to truncate responses, when the conventional/EDNS0-negotiated response size is not large enough, it truncates all answer, authority, and additional section resource records.
+</para>
+
+<para>
+<command>tinydns</command> includes <code>NS</code> records with answers to most queries. 
 This increases DNS packet sizes, but it draws queries away from parent servers, and reduces the frequency of long DNS delays. 
-With the default cache times, a client that uses a normal record at least once every day will always have the corresponding NS records cached and will never have to talk to parent servers.
+With the default cache times, a client that uses a normal record at least once every day will always have the corresponding <code>NS</code> records cached and will never have to talk to parent servers.
 </para>
 
 <para>
@@ -69,27 +84,23 @@ If a record set has ending time ("time to die") for the information; <command>ti
 
 <para>
 SOA resource records inform <command>tinydns</command> what requests to answer.
-It will only answer at all for domain names where there is a SOA resource record at or above that domain name in the namespace.
+It will only answer at all for domain names where there is a <code>SOA</code> resource record at or above that domain name in the namespace.
 </para>
 
 <para>
-There can be many SOA resource records for a domain, as the result of many . lines in the source data file.
-<command>tinydns</command> will return only one SOA record per domain when the request is actually for a domain's SOA resource record set. 
+There can be many <code>SOA</code> resource records for a domain, as the result of many <code>.</code> lines in the source data file.
+<command>tinydns</command> will return only one <code>SOA</code> record per domain when the request is actually for a domain's <code>SOA</code> resource record set. 
 </para>
 
 <para>
-NS resource records inform <command>tinydns</command> about delegation points (when they are not accompanied by SOA resource records).
+<code>NS</code> resource records inform <command>tinydns</command> about delegation points (when they are not accompanied by <code>SOA</code> resource records).
 It will always answer with a delegation response for domain names at or below a delegation point in the namespace.
 </para>
 
 <para>
-<command>tinydns</command> returns IP addresses (i.e. A or AAAA records generated from + or = or @ or . or &#x26; lines in the source data file) in a random order in the answer section. 
-If there are more than 8 records, it returns a random set of 8.
-</para>
-
-<para>
-ANY queries do not return any data other than CNAMEs from the data file.
-If the domain name exists and has no CNAMEs, they are answered with a single synthesized HINFO record.
+<command>tinydns</command> returns IP addresses (i.e. <code>A</code> or <code>AAAA</code> records generated from <code>+</code> or <code>=</code> or <code>@</code> or <code>.</code> or <code>&#x26;</code> lines in the source data file) in a random order in the answer section. 
+If there are more than 8 records, it returns a random list of 8.
+(People used to use this as a mechanism for spreading server load across multiple machines; albeit that <ulink url="http://jdebp.uk./FGA/dns-round-robin-is-useless.html">this was highly flawed, for several reasons</ulink>.)
 </para>
 
 </refsection>
@@ -105,9 +116,12 @@ Information for <filename>*.<replaceable>fqdn</replaceable></filename> is provid
 <informalexample>
 <para>
 For example, the lines (as written in the original database source file)
+</para>
 <programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
 +*.u.heaven.af.example:203.0.113.200</programlisting>
+<para>
 have the same effect as
+</para>
 <programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
 +joe.u.heaven.af.example:203.0.113.200
 +bill.u.heaven.af.example:203.0.113.200
@@ -116,6 +130,7 @@ have the same effect as
 +joe.bob.u.heaven.af.example:203.0.113.200
 +sally.floyd.u.heaven.af.example:203.0.113.200
 +post.pink.floyd.u.heaven.af.example:203.0.113.200</programlisting>
+<para>
 and so on. 
 </para>
 </informalexample>
@@ -123,9 +138,12 @@ and so on.
 <informalexample>
 <para>
 As another example, the lines
+</para>
 <programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
 @*.u.heaven.af.example::mail.heaven.af.example</programlisting>
+<para>
 have the same effect as
+</para>
 <programlisting>+pink.floyd.u.heaven.af.example:203.0.113.4
 @joe.u.heaven.af.example::mail.heaven.af.example
 @bill.u.heaven.af.example::mail.heaven.af.example
@@ -134,6 +152,7 @@ have the same effect as
 @joe.bob.u.heaven.af.example::mail.heaven.af.example
 @sally.floyd.u.heaven.af.example::mail.heaven.af.example
 @post.pink.floyd.u.heaven.af.example::mail.heaven.af.example</programlisting>
+<para>
 and so on.
 </para>
 
@@ -147,9 +166,74 @@ Notice that the wildcard does not apply to <filename>pink.floyd.u.heaven.af.exam
 </refsection>
 
 <refsection>
+<title>Security and privacy</title>
+
+<para>
+When it starts <command>tinydns</command> changes its root to the directory specified by the <envar>ROOT</envar> environment variable, and drops privileges to run as the user ID and group ID specified by the <envar>UID</envar> and <envar>GID</envar> environment variables.
+The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+
+<para>
+<code>ANY</code> queries used to be used by a few mail systems as a shortcut for performing <code>A</code> and <code>MX</code> queries in one go, although were never guaranteed to work that way, it just being an accident of implementation of ISC BIND in the 1990s.
+They are nowadays, instead, a common attack on the Domain Name System; as documented in RFC8482 in January 2019.
+<command>tinydns</command> does not return any data other than <code>CNAME</code>s from the data file in response to an <code>ANY</code> query.
+If the domain name exists and has no <code>CNAME</code>s, they are answered with a single synthesized <code>HINFO</code> record.
+</para>
+
+<para>
+<command>tinydns</command> has always minimized other "amplification" attacks, where a client falsifies its reply IP address to direct responses to a third party, or asks about third parties in order to generate back-end query resolution traffic to those third parties.
+When there is no <code>SOA</code> resource record at or above a queried domain name, <command>tinydns</command> simply sends no response at all.
+And it neither does query resolution, nor has a back end where it performs any kind of transaction with another server.
+</para>
+
+<para>
+Sending no response at all to non-Internet-class queries is a privacy measure.
+ISC's BIND made this into a way to fingerprint DNS servers by responding with synthetic internal program version information to <code>TXT</code> type queries in the CHAOS class domain names such as <filename>version.bind</filename>.
+Others even extended this into a more generic <filename>version.server</filename> domain name.
+<command>tinydns</command> never imitated this; and has never given out internal version information.
+</para>
+<note>
+<para>
+ChaosNet was a short-lived Local Area Network protocol at MIT in the 1970s; and BIND simply repurposed what had by the late 1980s become a defunct query class.
+The only other actually assigned non-Internet query class, in the 21st century, is Hesiod.
+The only use of non-Internet query classes in the wild is for fingerprinting people's versions of ISC's BIND, Microsoft's DNS server, Knot DNS, PowerDNS, et al..
+</para>
+</note>
+
+<para>
+<command>tinydns</command> can be used for providing a private copy of the DNS "root", or indeed any other, data for reducing query traffic that goes off-organization, off-LAN, or even off-machine.
+This is just a matter of obtaining those data, which are officially published for such use by several domain owners including the ICANN root, removing any overlaps/duplications of other data, and incorporating them into the static database file.
+It is in fact the very same process as providing "secondary" service for a domain, <emphasis>sans</emphasis> the step of listing the <command>tinydns</command> instance as one of the servers for the domain in a <code>.</code> record in the database.
+</para>
+
+<para>
+For best results, such data should be tagged with a location code that limits their visibility to only hosts within the organization/LAN, or to the local machine; or the instance of <command>tinydns</command> should not be listening on an Internet-routable IP address.
+<command>tinydns</command> does not leak location-tagged data.
+Answers given to clients in one location are not affected by the presence of data tagged for another location.
+</para>
+<note>
+<para>
+More specifically:
+If <command>tinydns</command> has a location-tagged copy of the DNS "root" for on-intranet/LAN/machine use, this will not cause it to therefore answer all queries from off-intranet/LAN/machine clients just because there is a SOA resource record set for the <filename>.</filename> domain name in the database.
+A single instance of <command>tinydns</command> can serve a private "root" to one set of locations whilst still being Internet-facing.
+</para>
+</note>
+
+</refsection>
+
+<refsection>
 <title>History</title>
 <para>
 <command>tinydns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+It incorporated the functionality of <citerefentry><refentrytitle>pickdns</refentrytitle><manvolnum>1</manvolnum></citerefentry>, rendering that obsolete, in 2001.
+</para>
+<para>
+<command>tinydns</command> ceased responding in the old style to <code>ANY</code>  queries in March 2019.
+It ceased similarly treating the <code>ANY</code> <emphasis>class</emphasis> (as opposed to <emphasis>type</emphasis>) as a wildcard in July 2025.
+It ceased responding to non-Internet-class queries in August 2025; prior to which it replied with an error response.
+</para>
+<para>
+<citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> gained EDNS0 capability in 2025.
 </para>
 </refsection>
 

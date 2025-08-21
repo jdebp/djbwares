@@ -12,13 +12,12 @@
 #include "byte.h"
 #include "str.h"
 #include "fmt.h"
+#include "ip.h"
 #include "ip4.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_domain.h"
 
 #define FATAL "tinydns-edit: fatal: "
-
-#define TTL_NS 259200
-#define TTL_POSITIVE 86400
 
 static char *fn;
 static char *fnnew;
@@ -42,7 +41,7 @@ void die_write()
 
 static char mode;
 static char *target;
-static char targetip[4];
+static struct ip_address targetip;
 
 static int fd;
 static buffer b;
@@ -60,8 +59,8 @@ static stralloc f[NUMFIELDS];
 
 static char *d1;
 static char *d2;
-static char ip[4];
-static char ipstr[IP4_FMT];
+static struct ip_address ip;
+static char ipstr[IP_FMT];
 static char strnum[FMT_ULONG];
 
 static char *names[26];
@@ -105,7 +104,7 @@ int main(int argc,char **argv)
   if (!dns_domain_fromdot(&target,*argv,str_len(*argv))) nomem();
 
   if (!*++argv) die_usage();
-  if (!ip4_scan(*argv,targetip)) die_usage();
+  if (!ip_scan(*argv,&targetip,':')) die_usage();
 
   umask(077);
 
@@ -198,8 +197,8 @@ int main(int argc,char **argv)
 	  if (dns_domain_equal(d1,target))
 	    strerr_die2x(100,FATAL,"host name already used");
 	  if (!stralloc_0(&f[1])) nomem();
-	  if (ip4_scan(f[1].s,ip))
-	    if (byte_equal(ip,4,targetip))
+	  if (ip_scan(f[1].s,&ip,':'))
+	    if (ip_equals(&ip,&targetip))
 	      strerr_die2x(100,FATAL,"IP address already used");
 	}
 	break;
@@ -229,7 +228,7 @@ int main(int argc,char **argv)
   if (!stralloc_copyb(&f[0],&mode,1)) nomem();
   if (!dns_domain_todot_cat(&f[0],target)) nomem();
   if (!stralloc_cats(&f[0],":")) nomem();
-  if (!stralloc_catb(&f[0],ipstr,ip4_fmt(ipstr,targetip))) nomem();
+  if (!stralloc_catb(&f[0],ipstr,ip_fmt(ipstr,&targetip,'_'))) nomem();
   switch(mode) {
     case '.': case '&': case '@':
       for (i = 0;i < 26;++i)

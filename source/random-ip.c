@@ -2,9 +2,11 @@
 #include "exit.h"
 #include "fmt.h"
 #include "scan.h"
-#include "dns.h"
+#include "dns_random.h"
+#include "ip.h"
+#include "ip4.h"
 
-static char ip[4];
+static char ip[IP4_LEN];
 static int ipfixed = 0;
 static unsigned long loops = 10000;
 static unsigned char tab[256];

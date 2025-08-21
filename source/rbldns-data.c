@@ -12,7 +12,7 @@
 #include "byte.h"
 #include "scan.h"
 #include "fmt.h"
-#include "ip4.h"
+#include "ip.h"
 
 #define FATAL "rbldns-data: fatal: "
 
@@ -47,7 +47,7 @@ void die_datatmp(void)
 
 int main(void)
 {
-  char ip[4];
+  struct ip_address ip;
   unsigned long u;
   unsigned int j;
   unsigned int k;
@@ -83,8 +83,8 @@ int main(void)
       case ':':
 	j = byte_chr(line.s + 1,line.len - 1,':');
 	if (j >= line.len - 1) syntaxerror(": missing colon");
-	if (ip4_scan(line.s + 1,ip) != j) syntaxerror(": malformed IP address");
-	if (!stralloc_copyb(&tmp,ip,4)) nomem();
+	if (ip_scan(line.s + 1,&ip,'_') != j) syntaxerror(": malformed IP address");
+	if (!stralloc_copyb(&tmp,&ip,sizeof ip)) nomem();
 	if (!stralloc_catb(&tmp,line.s + j + 2,line.len - j - 2)) nomem();
         if (cdb_make_add(&cdb,"",0,tmp.s,tmp.len) == -1)
           die_datatmp();

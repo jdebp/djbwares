@@ -105,9 +105,11 @@ A timestamp is an external TAI64 timestamp, printed as 16 lowercase hexadecimal 
 <informalexample>
 <para>
 For example, the lines 
+</para>
 <programlisting>+www.heaven.af.example:192.0.2.234:0:4000000038af1379
 +www.heaven.af.example:192.0.2.235::4000000038af1379
 </programlisting>
+<para>
 specify that <filename>www.heaven.af.example</filename> will have address 192.0.2.234 until time 4000000038af1379 (2000-02-19 22:04:31 UTC) and will then switch to IP address 192.0.2.235. 
 </para>
 </informalexample>
@@ -120,7 +122,7 @@ specify that <filename>www.heaven.af.example</filename> will have address 192.0.
 <para>
 You may include a client location <replaceable>lo</replaceable> on each line. 
 The line is ignored for clients outside that location. 
-Client locations are specified by % lines: 
+Client locations are specified by <code>%</code> lines: 
 </para>
 <para>
 <programlisting> %<replaceable>lo</replaceable>:<replaceable>ipprefix</replaceable>
@@ -132,12 +134,15 @@ A client is in only one location; longer prefixes override shorter prefixes.
 <informalexample>
 <para>
 For example, 
+</para>
 <programlisting>%in:192.168
 %ex
 +jupiter.heaven.af.example:192.168.1.2:::in
 +jupiter.heaven.af.example:192.0.2.234:::ex
++jupiter.heaven.af.example:3fff_0_1977_0905_1979_0305_1_2:::ex
 </programlisting>
-specifies that <filename>jupiter.heaven.af.example</filename> has address 192.168.1.2 for clients in the 192.168.* network and address 192.0.2.234 for everyone else.
+<para>
+specifies that <filename>jupiter.heaven.af.example</filename> has address 192.168.1.2 for clients in the 192.168.* network and addresses 192.0.2.234 and 3fff:0:1977:905:1979:305:1:2 for everyone else.
 </para>
 </informalexample>
 
@@ -150,7 +155,8 @@ specifies that <filename>jupiter.heaven.af.example</filename> has address 192.16
 
 <varlistentry>
 <term>
-#<replaceable>comment</replaceable>
+<programlisting>#<replaceable>comment</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -162,7 +168,8 @@ The line is ignored.
 
 <varlistentry>
 <term>
-.<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>.<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -173,7 +180,7 @@ Apex name server for domain <replaceable>fqdn</replaceable>.
 an NS ("name server") record showing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as a name server for <replaceable>fqdn</replaceable>; 
 </para></listitem>
 <listitem><para>
-an A ("address") record showing ip as the IP address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>; and 
+an A or AAAA ("address") record showing <replaceable>ip</replaceable> as the IP (4 or 6, respectively) address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>; and 
 </para></listitem>
 <listitem><para>
 an SOA ("start of authority") record for <replaceable>fqdn</replaceable> listing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as the primary name server and <filename>hostmaster@<replaceable>fqdn</replaceable></filename> as the contact address. 
@@ -182,42 +189,47 @@ an SOA ("start of authority") record for <replaceable>fqdn</replaceable> listing
 </para>
 <para>
 You may have several name servers for one domain, with a different <replaceable>x</replaceable> for each server. 
-</para>
-<para>
-If <replaceable>x</replaceable> contains a dot then <command>tinydns-data</command> will use <replaceable>x</replaceable> as the server name rather than <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
-This feature is provided only for compatibility reasons; names not ending with <replaceable>fqdn</replaceable> will force clients to contact parent servers much more often than they otherwise would, and will reduce the overall reliability of DNS. 
 You should omit <replaceable>ip</replaceable> if <replaceable>x</replaceable> has IP addresses assigned elsewhere in the data file; in this case, <command>tinydns-data</command> will omit the A record. 
 </para>
 <para>
-Examples: 
+If <replaceable>x</replaceable> contains a dot then <command>tinydns-data</command> will use <replaceable>x</replaceable> as the server name rather than <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
 </para>
+<caution>
+This feature is provided only for compatibility reasons; names not ending with <replaceable>fqdn</replaceable> will force clients to contact parent servers much more often than they otherwise would, and will reduce the overall reliability of DNS. 
+The better <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> scheme, where <replaceable>x</replaceable> is a single letter, is designed to use in-bailiwick delegation and to take maximum advantage of the noddy compression scheme used by the DNS protocol so that as much of a large multi-nameserver delegation as possible can fit into a 512-octet DNS/UDP packet.
+</caution>
+<refsection><title>Examples</title>
 <informalexample>
-<para>
 <programlisting>.panic.example:203.0.113.55:a
+.panic.example:3fff_0_1978_0308_1980_0125_0102_55:a
 </programlisting>
-creates an NS record showing <filename>a.ns.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.55 as the IP address of <filename>a.ns.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
+<para>
+creates an NS record showing <filename>a.ns.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.55 as the IPv4 address of <filename>a.ns.panic.example</filename>, an AAAA record showing 3fff:0:1978:308:1980:125:102:55 as the IPv6 address of <filename>a.ns.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
 </informalexample>
 <informalexample>
-<para>
 <programlisting>.panic.example:203.0.113.56:dns2.panic.example
+.panic.example:3fff_0_1978_0308_1980_0125_0102_56:dns2.panic.example
 </programlisting>
-creates an NS record showing <filename>dns2.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.56 as the IP address of <filename>dns2.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
+<para>
+creates an NS record showing <filename>dns2.panic.example</filename> as a name server for <filename>panic.example</filename>, an A record showing 203.0.113.56 as the IPv4 address of <filename>dns2.panic.example</filename>, an AAAA record showing 3fff:0:1978:308:1980:125:102:56 as the IPv6 address of <filename>dns2.panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
 </informalexample>
 <informalexample>
-<para>
 <programlisting>.panic.example::a.ns.heaven.af.example
 </programlisting>
+<para>
 creates an NS record showing <filename>a.ns.heaven.af.example</filename> as a name server for <filename>panic.example</filename>, and an SOA record for <filename>panic.example</filename>. 
 </para>
 </informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-&#x26;<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>&#x26;<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -228,40 +240,42 @@ Delegation to name server for domain <replaceable>fqdn</replaceable>.
 an NS record showing <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename> as a name server for <replaceable>fqdn</replaceable> and 
 </para></listitem>
 <listitem><para>
-an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
+an A or AAAA record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.ns.<replaceable>fqdn</replaceable></filename>. 
 </para></listitem>
 </itemizedlist>
 </para>
 <para>
-Normally &#x26; is used for domains delegated by this server to child servers, while . is used for domains delegated to this server. 
+Normally <code>&#x26;</code> is used for domains delegated by this server to child servers, while <code>.</code> is used for domains delegated by other servers to this server. 
 </para>
 <para>
 You may have several name servers for one domain, with a different <replaceable>x</replaceable> for each server. 
-If <replaceable>x</replaceable> contains a dot then it is treated specially; as for . lines. 
+If <replaceable>x</replaceable> contains a dot then it is treated specially; as for <code>.</code> lines and with the same caveat.
 </para>
-<para>
-Examples: 
-</para>
+<refsection><title>Examples</title>
 <informalexample>
-<para>
 <programlisting>&#x26;serious.panic.example:203.0.113.6:a
+&#x26;serious.panic.example:3fff_0_1978_0308_1980_0125_0102_6:a
 </programlisting>
-creates an NS record showing <filename>a.ns.serious.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, and an A record showing 203.0.113.6 as the IP address of <filename>a.ns.serious.panic.example</filename>. 
+<para>
+creates an NS record showing <filename>a.ns.serious.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, an A record showing 203.0.113.6 as the IPv4 address of <filename>a.ns.serious.panic.example</filename>, and an AAAA record showing 3fff:0:1978:308:1980:125:102:6 as the IPv6 address of <filename>a.ns.serious.panic.example</filename>. 
 </para>
 </informalexample>
 <informalexample>
-<para>
 <programlisting>&#x26;serious.panic.example:203.0.113.7:ns7.panic.example
+&#x26;serious.panic.example:3fff_0_1978_0308_1980_0125_0102_7:ns7.panic.example
 </programlisting>
-creates an NS record showing <filename>ns7.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, and an A record showing 203.0.113.7 as the IP address of <filename>ns7.panic.example</filename>. 
+<para>
+creates an NS record showing <filename>ns7.panic.example</filename> as a name server for <filename>serious.panic.example</filename>, an A record showing 203.0.113.7 as the IPv4 address of <filename>ns7.panic.example</filename>, and an AAAA record showing 3fff:0:1978:308:1980:125:102:7 as the IPv6 address of <filename>ns7.panic.example</filename>. 
 </para>
 </informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-=<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>=<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -269,7 +283,7 @@ Host <replaceable>fqdn</replaceable> with IP address <replaceable>ip</replaceabl
 <command>tinydns-data</command> creates 
 <itemizedlist>
 <listitem><para>
-an A record showing <replaceable>ip</replaceable> as the IP address of <replaceable>fqdn</replaceable> and 
+an A or AAAA record showing <replaceable>ip</replaceable> as the IP address of <replaceable>fqdn</replaceable> and 
 </para></listitem>
 <listitem><para>
 a PTR ("pointer") record showing <replaceable>fqdn</replaceable> as the name of d.c.b.a.in-addr.arpa if ip is a.b.c.d. 
@@ -279,58 +293,72 @@ a PTR ("pointer") record showing <replaceable>fqdn</replaceable> as the name of 
 <para>
 Remember to specify name servers for some suffix of <replaceable>fqdn</replaceable>; otherwise tinydns will not respond to queries about <replaceable>fqdn</replaceable>. 
 The same comment applies to other records described below. 
-Similarly, remember to specify name servers for some suffix of d.c.b.a.in-addr.arpa, if that domain has been delegated to you. 
+Similarly, remember to specify name servers for some suffix of <filename><replaceable>d</replaceable>.<replaceable>c</replaceable>.<replaceable>b</replaceable>.<replaceable>a</replaceable>.in-addr.arpa</filename>, if that domain has been delegated to you. 
 </para>
-<para>
-Example: 
-</para>
+<refsection><title>Example</title>
 <informalexample>
-<para>
-<programlisting>=button.panic.example:203.0.113.108
+<programlisting>=dont.panic.example:203.0.113.108
+=dont.panic.example:3fff_0_1978_0308_1980_0125_0102_108
 </programlisting>
-creates an A record showing 203.0.113.108 as the IP address of <filename>button.panic.example</filename>, and a PTR record showing <filename>button.panic.example</filename> as the name of <filename>108.113.0.203.in-addr.arpa</filename>. 
+<para>
+creates an A record showing 203.0.113.108 as the IPv4 address of <filename>dont.panic.example</filename>, an AAAA record showing 3fff:0:1978:308:1980:125:102:108 as the IPv6 address of <filename>dont.panic.example</filename>, and PTR records showing <filename>dont.panic.example</filename> as the names of <filename>108.113.0.203.in-addr.arpa</filename> and <filename>8.0.1.0.2.0.1.0.5.2.1.0.0.8.9.1.8.0.3.0.8.7.9.1.0.0.0.0.f.f.f.3.ip6.arpa</filename>.
 </para>
 </informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-+<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>+<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
 Server side alias <replaceable>fqdn</replaceable> with IP address <replaceable>ip</replaceable>. 
-This is just like =<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable> except that <command>tinydns-data</command> does not create the PTR record. 
+This is just like <code>=<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable></code> except that <command>tinydns-data</command> does not create the PTR record. 
 </para>
-<para>
-Example: 
-</para>
+<refsection><title>Example</title>
 <informalexample>
-<para>
-<programlisting>+button.panic.example:203.0.113.109
+<programlisting>+dont.panic.example:203.0.113.109
++dont.panic.example:3fff_0_1978_0308_1980_0125_0102_109
 </programlisting>
-creates an A record showing 203.0.113.109 as another IP address for <filename>button.panic.example</filename>. 
+<para>
+creates an A record showing 203.0.113.109 as another IPv4 address for <filename>dont.panic.example</filename>, and an AAAA record showing 3fff:0:1978:308:1980:125:102:109 as another IPv6 address for <filename>dont.panic.example</filename>.
 </para>
 </informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
--<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>-<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
-This type of line is used by programs that automatically edit + lines in data to temporarily exclude addresses of overloaded or dead machines. 
+This type of line is used by programs that automatically edit <code>+</code> lines in data to temporarily exclude addresses of machines whilst leaving the possibility for simply restoring them.
+(A machine, or one of its network interfaces, could be temporarily out of service, for example.)
 The line is ignored. 
 </para>
+<refsection><title>Example</title>
+<informalexample>
+<programlisting>-dont.panic.example:203.0.113.109
++dont.panic.example:3fff_0_1978_0308_1980_0125_0102_109
+</programlisting>
+<para>
+is how the IPv4 address record can be disabled from the <code>+</code> example.
+</para>
+</informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-S<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>p</replaceable>:<replaceable>prio</replaceable>:<replaceable>wt</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>S<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>p</replaceable>:<replaceable>prio</replaceable>:<replaceable>wt</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -341,7 +369,7 @@ Service for <replaceable>fqdn</replaceable>.
 a SRV ("service") record showing <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename> as a service for <replaceable>fqdn</replaceable> on port <replaceable>p</replaceable> with priority <replaceable>prio</replaceable> and weight <replaceable>wt</replaceable>, and 
 </para></listitem>
 <listitem><para>
-an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename>. 
+an A or AAAA record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename>. 
 </para></listitem>
 </itemizedlist>
 </para>
@@ -350,22 +378,84 @@ You may omit <replaceable>prio</replaceable> and <replaceable>wt</replaceable>; 
 If <replaceable>x</replaceable> contains a dot then it is treated specially; see above. 
 You may create several SRV records for <replaceable>fqdn</replaceable>, with a different <replaceable>x</replaceable> for each server. 
 </para>
-<para>
-Example: 
-</para>
+<note>
+The <filename><replaceable>x</replaceable>.srv.<replaceable>fqdn</replaceable></filename> names may seem cumbersome to humans, but the idea of service records is that humans do not see these domain names.
+They see a program that (say) speaks SIP over TCP, and only the part of <replaceable>fqdn</replaceable> after the initial underscored labels.
+The <filename><replaceable>x</replaceable>.srv</filename> scheme, moreover, has the same compression advantages for DNS/UDP packets as for <code>.</code>, <code>&#x26;</code>, and <code>@</code> lines.
+</note>
+<refsection><title>Examples</title>
 <informalexample>
-<para>
-<programlisting>S_sip._udp.panic.example:203.0.113.88:sip.panic.example:5060:10:20
+<programlisting>S_sip._udp.slocombe.example:203.0.113.88:a:5060:10:20
+S_sip._udp.slocombe.example:3fff_0_1972_0908_1985_0401_33_88:a:5060:10:20
 </programlisting>
-creates a SRV record showing port 5060 of <filename>sip.panic.example</filename> as a SIP/UDP service for <filename>panic.example</filename> with priority 10 and wt 20, and an A record showing 203.0.113.88 as the IP address of <filename>sip.panic.example</filename>. 
+<para>
+creates a SRV record showing port 5060 of <filename>a.srv._sip._udp.slocombe.example</filename> as a SIP/UDP service for <filename>slocombe.example</filename> with priority 10 and wt 20, an A record showing 203.0.113.88 as the IPv4 address of <filename>a.srv._sip._udp.slocombe.example</filename>, and an AAAA record showing 3fff:0:1972:908:1985:401:33:88 as the IPv6 address of <filename>a.srv._sip._udp.slocombe.example</filename>. 
 </para>
 </informalexample>
+<informalexample>
+<programlisting>S_nicname._tcp.humphries.example:203.0.113.65:a:43:10:20
+S_nicname._tcp.humphries.example:3fff_0_1972_0908_1985_0401_33_65:a:43:10:20
+</programlisting>
+<para>
+creates a SRV record showing port 43 of <filename>a.srv._nicname._tcp.humphries.example</filename> as a NICNAME/TCP service for <filename>humphries.example</filename> with priority 10 and wt 20, an A record showing 203.0.113.65 as the IPv4 address of <filename>a.srv._nicname._tcp.humphries.example</filename>, and an AAAA record showing 3fff:0:1972:908:1985:401:33:65 as the IPv6 address of <filename>a.srv._nicname._tcp.humphries.example</filename>. 
+</para>
+</informalexample>
+<informalexample>
+<programlisting>S_gemini._tcp.brahms.example:203.0.113.45:a:1965:10:20
+S_gemini._tcp.brahms.example:3fff_0_1972_0908_1985_0401_33_45:a:1965:10:20
+</programlisting>
+<para>
+creates a SRV record showing port 1965 of <filename>a.srv._gemini._tcp.brahms.example</filename> as a GEMINI/TCP service for <filename>brahms.example</filename> with priority 10 and wt 20, an A record showing 203.0.113.45 as the IPv4 address of <filename>a.srv._gemini._tcp.brahms.example</filename>, and an AAAA record showing 3fff:0:1972:908:1985:401:33:45 as the IPv6 address of <filename>a.srv._gemini._tcp.brahms.example</filename>. 
+</para>
+</informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-@<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>dist</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>H<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>prio</replaceable>:<replaceable>params</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
+</term>
+<listitem>
+<para>
+HTTPS service for <replaceable>fqdn</replaceable>. 
+<command>tinydns-data</command> creates 
+<itemizedlist>
+<listitem><para>
+an HTTPS ("HTTP/SSL service") record showing <filename><replaceable>x</replaceable>.<replaceable>fqdn</replaceable></filename> as an HTTPS service for <replaceable>fqdn</replaceable> with priority <replaceable>prio</replaceable>, and 
+</para></listitem>
+<listitem><para>
+an A or AAAA record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.<replaceable>fqdn</replaceable></filename>. 
+</para></listitem>
+</itemizedlist>
+</para>
+<note>
+<replaceable>params</replaceable> is not currently implemented and must be blank.
+</note>
+<para>
+You may omit <replaceable>prio</replaceable>; the default is 0. 
+If <replaceable>x</replaceable> contains a dot then it is treated specially; see above. 
+If <replaceable>x</replaceable> is omitted then it defaults to <filename>.</filename>.
+You may create several HTTPS records for <replaceable>fqdn</replaceable>, with a different <replaceable>x</replaceable> for each server. 
+</para>
+<refsection><title>Examples</title>
+<informalexample>
+<programlisting>Hrumbold.example:203.0.113.88:a:0
+Hrumbold.example:3fff_0_1972_0908_1985_0401_33_88:a:0
+</programlisting>
+<para>
+creates an HTTPS record showing <filename>a.rumbold.example</filename> as an HTTPS service for <filename>rumbold.example</filename> with priority 0, an A record showing 203.0.113.88 as the IPv4 address of <filename>a.rumbold.example</filename>, and an AAAA record showing 3fff:0:1972:908:1985:401:33:88 as the IPv6 address of <filename>a.rumbold.example</filename>. 
+</para>
+</informalexample>
+</refsection>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>
+<programlisting>@<replaceable>fqdn</replaceable>:<replaceable>ip</replaceable>:<replaceable>x</replaceable>:<replaceable>dist</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -376,7 +466,7 @@ Mail exchanger for <replaceable>fqdn</replaceable>.
 an MX ("mail exchanger") record showing <filename><replaceable>x</replaceable>.mx.<replaceable>fqdn</replaceable></filename> as a mail exchanger for <replaceable>fqdn</replaceable> at distance <replaceable>dist</replaceable> and 
 </para></listitem>
 <listitem><para>
-an A record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.mx.<replaceable>fqdn</replaceable></filename>. 
+an A or AAAA record showing <replaceable>ip</replaceable> as the IP address of <filename><replaceable>x</replaceable>.mx.<replaceable>fqdn</replaceable></filename>. 
 </para></listitem>
 </itemizedlist>
 </para>
@@ -386,33 +476,34 @@ If <replaceable>x</replaceable> contains a dot then it is treated specially; see
 You may create several MX records for <replaceable>fqdn</replaceable>, with a different <replaceable>x</replaceable> for each server. 
 Make sure to arrange for the SMTP server on each IP address to accept mail for <replaceable>fqdn</replaceable>. 
 </para>
-<para>
-Example: 
-</para>
+<refsection><title>Example</title>
 <informalexample>
-<para>
-<programlisting>@panic.example:203.0.113.88:mail.panic.example
+<programlisting>@panic.example:203.0.113.88:a
+@panic.example:3fff_0_1978_0308_1980_0125_0102_88:a
 </programlisting>
-creates an MX record showing <filename>mail.panic.example</filename> as a mail exchanger for <filename>panic.example</filename> at distance 0, and an A record showing 203.0.113.88 as the IP address of <filename>mail.panic.example</filename>. 
+<para>
+creates an MX record showing <filename>a.mx.panic.example</filename> as a mail exchanger for <filename>panic.example</filename> at distance 0, an A record showing 203.0.113.88 as the IP address of <filename>a.mx.panic.example</filename>, and an AAAA record showing 3fff:0:1978:308:1980:125:102:88 as the IP address of <filename>a.mx.panic.example</filename>. 
 </para>
 </informalexample>
+</refsection>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-'<replaceable>fqdn</replaceable>:<replaceable>s</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>'<replaceable>fqdn</replaceable>:<replaceable>s</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
 TXT ("text") record for <replaceable>fqdn</replaceable>. 
 <command>tinydns-data</command> creates 
+</para>
 <itemizedlist>
 <listitem><para>
 a TXT record for <replaceable>fqdn</replaceable> containing the string <replaceable>s</replaceable>. 
 </para></listitem>
 </itemizedlist>
-</para>
 <para>
 You may use octal \nnn codes to include arbitrary bytes inside <replaceable>s</replaceable>; for example, \072 is a colon. 
 </para>
@@ -421,7 +512,8 @@ You may use octal \nnn codes to include arbitrary bytes inside <replaceable>s</r
 
 <varlistentry>
 <term>
-^<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>^<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -434,14 +526,15 @@ a PTR record for <replaceable>fqdn</replaceable> pointing to the domain name <re
 </itemizedlist>
 </para>
 <para>
-Usually a = line is a more convenient way to create a mapping from an IP address to a domain name.
+Usually a <code>=</code> line is a more convenient way to create a mapping from an IP address to a domain name.
 </para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-C<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>C<replaceable>fqdn</replaceable>:<replaceable>p</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -453,17 +546,20 @@ a CNAME record for <replaceable>fqdn</replaceable> pointing to the domain name <
 </para></listitem>
 </itemizedlist>
 </para>
-<para>
-Don't use C<replaceable>fqdn</replaceable> if there are any other records for <replaceable>fqdn</replaceable>. 
-Don't use C<replaceable>fqdn</replaceable> for common aliases; use +<replaceable>fqdn</replaceable> instead. 
+<caution>
+Don't use <code>C<replaceable>fqdn</replaceable></code> if there are any other records for <replaceable>fqdn</replaceable>.
+The DNS protocol does not handle this.
+Don't use <code>C<replaceable>fqdn</replaceable></code> for straightforward simple aliases all mapping <replaceable>fqdn</replaceable>s to a common IP address; use <code>+<replaceable>fqdn</replaceable></code> instead.
+The latter is a lot more efficient, as it is handled DNS server-side rather than DNS client-side.
 Remember the wise words of Inigo Montoya: "You keep using CNAME records. I do not think they mean what you think they mean." 
-</para>
+</caution>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>
-Z<replaceable>fqdn</replaceable>:<replaceable>mname</replaceable>:<replaceable>rname</replaceable>:<replaceable>ser</replaceable>:<replaceable>ref</replaceable>:<replaceable>ret</replaceable>:<replaceable>exp</replaceable>:<replaceable>min</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>Z<replaceable>fqdn</replaceable>:<replaceable>mname</replaceable>:<replaceable>rname</replaceable>:<replaceable>ser</replaceable>:<replaceable>ref</replaceable>:<replaceable>ret</replaceable>:<replaceable>exp</replaceable>:<replaceable>min</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -480,7 +576,8 @@ Usually a . line is a more convenient way to create SOA records.
 
 <varlistentry>
 <term>
-:<replaceable>fqdn</replaceable>:<replaceable>n</replaceable>:<replaceable>rdata</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+<programlisting>:<replaceable>fqdn</replaceable>:<replaceable>n</replaceable>:<replaceable>rdata</replaceable>:<replaceable>ttl</replaceable>:<replaceable>timestamp</replaceable>:<replaceable>lo</replaceable>
+</programlisting>
 </term>
 <listitem>
 <para>
@@ -493,7 +590,7 @@ a record of type <replaceable>n</replaceable> for <replaceable>fqdn</replaceable
 </itemizedlist>
 </para>
 <para>
-<replaceable>n</replaceable> must be an integer between 1 and 65535; it must not be 2 (NS), 5 (CNAME), 6 (SOA), 12 (PTR), 15 (MX), or 252 (AXFR). 
+<replaceable>n</replaceable> must be an integer between 1 and 65535; it must not be 2 (NS), 5 (CNAME), 6 (SOA), 12 (PTR), 15 (MX), 251 (IXFR), 252 (AXFR) or 255 (ANY). 
 The proper format of <replaceable>rdata</replaceable> depends on <replaceable>n</replaceable>. 
 You may use octal \nnn codes to include arbitrary bytes inside <replaceable>rdata</replaceable>.
 </para>
@@ -512,21 +609,34 @@ You may use octal \nnn codes to include arbitrary bytes inside <replaceable>rdat
 <informalexample>
 <para>
 A typical data file:
-<programlisting>=lion.heaven.af.example:203.0.113.4
-@heaven.af.example:203.0.113.4
-@113.0.203.in-addr.arpa:203.0.113.4
-
-=tiger.heaven.af.example:203.0.113.5
-.heaven.af.example:203.0.113.5:a
-.113.0.203.in-addr.arpa:203.0.113.5:a
-
-=bear.heaven.af.example:203.0.113.6
-.heaven.af.example:203.0.113.6:b
-.113.0.203.in-addr.arpa:203.0.113.6:b
-
-=cheetah.heaven.af.example:203.0.113.248
-=panther.heaven.af.example:203.0.113.249 </programlisting>
 </para>
+<programlisting>.heaven.af.example:203.0.113.5:a
+.heaven.af.example:203.0.113.6:b
+.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_5:a
+.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_6:b
+# per support contract, renewable annually -- jim
+.heaven.af.example:3fff_0_8_716d_bac8_92_322_53:a.ns.offsite.example.com
+
+.113.0.203.in-addr.arpa:203.0.113.5:a
+.113.0.203.in-addr.arpa:203.0.113.6:b
+.0.f.f.f.3.ip6.arpa:3fff_0_4ab1_7_eb53_6820_90_5:a
+.0.f.f.f.3.ip6.arpa:3fff_0_4ab1_7_eb53_6820_90_6:b
+
+@heaven.af.example:203.0.113.4:a:10
+@heaven.af.example::offsite.example.com:20
+
+=lion.heaven.af.example:203.0.113.4
++lion.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_4:b
+=tiger.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_5:b
++tiger.heaven.af.example:203.0.113.5
+=bear.heaven.af.example:203.0.113.6
++bear.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_6:b
+# cheetah's IPv6 is wonky -- jim
+=cheetah.heaven.af.example:203.0.113.248
+-cheetah.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_248:b
+# experiment with IPv6-only for panther -- jim
+=panther.heaven.af.example:3fff_0_4ab1_7_eb53_6820_90_249:b
+-panther.heaven.af.example:203.0.113.249</programlisting>
 </informalexample>
 
 </refsection>
@@ -535,6 +645,10 @@ A typical data file:
 <title>History</title>
 <para>
 <command>tinydns-data</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+<para>
+<command>tinydns-data</command> ceased using the <filename>ip6.int.</filename> superdomain in 2016.
+The <filename>ip6.int.</filename> superdomain was deprecated by RFC3152 in 2001 and obsoleted by RFC4159 in 2005.
 </para>
 </refsection>
 

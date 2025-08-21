@@ -6,6 +6,7 @@
 #include "byte.h"
 #include "fmt.h"
 #include "scan.h"
+#include "ip.h"
 #include "ip4.h"
 #include "fd.h"
 #include "exit.h"
@@ -26,7 +27,8 @@
 #include "remoteinfo.h"
 #include "rules.h"
 #include "sig.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_resolve.h"
 
 static int verbosity = 1;
 static int flagkillopts = 1;
@@ -41,15 +43,15 @@ static stralloc tcpremoteinfo;
 
 static uint16 localport;
 static char localportstr[FMT_ULONG];
-static char localip[4];
-static char localipstr[IP4_FMT];
+static struct ip_address localip;
+static char localipstr[IP_FMT];
 static stralloc localhostsa;
 static const char *localhost = 0;
 
 static uint16 remoteport;
 static char remoteportstr[FMT_ULONG];
-static char remoteip[4];
-static char remoteipstr[IP4_FMT];
+static struct ip_address remoteip;
+static char remoteipstr[IP_FMT];
 static stralloc remotehostsa;
 static char *remotehost = 0;
 
@@ -137,7 +139,7 @@ void doit(int t)
 {
   int j;
 
-  remoteipstr[ip4_fmt(remoteipstr,remoteip)] = 0;
+  remoteipstr[ip_fmt(remoteipstr,&remoteip,':')] = 0;
 
   if (verbosity >= 2) {
     strnum[fmt_ulong(strnum,getpid())] = 0;
@@ -155,14 +157,14 @@ void doit(int t)
       strerr_die2sys(111,DROP,"unable to print banner: ");
   }
 
-  if (socket_local4(t,localip,&localport) == -1)
+  if (socket_local(t,&localip,&localport) == -1)
     strerr_die2sys(111,DROP,"unable to get local address: ");
 
-  localipstr[ip4_fmt(localipstr,localip)] = 0;
+  localipstr[ip_fmt(localipstr,&localip,':')] = 0;
   remoteportstr[fmt_ulong(remoteportstr,remoteport)] = 0;
 
   if (!localhost)
-    if (dns_name4(&localhostsa,localip) == 0)
+    if (dns_name(&localhostsa,&localip) == 0)
       if (localhostsa.len) {
 	if (!stralloc_0(&localhostsa)) drop_nomem();
 	localhost = localhostsa.s;
@@ -173,12 +175,12 @@ void doit(int t)
   env("TCPLOCALHOST",localhost);
 
   if (flagremotehost)
-    if (dns_name4(&remotehostsa,remoteip) == 0)
+    if (dns_name(&remotehostsa,&remoteip) == 0)
       if (remotehostsa.len) {
 	if (flagparanoid)
-	  if (dns_ip4(&tmp,&remotehostsa) == 0)
-	    for (j = 0;j + 4 <= tmp.len;j += 4)
-	      if (byte_equal(remoteip,4,tmp.s + j)) {
+	  if (dns_ip(&tmp,&remotehostsa) == 0)
+	    for (j = 0;j + sizeof(struct ip_address) <= tmp.len;j += sizeof(struct ip_address))
+	      if (ip_equals(&remoteip,tmp.s + j)) {
 		flagparanoid = 0;
 		break;
 	      }
@@ -192,7 +194,7 @@ void doit(int t)
   env("TCPREMOTEHOST",remotehost);
 
   if (flagremoteinfo) {
-    if (remoteinfo(&tcpremoteinfo,remoteip,remoteport,localip,localport,timeout) == -1)
+    if (remoteinfo(&tcpremoteinfo,&remoteip,remoteport,&localip,localport,timeout) == -1)
       flagremoteinfo = 0;
     if (!stralloc_0(&tcpremoteinfo)) drop_nomem();
   }
@@ -370,18 +372,18 @@ main(int argc,char **argv)
  
   if (!stralloc_copys(&tmp,hostname))
     strerr_die2x(111,FATAL,"out of memory");
-  if (dns_ip4_qualify(&addresses,&fqdn,&tmp) == -1)
+  if (dns_ip_qualify(&addresses,&fqdn,&tmp) == -1)
     strerr_die4sys(111,FATAL,"temporarily unable to figure out IP address for ",hostname,": ");
-  if (addresses.len < 4)
+  if (addresses.len < sizeof(struct ip_address))
     strerr_die3x(111,FATAL,"no IP address for ",hostname);
-  byte_copy(localip,4,addresses.s);
+  localip = *(const struct ip_address*)addresses.s;
 
-  s = socket_tcp4();
+  s = socket_tcp(&localip);
   if (s == -1)
     strerr_die2sys(111,FATAL,"unable to create socket: ");
-  if (socket_bind4_reuse(s,localip,localport) == -1)
+  if (socket_bind_reuse(s,&localip,localport) == -1)
     strerr_die2sys(111,FATAL,"unable to bind: ");
-  if (socket_local4(s,localip,&localport) == -1)
+  if (socket_local(s,&localip,&localport) == -1)
     strerr_die2sys(111,FATAL,"unable to get local address: ");
   if (socket_listen(s,backlog) == -1)
     strerr_die2sys(111,FATAL,"unable to listen: ");
@@ -409,7 +411,7 @@ main(int argc,char **argv)
     while (numchildren >= limit) sig_pause();
 
     sig_unblock(sig_child);
-    t = socket_accept4(s,remoteip,&remoteport);
+    t = socket_accept(s,&remoteip,&remoteport);
     sig_block(sig_child);
 
     if (t == -1) continue;

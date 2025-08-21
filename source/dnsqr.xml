@@ -48,6 +48,7 @@ Currently recognized names are:
 <code>txt</code>,
 <code>cname</code>,
 <code>soa</code>,
+<code>loc</code>,
 <code>hinfo</code>,
 <code>rp</code>,
 <code>sig</code>,
@@ -57,25 +58,31 @@ Currently recognized names are:
 <code>srv</code>.
 </para>
 
-<refsection>
-<title>Configuring the location of the local proxy DNS server</title>
-
 <para>
-The local proxy DNS server is configured in <filename>/etc/resolv.conf</filename>.
-This can be overridden with the <envar>DNSCACHEIP</envar> environment variable, whose value comprises a list of whitespace-separated IP addresses.
+<command>dnsqr</command> makes all DNS lookups using the locally configured DNS proxy server(s), and performs no name qualification on what is taken to already be a "fully-qualified" domain name (trailing dot or no) <replaceable>fqdn</replaceable>.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found.
 </para>
 
-</refsection>
+<caution>
+<command>dnsqr</command> is a diagnostic tool, and thus permits using improper values of <replaceable>t</replaceable>.
+</caution>
+
+<note>
+<command>dnsqr</command> <arg choice='plain'>axfr</arg>, <command>dnsqr</command> <arg choice='plain'>any</arg>, and <command>dnsqr</command> <arg choice='plain'>opt</arg> simulate things that valid DNS clients will not actually do.
+See RFC 8482 for the particular case of <arg choice='plain'>any</arg> passing into desuetude, and RFC 6891 for why <arg choice='plain'>opt</arg> is never a valid client query type.
+</note>
+
+<note>
+Because <command>dnsqr</command> is a diagnostic tool, certain standard <replaceable>fqdn</replaceable>s, that normally short-circuit DNS lookups to the proxy DNS server(s) inside the DNS client library, will not do so and will instead generate query traffic for domain names that are in normal operation not queried.
+<citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> synthesizes much the same fixed responses to these queries as the DNS client library itself synthesizes.
+Other proxy DNS servers (and indeed the original Bernstein <citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry>) may not do, and may generate bogus traffic to the public "<code>.</code>" content DNS servers and other content DNS servers, yielding possibly bogus answers.
+</note>
 
 </refsection>
 
 <refsection>
 <title>See also</title>
 <variablelist>
-<varlistentry>
-<term><citerefentry><refentrytitle>resolv.conf</refentrytitle><manvolnum>5</manvolnum></citerefentry></term>
-<listitem><para>the configuration file consulted by this program and by the C library</para></listitem>
-</varlistentry>
 <varlistentry>
 <term><citerefentry><refentrytitle>dnsq</refentrytitle><manvolnum>1</manvolnum></citerefentry></term>
 <listitem><para>a similar tool that makes requests to content DNS servers</para></listitem>

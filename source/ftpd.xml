@@ -41,7 +41,7 @@ It prints responses on standard output, and local log information on standard er
 </para>
 
 <para>
-ftpd recognizes <command>USER</command>, <command>PASS</command>, and <command>ACCT</command>, but it does not check usernames or passwords. 
+ftpd recognizes <command>USER</command>, <command>PASS</command>, <command>REIN</command>, and <command>ACCT</command>, but it does not check usernames or passwords. 
 To work around a problem with various badly written FTP application-level gateways, it always asks for a password after a <command>USER</command> command if the username is "anonymous".
 </para>
 
@@ -66,6 +66,7 @@ Initially, ftpd attempts to take the virtual host name <code><replaceable>v</rep
 If those variables are not set, ftpd uses the host name <filename>0</filename> as an initial default.
 FTP clients may subsequently specify a host name with the <command>HOST</command> command.
 ftpd always converts the host name to lowercase. 
+<command>REIN</command> does not re-initialize the virtual host name.
 </para>
 
 <para>

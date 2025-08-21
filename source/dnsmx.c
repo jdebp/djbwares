@@ -5,7 +5,9 @@
 #include "byte.h"
 #include "str.h"
 #include "fmt.h"
-#include "dns.h"
+#include "dns_resolve.h"
+#include "dns_domain.h"
+#include "dns_random.h"
 
 #define FATAL "dnsmx: fatal: "
 

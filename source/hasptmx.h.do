@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 redo-ifchange tryptmx.c compile link
 if ( ./compile tryptmx.o tryptmx.c tryptmx.d && ./link tryptmx tryptmx.o && ./tryptmx ) >/dev/null 2>&1

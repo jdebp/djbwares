@@ -17,7 +17,7 @@
 
 <refnamediv>
 <refname>tcprules</refname>
-<refpurpose>compiles rules for <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
+<refpurpose>compile rules for <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry></refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -30,12 +30,11 @@
 
 <refsection><title>Description</title>
 <para>
-<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-optionally follows rules to decide whether a TCP connection is acceptable.
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> optionally follows rules to decide whether a TCP connection is acceptable.
 </para>
 <informalexample>
 <para>
-For example, the rule <programlisting>18.23.0.32:deny</programlisting> prohibits connections from IP address 18.23.0.32. 
+For example, the rule <programlisting>192.0.2.32:deny</programlisting> prohibits connections from IP address 192.0.2.32. 
 </para>
 </informalexample>
 
@@ -62,7 +61,8 @@ The binary <filename><replaceable>cdb</replaceable></filename> format is portabl
 </refsection>
 <refsection><title>Rule format</title>
 <para>
-A rule is one line. A file containing rules may also contain comments: lines beginning with # are ignored. 
+A rule is one line.
+A file containing rules may also contain comments: lines beginning with # are ignored. 
 </para>
 
 <para>
@@ -100,9 +100,14 @@ the empty string.
 </para></listitem>
 </itemizedlist>
 </para>
+<caution>
+<envar>TCPREMOTEINFO</envar> and <envar>TCPREMOTEHOST</envar> are attacker-supplied or attacker-controlled data.
+Avoid setting up rules that use these variables.
+</caution>
 
 <para>
-<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> uses the first rule it finds. You should use the <arg>-p</arg> option to <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> if you rely on <envar>TCPREMOTEHOST</envar> here. 
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> uses the first rule it finds.
+You should use the <arg>-p</arg> option to <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> if you rely on <envar>TCPREMOTEHOST</envar> here. 
 </para>
 
 <informalexample>
@@ -110,7 +115,7 @@ the empty string.
 For example, here are some rules: 
 </para>
 <programlisting>joe@127.0.0.1:first
-18.23.0.32:second
+192.0.2.32:second
 :third
 127.:fourth
 </programlisting>
@@ -120,7 +125,7 @@ If <envar>TCPREMOTEIP</envar> is 10.119.75.38, <citerefentry><refentrytitle>tcps
 </para>
 
 <para>
-If <envar>TCPREMOTEIP</envar> is 18.23.0.32, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the second instructions. 
+If <envar>TCPREMOTEIP</envar> is 192.0.2.32, <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> will follow the second instructions. 
 </para>
 
 <para>
@@ -149,24 +154,53 @@ Similarly, <code>10.2-3.:ins</code> is an abbreviation for <code>10.2.:ins</code
 The instructions in a rule must begin with either <code>allow</code> or <code>deny</code>.
 <code>deny</code> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop the connection without running anything.
 </para>
-<informalexample>
-<para>
-For example, the rule <programlisting>:deny</programlisting> tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop all connections that aren't handled by more specific rules. 
-</para>
-</informalexample>
 
 <para>
 The instructions may continue with some environment variables, in the form <code>var="x"</code>.
 <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> adds an environment variable <envar>var</envar> with value <replaceable>x</replaceable>.
 </para>
+
+<refsection><title>Examples</title>
+
 <informalexample>
+<blockquote><programlisting>:deny
+</programlisting></blockquote>
 <para>
-For example, <programlisting>10.0.:allow,RELAYCLIENT="@fix.me"</programlisting> adds an environment variable <envar>RELAYCLIENT</envar> with value <code>@fix.me</code>.
-The quotes may be replaced by any repeated character: <programlisting>10.0.:allow,RELAYCLIENT=/@fix.me/</programlisting>
-Any number of variables may be listed: <programlisting>127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"</programlisting>
+tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to drop all connections that aren't handled by more specific rules. 
 </para>
 </informalexample>
+<informalexample>
+<blockquote><programlisting>:allow,AXFR=""
+203.0.113.90:allow,AXFR="example.com,example.org,example.net,example"
+10.0.53.1:allow,AXFR="test,home.arpa"
+</programlisting></blockquote>
+<para>
+tells <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> to allow all connections that aren't handled by more specific rules, and always set the <envar>AXFR</envar> environment variable to something.
+</para>
+</informalexample>
+<informalexample>
+<blockquote><programlisting>10.0.:allow,RELAYCLIENT="@fix.me"
+</programlisting></blockquote>
+<para>
+adds an environment variable <envar>RELAYCLIENT</envar> with value <code>@fix.me</code>.
+</para>
+</informalexample>
+<informalexample>
+<para>
+The quotes may be replaced by any repeated character:
+</para>
+<blockquote><programlisting>10.0.:allow,RELAYCLIENT=/@fix.me/
+</programlisting></blockquote>
+</informalexample>
+<informalexample>
+<para>
+Any number of variables may be listed:
+</para>
+<blockquote><programlisting>127.0.0.1:allow,RELAYCLIENT="",TCPLOCALHOST="movie.edu"
+</programlisting></blockquote>
+</informalexample>
 
+</refsection>
 </refsection>
 </refsection>
 
@@ -193,7 +227,7 @@ Any number of variables may be listed: <programlisting>127.0.0.1:allow,RELAYCLIE
 <title>Author</title>
 <para>
 Original code and documentation by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
-Converted to manual pages and updated by <personname><firstname>Gerrit</firstname><surname>Pape</surname></personname> in 2000, 2001, and 2002. 
+Converted to manual pages and updated by <personname><firstname>Gerrit</firstname> <surname>Pape</surname></personname> in 2000, 2001, and 2002. 
 Converted to DocBook XML by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
 </para>
 </refsection>

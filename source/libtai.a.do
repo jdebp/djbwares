@@ -1,4 +1,7 @@
 #!/bin/sh -e
+## **************************************************************************
+## For copyright and licensing terms, see the file named COPYING.
+## **************************************************************************
 # vim: set filetype=sh:
 objects0=""
 objects1="tai_add.o tai_uint.o tai_now.o tai_pack.o tai_sub.o tai_unpack.o taia_add.o taia_approx.o taia_frac.o taia_half.o taia_less.o taia_now.o taia_pack.o taia_unpack.o taia_sub.o taia_uint.o taia_fmtfrac.o taia_tai.o"

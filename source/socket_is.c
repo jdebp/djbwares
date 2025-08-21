@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "socket.h"
 
-static int socket_is(int fd, int family, int type) {
+static int socket_is(int fd, int family1, int family2, int type) {
   struct stat s;
   struct sockaddr a = {};
   socklen_t al = sizeof(a);
@@ -28,40 +28,16 @@ static int socket_is(int fd, int family, int type) {
     return 0;
   if (al < sizeof(sa_family_t))
     return 0;
-  if (a.sa_family != family)
+  if (a.sa_family != family1 && a.sa_family != family2)
     return 0;
 
   return 1;
 }
 
 int socket_is_udp(int fd) {
-  if (socket_is(fd, AF_INET, SOCK_DGRAM))
-    return 1;
-  if (socket_is(fd, AF_INET6, SOCK_DGRAM))
-    return 1;
-  return 0;
-}
-
-int socket_is_udp4(int fd) {
-  return socket_is(fd, AF_INET, SOCK_DGRAM);
-}
-
-int socket_is_udp6(int fd) {
-  return socket_is(fd, AF_INET6, SOCK_DGRAM);
+  return socket_is(fd, AF_INET, AF_INET6, SOCK_DGRAM);
 }
 
 int socket_is_tcp(int fd) {
-  if (socket_is(fd, AF_INET, SOCK_STREAM))
-    return 1;
-  if (socket_is(fd, AF_INET6, SOCK_STREAM))
-    return 1;
-  return 0;
-}
-
-int socket_is_tcp4(int fd) {
-  return socket_is(fd, AF_INET, SOCK_STREAM);
-}
-
-int socket_is_tcp6(int fd) {
-  return socket_is(fd, AF_INET6, SOCK_STREAM);
+  return socket_is(fd, AF_INET, AF_INET6, SOCK_STREAM);
 }

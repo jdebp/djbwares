@@ -42,8 +42,8 @@ If it encounters a temporary problem that prevents it from determining the list 
 </para>
 
 <para>
-<command>dnsip</command> makes all DNS lookups using the locally configured DNS proxy server.
-See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></citerefentry> for how this server is found.
+<command>dnsip</command> makes all DNS lookups using the locally configured DNS proxy server(s), and performs no name qualification on what is taken to already be a "fully-qualified" domain name (trailing dot or no) <replaceable>fqdn</replaceable>.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, and for certain standard domain names that short-circuit DNS lookups to the proxy DNS server(s).
 </para>
 
 </refsection>
@@ -66,6 +66,11 @@ See <citerefentry><refentrytitle>dnsqr</refentrytitle><manvolnum>1</manvolnum></
 <title>History</title>
 <para>
 <command>dnsip</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 1999.
+</para>
+
+<para>
+In the original Bernstein <command>dnsip</command>, the mis-behaviour with stupid consequences and real-world liabilities of the original Bernstein DNS client library would occur.
+This undocumented behaviour was removed in 2025 and is not present in this version of <command>dnsip</command>.
 </para>
 </refsection>
 

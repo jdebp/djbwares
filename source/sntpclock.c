@@ -1,10 +1,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/param.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include "strerr.h"
 #include "ip.h"
+#include "socket.h"
 #include "str.h"
 #include "byte.h"
 #include "substdio.h"
@@ -91,7 +90,7 @@ void die_usage()
 
 static char *host;
 static struct ip_address ipremote;
-static struct sockaddr_in sa;
+static uint16 portremote = 123; /* NTP */
 static int s;
 
 static unsigned char query[48];
@@ -121,7 +120,6 @@ int main(int argc,char ** argv)
 {
   struct timeval tvselect;
   fd_set rfds;
-  char *x;
   unsigned long u;
   int r;
   int loop;
@@ -141,20 +139,20 @@ int main(int argc,char ** argv)
   host = argv[1];
   if (!host) die_usage();
   if (!str_diff(host,"0")) host = "127.0.0.1";
-  if (host[ip_scan(host,&ipremote)]) die_usage();
+  if (host[ip_scan(host,&ipremote,':')]) die_usage();
 
-  s = socket(AF_INET,SOCK_DGRAM,0);
+  s = socket_udp(&ipremote);
   if (s == -1)
     strerr_die2sys(111,FATAL,"unable to create socket: ");
-
-  byte_zero(&sa,sizeof(sa));
-  byte_copy(&sa.sin_addr,4,&ipremote);
-  x = (char *) &sa.sin_port;
-  x[0] = 0;
-  x[1] = 123; /* NTP */
-  sa.sin_family = AF_INET;
+#if 0
+  if (socket_connect(s,&ipremote,portremote) == -1)
+    strerr_die2sys(111,FATAL,"unable to connect socket: ");
+#endif
 
   for (loop = 0;loop < 10;++loop) {
+    uint16 dummy2;
+    struct ip_address dummy1 = IP_ADDRESS_INIT;
+
     byte_zero(query,sizeof query);
     query[0] = 27; /* client, NTP version 3 */
     query[2] = 8;
@@ -173,7 +171,7 @@ int main(int argc,char ** argv)
     query[46] = u;
   
     taia_now(&ta0);
-    if (sendto(s,query,sizeof query,0,(struct sockaddr *) &sa,sizeof sa) == -1)
+    if (socket_send(s,query,sizeof query,&ipremote,portremote) == -1)
       strerr_die2sys(111,FATAL,"unable to send request: ");
     FD_ZERO(&rfds);
     FD_SET(s,&rfds);
@@ -183,7 +181,7 @@ int main(int argc,char ** argv)
       strerr_warn2(WARNING,"unable to read clock: timed out",0);
       continue;
     }
-    r = recv(s,response,sizeof response,0);
+    r = socket_recv(s,response,sizeof response,&dummy1,&dummy2);
     if (r == -1) {
       strerr_warn2(WARNING,"unable to read clock: ",&strerr_sys);
       continue;

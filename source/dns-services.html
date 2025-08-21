@@ -1,0 +1,191 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>The conventional Domain Name System services to run</title>
+<h1 class="Ruled">The conventional Domain Name System services to run</h1>
+
+<h2 class="Ruled">What services one runs</h2>
+
+<p>
+Conventionally in a modern scenario one needs to run three, possibly four, of the <a href="index.html">djbwares toolset's</a> Domain Name System services:
+</p>
+<ul>
+<li><p>an instance of <a href="commands/dnscache.xml"><code>dnscache</code></a> to provide resolving proxy DNS service to the DNS client libraries built into applications;</p></li>
+<li><p>an instance of <a href="commands/tinydns.xml"><code>tinydns</code></a> to provide a private root content DNS server;</p></li>
+<li><p>an instance of <a href="commands/tinydns.xml"><code>tinydns</code></a> to provide public content DNS service;</p></li>
+<li><p>an instance of <a href="commands/tinydns.xml"><code>axfrdns</code></a> to provide public content DNS service (if necessary); and</p></li>
+<li><p>an instance of <a href="commands/walldns.xml"><code>walldns</code></a> to provide various fixed DNS data.</p></li>
+</ul>
+
+<p>
+This differs from Daniel J. Bernstein's original <a href="http://cr.yp.to/djbdns.html">djbdns</a>, which was aimed at the world of 1999 and 2000.
+Several norms now, were not norms then.
+Indeed, <a href="dns-private-root.html">running a private root content DNS server</a>, now a mainstream thing, was <a href="http://cr.yp.to/dnsroot.html">pioneered by djbdns</a> and the BIND people were still hemming and hawing about it, despite it having been successfully practiced in the djbdns world for all of that time, two decades later before finally seeing the light.
+There are now many reasons for running <a href="commands/walldns.xml"><code>walldns</code></a>, where that was a very specialized service at the turn of the 21st century.
+</p>
+
+<p>
+Exactly <em>how</em> one runs <a href="commands/dnscache.xml"><code>dnscache</code></a>, <a href="commands/tinydns.xml"><code>tinydns</code></a>, <a href="commands/axfrdns.xml"><code>axfrdns</code></a>, and <a href="commands/walldns.xml"><code>walldns</code></a> as services is beyond the scope of this Guide.
+The various -conf utilities of the original djbdns are long-since obsolete, and service definitions/bundles for specific service management systems (from daemontools through runit to nosh) have become available elsewhere over the years.
+</p>
+
+<h2 class="Ruled">How these services fit together</h2>
+
+<h3 class="Ruled">Local proxy DNS service</h3>
+
+<div class="sidebar">
+Further reading:
+<ul>
+<li>Jonathan de Boyne Pollard (2000). <a href="https://jdebp.uk/FGA/proxy-server-ip-addresses.html"><i>The IP addresses on which proxy servers should be configured to listen</i></a> Frequently Given Answers.</li>
+</ul>
+</div>
+
+<p>
+As mentioned, the instance <a href="commands/dnscache.xml"><code>dnscache</code></a> provides resolving proxy DNS service to the DNS client libraries built into applications.
+It is listed in the <code>DNSCACHEIP</code> environment variable as documented in the <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> manual, or in the <code>/etc/resolv.conf</code> file.
+</p>
+
+<p>
+It should be reachable <em>at best</em> only to machines on the same LAN, and the normal configuration is for each machine to run its own instance of the service listening on the 127.0.0.1 (or the 0:0:0:0:0:0:0:1) IP address only reachable from the machine itself.
+This IP address is the hardwired out-of-the-box fallback default in most DNS client libraries, sans any configuration being done at all.
+The antics of some multinational corporations (e.g. CloudFlare, Quad9, and Google) notwithstanding, proxy DNS service is not something to be providing to Internet at large.
+</p>
+
+<p>
+<a href="commands/dnscache.xml"><code>dnscache</code></a> should be configured, in its <code>servers/@</code> file, with the IP address where the instance of <a href="commands/tinydns.xml"><code>tinydns</code></a> running the private root is.
+</p>
+
+<h3 class="Ruled">Content DNS service</h3>
+
+<p>
+One should usually have multiple instances of tinydns, listening on several non-zero IP addresses, that share the same <code>data.cdb</code> database file and that can be brought up and down separately.
+This will usually be two instances:
+</p>
+<ul>
+<li>one for dnscache to talk to on a private IP address not routable to Internet (and not necessarily reachable even over the LAN) that serves up the private root data specifically to dnscache; and</li>
+<li>one for the world to talk to on a public WAN-reachable IP address not only routeable to Internet but listed in the public DNS as a server.</li>
+</ul>
+
+<p>
+Multiple instances of <a href="commands/tinydns.xml"><code>tinydns</code></a> and <a href="commands/axfrdns.xml"><code>axfrdns</code></a> can share a single <code>data.cdb</code> file with very little overhead.
+tinydns and axfrdns read the pre-compiled Constant DataBase file off the disc, employing the operating system's disc cache of course and thus sharing the cache between all axfrdns and tinydns processes.
+They do not each read a source file and create multiple non-shared compiled copies in memory &mdash; one of the mis-features of ISC's BIND when Bernstein first invented djbdns that djbdns was designed to avoid.
+</p>
+
+<p>
+Given that dnscache and the private tinydns can use maximally-sized DNS/UDP packets with EDNS0 to speak to each other, which DNS/TCP does not improve upon, there is very little utility in running an axfrdns side-by-side on the private root IP address.
+For the world, however, clients of the world-facing tinydns might not even be able to signal larger than 512-byte DNS/UDP support with EDNS0; and if one has large resource record sets that will hit this 512-byte limit in DNS/UDP responses, one should have an <a href="commands/axfrdns.xml"><code>axfrdns</code></a> running in parallel with tinydns on the same public WAN-reachable IP address (and port 53).
+</p>
+
+<p>
+All <a href="commands/axfrdns.xml"><code>axfrdns</code></a> instances should inherit a <code>AXFR</code> environment variable set to a zero-length string.
+This stops the world from being able to perform "zone transfers" for anything, which is the best default for a world-facing DNS/TCP service.
+How one later specifies that individual DNS/TCP clients on specific IP addresses get individualized <code>AXFR</code> environment variable values that permit them, specifically, to "zone transfer" specific domain name apices, is a matter of how the axfrdns service is managed and configured.
+With djbwares and the Bernstein tools, one would have a rules database compiled with <a href="commands/tcprules.xml"><code>tcprules</code></a> and use the <code>-x</code> flag to <a href="commands/tcpserver.xml"><code>tcpserver</code></a> to tell it where the rules database is.
+</p>
+
+<h3 class="Ruled">Split-horizon DNS service from a single shared database</h3>
+
+<div class="sidebar">
+Further reading:
+<ul>
+<li>Jonathan de Boyne Pollard (2002). <a href="https://jdebp.uk/FGA/dns-split-horizon.html"><i>Providing "split horizon" DNS service.</i></a> Frequently Given Answers.</li>
+</ul>
+</div>
+
+<p>
+In order to <a href="dns-private-root.html">provide a private root content DNS server</a> and public content DNS service from the same <code>data.cdb</code> file, lines in the <code>data</code> source file must be tagged with location codes, as set out in the <a href="commands/tinydns-data.xml"><code>tinydns-data</code></a> manual, differentiating on-machine/on-site clients from the rest of Internet.
+</p>
+
+<p>
+Although no direct harm can come from it, as the data served are by definition public DNS data, it is not de rigeur to serve root data to the world.
+Moreover, doing so obviates a useful feaure of <a href="commands/tinydns.xml"><code>tinydns</code></a>, namely that it makes it always respond to every query whatever the domain name.
+Normally, and going all of the way back to the Bernstein original, tinydns resists DNS "amplification" attacks by simply not responding to queries about domains that it has not been told that its database is authoritative for.
+A private root is told that its database is authoritative for <em>every possible</em> domain name.
+</p>
+
+<p>
+Thus the private root should be served on-LAN on some IP address that is not routable off-LAN, or &mdash; better &mdash; on-machine where the instance of dnscache is running.
+The conventional IP address for the latter is 127.53.0.1 (because tinydns and dnscache both use port 53, the fixed well-known port for Domain Name System services).
+dnscache starts query resolution with the information published there, and some things end there, with no communication off-site/off-machine at all.
+</p>
+
+<p>
+Bogus queries for things that are the results of misconfigurations (e.g. private names being mis-used as top-level domains or because of odd search paths being configured) or for for things that are the results of user mis-use (e.g. pseudo-IP-address domain names such as <code>203.0.113.60.</code> where users have supplied IP addresses to programs that expect domain names) never escape off-machine/off-site, never place load on the public root content DNS servers, and never send internal site information to those servers and make it visible to all of the people/companies in the network hops along the path that it has to travel to them.
+</p>
+
+<p>
+The data served to the world will be the data tagged with the public location codes of DNS clients speaking to (the) tinydns (that is specifically listening) on a public IP address such as 192.0.2.234 or 3fff:0:1977:0905:1979:0305:1:2.
+The original Bernstein djbdns tutorial contains (somewhat dated, but still relevant) guides on how to receive delegations pointing to that IP address for domain name apices that one owns, and how to set up domain apices, delegations for subdomains, and other data in the <code>data</code> file that is compiled into the <code>data.cdb</code> file.
+</p>
+
+<h3 class="Ruled">Synthetic content DNS service</h3>
+
+<p>
+Post-dating by years the last Bernstein-published version of djbdns, version 1.05 in February 2001, is the concept of what IANA now lists as <a href="https://www.iana.org/assignments/special-use-domain-names/special-use-domain-names.xhtml">special-use domain names</a>, the data for which are fixed and can be entirely synthesized without any database file.
+These domain names either have well-known universal uses, or act as reservation placeholders for things that have the form of domain names but are not actually part of the Domain Name System.
+</p>
+
+<p>
+The original Bernstein djbdns actually had a synthetic content DNS service, albeit for one highly specialized use: <a href="commands/walldns.xml"><code>walldns</code></a>.
+This has been given more functions in djbwares, and whilst retaining its original name of a "DNS wall" it is now a more general DNS server for all things that can be synthesized without a database.
+It is the final "DNS wall" in what is nowadays a three-level system:
+</p>
+
+<ul>
+<li><p>
+DNS client libraries such as <a href="commands/djbdns-client.xml"><code>djbdns-client</code></a> synthesize responses for a few well-known domain names, and queries for the resource records for those domain names never get sent to any DNS server <em>at all</em>.
+Certain things are either fundamental, and work even when there are not any DNS servers running (e.g. the domain name <code>localhost.</code>), or are fundamentally excluded from DNS servers (e.g. <code>invalid.</code> and all of its subdomains).
+Also observe that a couple of RFCs mandate that DNS client libraries send queries about some special-use domain names off to specalist DNS servers that are <em>not</em> the main dnscache.
+</p></li>
+<li><p>
+The main <a href="commands/dnscache.xml"><code>dnscache</code></a> provides resolving proxy DNS service and not only synthesizes most of the same answers as the DNS client libraries do, for the benefits of old DNS client libraries that do not synthesize answers internally (including the one in the original Bernstein djbdns), but synthesizes various additional things that RFCs mandate be synthesized at this level.
+These range from things that should not have reached dnscache and definitely should not go any further out to Internet at large (e.g. <code>onion.</code> names) to things that should not be loaded onto public content servers for privacy/efficiency reasons and their data are fixed and well-known.
+</p></li>
+<li><p>
+<a href="commands/walldns.xml"><code>walldns</code></a> acts as a final catch-all, not only synthesizing the same stuff as the other two layers, for the benefits of old djbwares or non-djbwares DNS clients and proxy DNS servers (the exact mechanics of pointing them to walldns being beyond the scope of this Guide), but providing things that would be invariant from public DNS content servers (e.g. the null <code>test.</code>) or that provide optional substitutes for the public DNS (e.g. its own original "reverse lookup opaque wall" and an optional null <code>example.</code>, albeit that IANA provides public data for that latter).
+</p></li>
+</ul>
+
+<p>
+Conventionally, <a href="commands/walldns.xml"><code>walldns</code></a> should be positioned similarly to the private root <a href="commands/tinydns.xml"><code>tinydns</code></a>, listening on the IP address 127.53.1.1 on the same machine as <a href="commands/dnscache.xml"><code>dnscache</code></a>.
+This is the most minimal-resource-use setup for walldns, as DNS lookups that it handles become in effect a mere IPC call over the software loopback network interface on the machine, from dnscache.
+</p>
+
+<h3 class="Ruled">Prune-and-graft points</h3>
+
+<div class="sidebar">
+There is a lengthy list of prune-and graft points, nowadays, that should direct dnscache to the private walldns by default:
+<ul>
+<li>Jonathan de Boyne Pollard (2004). <a href="https://jdebp.uk/FGA/dns-private-address-split-horizon.html"><i>Employ split horizon DNS service if you are using non-public IP address ranges.</i></a> Frequently Given Answers.</li>
+<li>IANA (2016). <a href="https://www.iana.org/assignments/locally-served-dns-zones/locally-served-dns-zones.xhtml"><i>Locally served DNS zones</i></a></li>
+</ul>
+</div>
+
+<p>
+dnscache is configured with prune-and-graft points, in its <code>servers/</code> subdirectory, for domain apices such as <code>home.arpa.</code> and <code>test.</code>, which fall into the in-between category of things that will not be public data, but that are also not invariant-valued.
+These either point to walldns, serving up null data, or to the private root tinydns, serving up (location tagged) site-local homenet and test data.
+</p>
+
+<p>
+RFC 6761 describes lookups that should be handled on-site in one of two ways, switchable by the local network administrator(s) according to local needs, and should never go off-site to public content DNS servers:
+</p>
+
+<ul>
+<li><p>
+<code>test.</code> has two modes: either there are no local test domains, in which case the prune-and-graft settings should direct dnscache to talk to walldns (which serves a null version of <code>test.</code> and its subdomains), or there are local test domains, in which case the prune-and-graft settings should direct dnscache to talk to tinydns (which will publish the test data, location-tagged for that dnscache only).
+</p></li>
+<li><p>
+The reverse-lookup domain names used to map RFC 1918 private-use IP addresses (e.g. <code>1.0.168.192.in-addr.arpa.</code>) have two modes: either there are no local names associated with these IP addresses, in which case the prune-and-graft settings should direct dnscache to talk to walldns (which serves its original "DNS wall" for this purpose), or there are local names, in which case the prune-and-graft settings should direct dnscache to talk to tinydns (which will publish the name data, location-tagged for that dnscache only).
+</p></li>
+</ul>
+
+<p>
+All of the RFC 1918 private-use IP addresses should be pruned-and-grafted in this way, and should be done so at the correct highest level (e.g. <code>10.in-addr.arpa.</code> and <code>16.172.in-addr.arpa</code> and <code>168.192.in-addr.arpa.</code>, not subdomains thereof).
+</p>
+
+<p>
+<code>home.arpa.</code> has similar requirements to <code>test.</code>, and the prune-and-graft settings should direct it either to walldns or to tinydns (with internal-location-taged data).
+In contrast, all of <code>example.org</code>, <code>example.net</code>, <code>example.com</code>, <code>example</code> should <em>not</em> be pruned and grafted to walldns and tinydns.
+IANA actually owns these and they exist as delegated domains in the global public DNS.
+It even runs servers for them.
+</p>

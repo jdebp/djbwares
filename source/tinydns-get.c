@@ -10,10 +10,12 @@
 #include "case.h"
 #include "printpacket.h"
 #include "parsetype.h"
+#include "ip.h"
 #include "ip4.h"
-#include "dns.h"
+#include "dns_constants.h"
+#include "dns_domain.h"
 
-extern int respond(char *,char *,char *);
+extern int respond(char *,char *,const struct ip_address *ip);
 
 #define FATAL "tinydns-get: fatal: "
 
@@ -26,7 +28,7 @@ void oops(void)
   strerr_die2sys(111,FATAL,"unable to parse: ");
 }
 
-static char ip[4];
+static struct ip_address ip;
 static char type[2];
 static char *q;
 
@@ -46,7 +48,7 @@ int main(int argc,char **argv)
   if (!dns_domain_fromdot(&q,*argv,str_len(*argv))) oops();
 
   if (*++argv) {
-    if (!ip4_scan(*argv,ip)) usage();
+    if (!ip_scan(*argv,&ip,':')) usage();
   }
 
   if (!stralloc_copys(&out,"")) oops();
@@ -57,17 +59,17 @@ int main(int argc,char **argv)
   if (!stralloc_cats(&out,":\n")) oops();
 
   if (!response_query(q,type,DNS_C_IN)) oops();
-  response[3] &= ~128;
-  response[2] &= ~1;
-  response[2] |= 4;
+  response[3] &= ~128;	/* set RA=0 */
+  response[2] &= ~1;  /* set RD=0 */
+  response[2] |= 4; /* set AA=1 */
   case_lowerb(q,dns_domain_length(q));
 
-  if (byte_equal(type,2,DNS_T_AXFR)) {
+  if (byte_equal(type,2,DNS_T_AXFR)|byte_equal(type,2,DNS_T_IXFR)) {
     response[3] &= ~15;
     response[3] |= 4;
   }
   else
-    if (!respond(q,type,ip)) goto DONE;
+    if (!respond(q,type,&ip)) goto DONE;
 
   if (!printpacket_cat(&out,response,response_len)) oops();
 

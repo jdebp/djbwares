@@ -1,0 +1,83 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Synchronizing with other systems</title>
+<h1 class="Ruled">Synchronizing with other systems</h1>
+
+<h2 class="Ruled">Easy time synchronization</h2>
+
+<p>
+One synchronizes the system clock with time sources, with djbwares, using <a href="commands/taiclock.xml"><code>taiclock</code></a> or <a href="commands/sntpclock.xml"><code>sntpclock</code></a>.
+One uses one or the other, never both.
+</p>
+
+<p>
+The TAICLOCK protocol that <a href="commands/taiclock.xml"><code>taiclock</code></a> speaks was <a href="http://cr.yp.to/proto/taiclock.txt">documented by Bernstein in 1997</a> and its chosen UDP port number was <a href="https://iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=taiclock">belatedly recognized by IANA in 2018</a>.
+<a href="commands/sntpclock.xml"><code>sntpclock</code></a> speaks the Simple Network Time Protocol, that preceded TAICLOCK by just 5 years.
+</p>
+
+<p>
+Organizationally, they both expect the same simple hierarchical star topology: a server acts as the time source for several subobordinate machines, which in turn may be sources for yet further subordinate machines; synchronizing from multiple sources is abnormal and the client's problem; and there must not be loops in the client-server graph.
+(The Network Time Protocol from which SNTP is derived has many complexities for multiple-source machines, formal strata for time sources, and cycle avoidance in the more complex client-server graphs that it encompasses.)
+This simple many-to-one client-server topology is why one never uses both on a single machine.
+</p>
+
+<p>
+Neither actually sets the clock; instead they write out a time difference that is fed into <a href="commands/clockadd.xml"><code>clockadd</code></a>.
+(It can be fed into <a href="commands/clockview.xml"><code>clockview</code></a> if one wants to see what adjustment <em>would</em> be made.)
+The commonality means that whether using SNTP or TAICLOCK for obtaining the time from a server, <a href="time-tai.html">the system itself runs in TAI-10</a>.
+</p>
+
+<h2 class="Ruled">System clock drift</h2>
+
+<p>
+Compared to even simple digital watches, the software clocks maintained by operating system kernels are woefully inaccurate, an error measured in minutes per day not being even uncommon.
+(There are many reasons for this, and it is not a matter of "Surely, with better hardware &hellip;".
+The inaccuracy is in part <em>caused</em> by the fact that the hardware is more sophisticated than that of a digital watch.)
+</p>
+
+<p>
+A daily synchronization with a time server is really the minimum degree of synchronization that one should employ.
+For comparison:
+Windows machines that are part of a Windows Server "domain" synchronize every hour.
+NTP systems on RedHat synchronize anywhere from roughly every quarter of an hour to roughly every minute.
+</p>
+
+<h3 class="Ruled">System clock regulation</h3>
+
+<p>
+The outputs of sntpclock and taiclock can additionally be fed to <a href="commands/clockspeed.xml"><code>clockspeed</code></a>.
+This is a more complicated self-regulation system where the system tries to work out how poorly its operating system clock maintains the correct time, and periodically applies adjustments in order to fix that.
+This reduces the need for frequent checks against a time source.
+</p>
+
+<p>
+However, this sophistication comes at a price.
+One has to understand how timer interrupts (that drive the kernel's software clock) can be missed, how modern speed-varying power-saving techniques (adopted years after clockspeed was invented) affected clockspeed's assumptions of an invariant CPU counter frequency, and how the concept of CPUs possessing Invariant Time-Stamp Counters then came about (when the power-saving techniques broke things, because it was not just clockspeed that made such assumptions).
+</p>
+
+<h2 class="Ruled">Time sources</h2>
+
+<p>
+For decades, people would just go with the default time sources that their operating systems came pre-supplied with, or that some high-search-engine-ranked WWW page happened to give.
+And the result would be that one of the world's NTP servers would get a disproportionate amount of client traffic compared to its peers.
+</p>
+
+<p>
+Do not do this.
+</p>
+
+<p>
+At the very least, pick an Internet time server <em>responsibly</em>.
+</p>
+
+<p>
+In fact, remember that it is not 1997 any more.
+You do not have to obtain time from servers on Internet at all, now.
+We are back to an era of getting the time via radio.
+</p>
+
+<p>
+You can operate a cheap combined GNSS receiver and time server on your LAN, and synchronize all of your LAN machines to that.
+(Your GNSS can be the U.S.A.'s GPS, Europe's Galileo, or even the Russian and Chinese systems if you are Russian or Chinese.)
+There are, as of the 2020s, many hobbyists who show how this can be done nowadays not with hundreds or thousands of quids' worth of expensive enterprise-class kit, but with the likes of a RaspberryPi and an antenna on the roof.
+</p>

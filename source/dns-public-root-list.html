@@ -1,0 +1,63 @@
+<link rel="Up" href="index.html" title="djbwares Guide" />
+<link rel="Stylesheet" type="text/css" href="guide.css" title="Guide default style" />
+<title>Updating the public root content DNS server list</title>
+<h1 class="Ruled">Updating the public root content DNS server list</h1>
+
+<p>
+The <a href="dns-services.html">conventional setup for DNS services</a></li> has an instance of <a href="commands/tinydns.xml"><code>tinydns</code></a> as <a href="dns-private-root.html">a private root content DNS server</a>.
+The <code>servers/@</code> file for <a href="commands/dnscache.xml"><code>dnscache</code></a> simply lists 127.53.0.1 (or whatever on-machine/on-site IP address tinydns is listening on).
+</p>
+
+<p>
+Unconventionally, but in the old style of Bernstein djbdns, one can have the <code>servers/@</code> file list the IP addresses of the public root content DNS servers run by ICANN.
+The list of "<samp>.</samp>" content DNS servers changes over time.
+</p>
+
+<p>
+Some changes over the years to the list of ICANN's "<samp>.</samp>" content DNS servers were on 
+<a href="https://root-servers.org/news/b-root-ipv4-address-renumbered.txt">2017-10-24</a>, 
+<a href="http://www.dns.icann.org/l-root-ipv6-renumbering/">2016-03-23</a>,
+<a href="https://h.root-servers.org/renumber.html">2015-12-01</a>, 
+<a href="https://www.dns.icann.org/ip-change-28oct07/">2007-11-01</a>,
+<a href="https://root-servers.org/news/new-ip-b.html">2004-01-29</a>,
+2002-11-05,
+and 1997-08-22; and this is not even a complete list.
+The IP addresses do not change egregiously often in practice, and it is normally sufficient to update the list once or twice per year.
+</p>
+
+<p>
+Bernstein djbdns shipped with a file named <code>/etc/dnsroots.global</code> which contained ICANN's list of these IP addresses as it stood in 2001.
+It is no longer packaged by djbwares, in favour of just collecting the updated address list using this method instead.
+It is nonetheless possible to limp along with this same list if one has it, a quarter of a century later, with somewhat degraded query resolution, and with the caveat that someone might re-use one of the old IP addresses and put a DNS server on it.
+</p>
+
+<h2 class="Ruled">Procedure</h2>
+
+<p>
+Use a command pipeline to obtain the list of IP addresses of the "<samp>.</samp>" content DNS servers, directing its output to the <samp>root/servers/@</samp> file, then restart the <a href="commands/dnscache.xml"><code>dnscache</code></a> service:
+</p>
+
+<blockquote><div class="command-window"><pre><span class="command-prompt">~ #</span><span class="user-input">cd "$(system-control find dnscache@127.0.0.1)/service"</span>
+<span class="command-prompt">/var/local/service-bundles/services/dnscache@127.0.0.1/service #</span><span class="user-input">cd "$(system-control print-service-env dnscache@127.0.0.1 ROOT"</span>
+<span class="command-prompt">/var/local/service-bundles/services/dnscache@127.0.0.1/service/root #</span><span class="user-input">printf '%s\n' $(dnsip $(dnsns .)) &gt; servers/.@.tmp</span>
+<span class="command-prompt">/var/local/service-bundles/services/dnscache@127.0.0.1/service/root #</span><span class="user-input">mv servers/.@.tmp servers/@</span>
+<span class="command-prompt">/var/local/service-bundles/services/dnscache@127.0.0.1/service/root #</span><span class="user-input">system-control try-restart dnscache@127.0.0.1</span>
+<span class="command-prompt">/var/local/service-bundles/services/dnscache@127.0.0.1/service/root #</span></pre></div></blockquote>
+
+<h2 class="Ruled">Notes</h2>
+
+</p>
+The service management tooling here is from <a href="https://jdebp.uk/Softwares/nosh/">the nosh toolset</a>.
+<p>
+
+<p>
+<a href="commands/dnsip.xml"><code>dnsip</code></a> is IPv6-capable, and will print multiple IP addresses on a single line.
+The ICANN "<samp>.</samp>" content DNS servers all nowadays have both IPv4 and IPv6 addresses, <a href="https://www.icann.org/en/announcements/details/ipv6-address-added-for-root-servers-in-the-root-zone--addition-enhances-end-to-end-connectivity-for-ipv6-networks-4-2-2008-en">a process that began in 2008</a>.
+The use of <samp>printf '%s\n'</samp> is a standard Unix idiom for separating these addresses onto individual single lines.
+</p>
+
+<p>
+The use of <samp>.@.tmp</samp> is not necessary for dnscache, which does not re-read the <samp>servers/@</samp> file once it has started.
+It is to avoid losing the original <samp>servers/@</samp> file should a network outage or something cause the two lookup tools to fail.
+It is a wise idea to just look at the new file, and check that it really does list 26-or-so IP addresses, before moving it into place.
+</p>

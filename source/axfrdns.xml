@@ -17,7 +17,7 @@
 
 <refnamediv>
 <refname>axfrdns</refname>
-<refpurpose>a UCSPI-TCP general-purpose content DNS server </refpurpose>
+<refpurpose>a UCSPI-TCP general-purpose content DNS server</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -31,8 +31,28 @@
 
 <para>
 <command>axfrdns</command> is a content DNS server that speaks the DNS/TCP protocol.
-It accepts DNS queries on its standard input, and responds with locally configured information on its standard output.
+It accepts DNS queries on its standard input, and responds with locally configured information from a static database on its standard output.
+It runs in a system-secured environment and requires no privileges nor any filesystem access other than read access to its static database.
+It logs a record of its operation simply to its standard error.
+</para>
+
+<para>
+<command>axfrdns</command> respects a location code system encoded in its database and differentiates amongst requesting clients according to their locations, determined by their IP addresses.
+It is designed to be Internet-facing; and its normal use is for answering Internet DNS queries from hosts around the Internet.
 It is used for the "zone transfer" mechanism and for where the response size exceeds the packet size for the DNS/UDP protocol.
+It can also be employed locally on a LAN, or even locally within a single machine, for providing information to hosts on an intranet.
+</para>
+<note>
+<citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> supports EDNS0 and clients negotiating packet sizes up to 64KiB.
+Since this is <emphasis>also</emphasis> the DNS/TCP protocol size limit, EDNS0-capable clients can in theory avoid falling back to DNS/TCP.
+(In practice, the world has yet to grow DNS data sets to where this is an everyday occurrence; or fully adopt EDNS0 in all clients.
+However, for local use it may be possible to rule out any need for <command>axfrdns</command> nowadays if all permissible clients speak EDNS0 and negotiate big-enough big packet sizes, and "zone transfer" is not required.
+And for all uses it has long been possible to rule it out if "zone transfer" is not required and it is administratively known or constrained that no data set in the database can ever hit the (non-EDNS0) 512-byte DNS/UDP size limit.)
+</note>
+
+<para>
+It is possible to run multiple entirely isolated instances of <command>axfrdns</command> on a single machine, each with their own static databases and listening on particular IP addresses for different purposes.
+It is conversely possible to run multiple instances on a single machine, each listening on particular IP addresses, all sharing a single database.
 </para>
 
 <para>
@@ -43,12 +63,23 @@ The latter can be set up with <citerefentry><refentrytitle>envuidgid</refentryti
 </para>
 
 <para>
+<command>axfrdns</command> aborts if it runs out of memory, or has trouble reading <filename>data.cdb</filename>, or receives a request larger than 512 bytes, or receives a truncated request, or receives a non-Internet-class query, or receives an inverse query, or receives a request containing anything other than a single query (and optionally 1 authority record), or receives a request not answered by <filename>data.cdb</filename>, or waits 60 seconds with nothing happening.
+</para>
+
+</refsection>
+
+<refsection>
+<title>Answers</title>
+
+<para>
 <command>axfrdns</command> answers queries as specified by <filename>data.cdb</filename>, a binary file in its root directory created by <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-It provides "zone transfer" results from that file; and also answers normal client queries, such as the SOA queries sent via DNS/TCP that usually precede "zone transfer" requests.
+It is used for the "zone transfer" mechanism and for where the response size exceeds the packet size for the DNS/UDP protocol.
+It provides "zone transfer" results from that file; and also answers normal client queries, such as the <code>SOA</code> queries sent via DNS/TCP that usually precede "zone transfer" requests.
 </para>
 
 <para>
-<command>axfrdns</command> aborts if it runs out of memory, or has trouble reading <filename>data.cdb</filename>, or receives a request larger than 512 bytes, or receives a truncated request, or receives a non-Internet-class query, or receives an inverse query, or receives a query containing anything other than a single query, or receives a request not answered by <filename>data.cdb</filename>, or waits 60 seconds with nothing happening.
+<command>axfrdns</command> answers the same as <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> (q.v.), except that its response size limit is 64KiB, as determined by the DNS/TCP protocol.
+It is usually configured to work in the same root directory as an instance of <citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> listening on the same IP address.
 </para>
 
 <refsection>
@@ -73,22 +104,36 @@ It is up to the client to decide which out-of-zone records to keep.
 <command>axfrdns</command> does not provide glue records outside the target domain.
 </para>
 
+<caution>
+The "zone transfer" protocol does not support timestamps, comments, temporarily disabled address records (<code>-</code> lines), or location codes.
+It also splits up <code>@</code>, <code>.</code>, and <code>S</code> lines, with IP addresses and intermediate names together in a single line, into multiple component parts.
+</caution>
+
 <para>
-The "zone transfer" protocol does not support timestamps. 
 If a record is scheduled to be created in the future, <command>axfrdns</command> does not send it; after the starting time, the "zone transfer" client will continue claiming that the record doesn't exist, until it contacts <command>axfrdns</command> again. 
 Similarly, if a record is scheduled to die in the future, <command>axfrdns</command> sends it (with a 2-second TTL); after the ending time, the "zone transfer" client will continue providing the old record, until it contacts <command>axfrdns</command> again.
 </para>
 
 <para>
-"Zone transfer" clients rely on SOA serial numbers changing for every zone modification.
+"Zone transfer" clients rely on <code>SOA</code> serial numbers changing for every zone modification.
 <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry> uses the modification time of the data file as its serial number for all zones. 
-So do not make more than one modification per second.
+So do not make more than one modification per second, or use something other than "zone transfer".
 </para>
 
 <para>
-BIND's "zone transfer" client, <command>named-xfer</command>, converts "zone transfer" data to zone-file format. 
-Beware: that zone-file format has no generic mechanism to express records of arbitrary types; <command>named-xfer</command> chokes if it does not recognize a record type used in <filename>data.cdb</filename>.
+"zone transfers" are special transactions, with rules different to normal DNS/TCP transactions, with types <code>AXFR</code> or <code>IXFR</code>.
+The <filename>data.cdb</filename> file does not hold old, superseded, data from before a <citerefentry><refentrytitle>tinydns-data</refentrytitle><manvolnum>1</manvolnum></citerefentry> recompilation; so <command>axfrdns</command> always falls back from the latter to the former, and never returns "incremental" responses.
+The standard <code>SOA</code>, check serial number, then optionally <code>AXFR</code> form is the better way to perform "zone transfers" from <command>axfrdns</command>.
 </para>
+
+<para>
+BIND's "zone transfer" client, <command>named-xfer</command>, converts "zone transfer" data to "zone-file" format. 
+</para>
+<warning>
+That "zone-file" format has no generic mechanism to express records of arbitrary types; <command>named-xfer</command> chokes if it does not recognize a record type used in <filename>data.cdb</filename>.
+<command>named-xfer</command> also chokes according to various internal arbitrary (and optionally configured) BIND rules that are not on-the-wire protocol restrictions.
+You may find the BIND client unable to receive a <code>+</code> record where a name happens to begin with an underscore, for just one example.
+</warning>
 
 </refsection>
 
@@ -98,6 +143,10 @@ Beware: that zone-file format has no generic mechanism to express records of arb
 <title>History</title>
 <para>
 <command>axfrdns</command> was originally part of <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>'s djbdns toolset in 2000.
+</para>
+
+<para>
+<citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> gained EDNS0 capability, and <command>axfrdns</command> gained <code>IXFR</code> capability, in 2025.
 </para>
 </refsection>
 

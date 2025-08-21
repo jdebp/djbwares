@@ -41,6 +41,7 @@ The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceab
 
 <para>
 If the file is unopenable or if <command>geminid</command> does not like the request, <command>geminid</command> prints an error message and exits.
+If the URL length exceeds the <citerefentry><refentrytitle>pathconf</refentrytitle><manvolnum>3</manvolnum></citerefentry> <code>_PC_PATH_MAX</code> value for the <arg choice='plain'><replaceable>root</replaceable></arg> directory, <command>geminid</command> prints an error message and exits.
 If <command>geminid</command> runs out of memory, encounters an I/O error, or does not receive an input packet within 60 seconds, it exits silently.
 </para>
 
@@ -80,6 +81,10 @@ If it successfully opens the file, <command>geminid</command> uses the file name
 
 <refsection>
 <title>Unsupported features</title>
+
+<para>
+In addition to the GEMINI protocol's restrictions, <command>geminid</command> rejects requests with URLs containing query parts.
+</para>
 
 <para>
 <command>geminid</command> does not generate its own directory listings, even if <filename>index.gemini</filename> does not exist. 

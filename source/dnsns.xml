@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="dnsns">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>dnsns</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>dnsns</refname>
+<refpurpose>look up the name server records of a domain name</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>dnsns</command>
+<arg choice='req' rep='repeat'><replaceable>fqdn</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>dnsns</command> looks up the <code>NS</code> resource records for <replaceable>fqdn</replaceable> in the Domain Name System, and prints them.
+</para>
+
+<para>
+Normally <command>dnsns</command> exits 0. 
+If it encounters a temporary problem that prevents it from determining the <code>NS</code> resource records, it prints an error message and exits 111.
+</para>
+
+<para>
+<command>dnsns</command> makes all DNS lookups using the locally configured DNS proxy server(s), and performs no name qualification on what is taken to already be a "fully-qualified" domain name (trailing dot or no) <replaceable>fqdn</replaceable>.
+See <citerefentry><refentrytitle>djbdns-client</refentrytitle><manvolnum>5</manvolnum></citerefentry> for how this server is found, and for certain standard domain names that short-circuit DNS lookups to the proxy DNS server(s).
+</para>
+
+<caution>
+<replaceable>fqdn</replaceable> can take the appearance of the human-readable form of a (legal and well-formed) IPv4 address.
+However, it is <emphasis>always</emphasis> considered to be a domain name and passed to the locally configured proxy DNS server(s) for lookup.
+<citerefentry><refentrytitle>dnscache</refentrytitle><manvolnum>1</manvolnum></citerefentry> filters queries for such names and synthesizes fixed responses to them that list no <code>NS</code> resource records.
+Other proxy DNS servers rely upon the fact that the public "<code>.</code>" content DNS servers state that these domains do not exist, and generate bogus traffic to those servers.
+</caution>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>dnsns</command> was added to djbwares in 2025.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Original code of <citerefentry><refentrytitle>dnsmx</refentrytitle><manvolnum>1</manvolnum></citerefentry> (from which this is derived) by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation modernizations by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

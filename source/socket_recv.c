@@ -4,34 +4,22 @@
 #include <netinet/in.h>
 #include "byte.h"
 #include "socket.h"
+#include "ip.h"
+#include "ip4.h"
+#include "ip6.h"
 
-int socket_recv4(int s,char *buf,int len,char ip[4],uint16 *port)
+extern int ip_make(struct ip_address * ip,const struct sockaddr_storage * ss,uint16 *port);
+
+int socket_recv(int s,char *buf,int len,struct ip_address * ip,uint16 *port)
 {
-  struct sockaddr_in sa;
-  socklen_t dummy = sizeof sa;
+  struct sockaddr_storage ss;
+  socklen_t dummy = sizeof ss;
   int r;
 
-  r = recvfrom(s,buf,len,0,(struct sockaddr *) &sa,&dummy);
+  r = recvfrom(s,buf,len,0,(struct sockaddr *) &ss,&dummy);
   if (r == -1) return -1;
 
-  byte_copy(ip,4,&sa.sin_addr);
-  uint16_unpack_big((char *) &sa.sin_port,port);
-
-  return r;
-}
-
-int socket_recv6(int s,char *buf,int len,char ip[20],uint16 *port)
-{
-  struct sockaddr_in6 sa;
-  socklen_t dummy = sizeof sa;
-  int r;
-
-  r = recvfrom(s,buf,len,0,(struct sockaddr *) &sa,&dummy);
-  if (r == -1) return -1;
-
-  byte_copy(ip,16,&sa.sin6_addr);
-  byte_copy(ip+16,4,&sa.sin6_scope_id);
-  uint16_unpack_big((char *) &sa.sin6_port,port);
+  ip_make(ip,&ss,port);
 
   return r;
 }

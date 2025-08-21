@@ -1,7 +1,8 @@
 #include "scan.h"
+#include "ip.h"
 #include "ip4.h"
 
-unsigned int ip4_scan(const char *s,char ip[4])
+unsigned int ip4_scan(const char *s,char ip[IP4_LEN])
 {
   unsigned int i;
   unsigned int len;
