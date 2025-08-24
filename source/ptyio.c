@@ -97,7 +97,7 @@ int main(int argc,char **argv)
     sig_unblock(SIGTTOU);
     sig_catch(SIGCONT, sigcont);
     sig_unblock(SIGCONT);
-  
+
     if (ttymodes_get(&tminit,fdtty) == -1) {
       substdio_putsflush(subfderr,"ptyio: fatal: unable to get modes of attached tty\n");
       _exit(111);
@@ -105,7 +105,7 @@ int main(int argc,char **argv)
     tmraw = tminit;
     ttymodes_makeraw(&tmraw);
     ttymodes_set(&tmraw,fdtty);
-  
+
     sig_block(SIGCONT);
     while (flagcont) {
       flagcont = 0;
@@ -116,7 +116,7 @@ int main(int argc,char **argv)
       ttymodes_set(&tmraw,fdtty);
       sig_block(SIGCONT);
     }
-  
+
     sig_catch(SIGCONT,SIG_DFL);
     sig_unblock(SIGCONT);
   }
@@ -193,7 +193,7 @@ int main(int argc,char **argv)
     if (select(6,&rfds,&wfds,(fd_set *) 0,(struct timeval *) 0) == -1)
       continue;
     sig_block(SIGWINCH);
-    
+
     if (FD_ISSET(0,&rfds)) if (flagreading && flagptywok) {
       r = read(0,bufin,sizeof(bufin));
       if (r <= 0)

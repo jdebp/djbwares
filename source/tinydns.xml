@@ -233,7 +233,7 @@ It ceased similarly treating the <code>ANY</code> <emphasis>class</emphasis> (as
 It ceased responding to non-Internet-class queries in August 2025; prior to which it replied with an error response.
 </para>
 <para>
-<citerefentry><refentrytitle>tinydns</refentrytitle><manvolnum>1</manvolnum></citerefentry> gained EDNS0 capability in 2025.
+<command>tinydns</command> gained EDNS0 capability in 2025.
 </para>
 </refsection>
 

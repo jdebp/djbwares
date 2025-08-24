@@ -1,5 +1,5 @@
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "scan.h"
 #include "exit.h"
 #include "stralloc.h"
@@ -14,8 +14,8 @@
 #include "ip4.h"
 #include "dns_constants.h"
 #include "dns_domain.h"
-
-extern int respond(char *,char *,const struct ip_address *ip);
+#include "dns_packet.h"
+#include "dns_server.h"
 
 #define FATAL "tinydns-get: fatal: "
 
@@ -64,12 +64,12 @@ int main(int argc,char **argv)
   response[2] |= 4; /* set AA=1 */
   case_lowerb(q,dns_domain_length(q));
 
-  if (byte_equal(type,2,DNS_T_AXFR)|byte_equal(type,2,DNS_T_IXFR)) {
+  if (dns_packet_typematch(type,DNS_T_AXFR)||dns_packet_typematch(type,DNS_T_IXFR)) {
     response[3] &= ~15;
     response[3] |= 4;
   }
   else
-    if (!respond(q,type,&ip)) goto DONE;
+    if (!respond(q,type,MAX_RESPONSE,&ip)) goto DONE;
 
   if (!printpacket_cat(&out,response,response_len)) oops();
 

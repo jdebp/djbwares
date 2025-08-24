@@ -10,7 +10,7 @@
 #include "exit.h"
 #include "open.h"
 #include "scan.h"
-#include "byte.h"
+#include "mem.h"
 #include "str.h"
 #include "ip.h"
 #include "ip4.h"
@@ -144,17 +144,17 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
   int i;
 
   pos = x_getname(buf,len,pos,&d1);
-  pos = x_copy(buf,len,pos,data,10);
-  uint16_unpack_big(data,&typenum);
-  uint32_unpack_big(data + 4,&ttl);
-  uint16_unpack_big(data + 8,&dlen);
+  pos = x_copy(buf,len,pos,data,RRFIXED_SIZE);
+  uint16_unpack_big(data + RRFIXED_TYPE,&typenum);
+  uint32_unpack_big(data + RRFIXED_TTL,&ttl);
+  uint16_unpack_big(data + RRFIXED_DATALEN,&dlen);
   if (len - pos < dlen) { errno = error_proto; return 0; }
   len = pos + dlen;
 
   if (!dns_domain_suffix(d1,zone)) return len;
-  if (byte_diff(data + 2,2,DNS_C_IN)) return len;
+  if (!dns_packet_rrinternetclass(data)) return len;
 
-  if (byte_equal(data,2,DNS_T_SOA)) {
+  if (dns_packet_rrtypematch(data,DNS_T_SOA)) {
     if (++numsoa >= 2) return len;
     pos = x_getname(buf,len,pos,&d2);
     pos = x_getname(buf,len,pos,&d3);
@@ -176,16 +176,16 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
       if (!stralloc_catulong0(&line,u32,0)) return 0;
     }
   }
-  else if (byte_equal(data,2,DNS_T_NS)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_NS)) {
     if (!stralloc_copys(&line,"&")) return 0;
-    if (byte_equal(d1,2,"\1*")) { errno = error_proto; return 0; }
+    if (mem_equal(d1,2,"\1*")) { errno = error_proto; return 0; }
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,"::")) return 0;
     x_getname(buf,len,pos,&d1);
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,".")) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_CNAME)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_CNAME)) {
     if (!stralloc_copys(&line,"C")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,":")) return 0;
@@ -193,27 +193,27 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,".")) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_SRV)) { 
-    uint16 dist, weight, port; 
-    if (!stralloc_copys(&line,"S")) return 0; 
-    if (!dns_domain_todot_cat(&line,d1)) return 0; 
-    if (!stralloc_cats(&line,"::")) return 0; 
-    pos = x_copy(buf,len,pos,data,2); 
-    uint16_unpack_big(data,&dist); 
-    pos = x_copy(buf,len,pos,data,2); 
-    uint16_unpack_big(data,&weight); 
-    pos = x_copy(buf,len,pos,data,2); 
-    uint16_unpack_big(data,&port); 
-    x_getname(buf,len,pos,&d1); 
-    if (!dns_domain_todot_cat(&line,d1)) return 0; 
-    if (!stralloc_cats(&line,".:")) return 0; 
-    if (!stralloc_catulong0(&line,dist,0)) return 0; 
-    if (!stralloc_cats(&line,":")) return 0; 
-    if (!stralloc_catulong0(&line,weight,0)) return 0; 
-    if (!stralloc_cats(&line,":")) return 0; 
-    if (!stralloc_catulong0(&line,port,0)) return 0; 
-  } 
-  else if (byte_equal(data,2,DNS_T_PTR)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_SRV)) {
+    uint16 dist, weight, port;
+    if (!stralloc_copys(&line,"S")) return 0;
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,"::")) return 0;
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&dist);
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&weight);
+    pos = x_copy(buf,len,pos,data,2);
+    uint16_unpack_big(data,&port);
+    x_getname(buf,len,pos,&d1);
+    if (!dns_domain_todot_cat(&line,d1)) return 0;
+    if (!stralloc_cats(&line,".:")) return 0;
+    if (!stralloc_catulong0(&line,dist,0)) return 0;
+    if (!stralloc_cats(&line,":")) return 0;
+    if (!stralloc_catulong0(&line,weight,0)) return 0;
+    if (!stralloc_cats(&line,":")) return 0;
+    if (!stralloc_catulong0(&line,port,0)) return 0;
+  }
+  else if (dns_packet_rrtypematch(data,DNS_T_PTR)) {
     if (!stralloc_copys(&line,"^")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,":")) return 0;
@@ -221,7 +221,7 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!dns_domain_todot_cat(&line,d1)) return 0;
     if (!stralloc_cats(&line,".")) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_MX)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_MX)) {
     uint16 dist;
     if (!stralloc_copys(&line,"@")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
@@ -233,7 +233,7 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     if (!stralloc_cats(&line,".:")) return 0;
     if (!stralloc_catulong0(&line,dist,0)) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_A) && (dlen == IP4_LEN)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_A) && (dlen == IP4_LEN)) {
     char ipstr[IP4_FMT];
     if (!stralloc_copys(&line,"+")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
@@ -241,7 +241,7 @@ unsigned int doit(char *buf,unsigned int len,unsigned int pos)
     x_copy(buf,len,pos,data,IP4_LEN);
     if (!stralloc_catb(&line,ipstr,ip4_fmt(ipstr,data))) return 0;
   }
-  else if (byte_equal(data,2,DNS_T_AAAA) && (dlen == IP6_SANS_SCOPE_LEN)) {
+  else if (dns_packet_rrtypematch(data,DNS_T_AAAA) && (dlen == IP6_SANS_SCOPE_LEN)) {
     char ipstr[IP6_FMT];
     if (!stralloc_copys(&line,"+")) return 0;
     if (!dns_domain_todot_cat(&line,d1)) return 0;
@@ -350,7 +350,7 @@ int main(int argc,char **argv)
   pos = x_getname(packet.s,packet.len,pos,&d1);
   if (!dns_domain_equal(zone,d1)) { errno = error_proto; die_parse(); }
   pos = x_copy(packet.s,packet.len,pos,out,10);
-  if (byte_diff(out,4,DNS_T_SOA DNS_C_IN)) { errno = error_proto; die_parse(); }
+  if (mem_diff(out,4,DNS_T_SOA DNS_C_IN)) { errno = error_proto; die_parse(); }
   pos = x_skipname(packet.s,packet.len,pos);
   pos = x_skipname(packet.s,packet.len,pos);
   pos = x_copy(packet.s,packet.len,pos,out,4);

@@ -7,7 +7,7 @@
 #define IP6_LEN 20
 #define IP6_SANS_SCOPE_LEN 16
 #define IP6_SCOPE_ID_LEN 4
-struct ip_address { 
+struct ip_address {
   unsigned char len;
   union {
     unsigned char d4[IP4_LEN];

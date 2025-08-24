@@ -240,14 +240,20 @@ This option queries attacker-supplied servers for attacker-supplied information,
 Use <arg>-R</arg> wherever possible.
 Other compatible tools (such as <citerefentry><refentrytitle>s6-tcpclient</refentrytitle><manvolnum>1</manvolnum></citerefentry>) have indeed reversed the default.
 </caution>
+<caution>
+<command>tcpserver</command> does not handle the IDENT protocol's error responses correctly, or recognize operating systems.
+</caution>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term><arg>-R</arg></term>
 <listitem><para>
 Do not attempt to obtain <envar>TCPREMOTEINFO</envar> from the remote host.
-To avoid loops, you must use this option for servers on TCP ports 53 and 113.
-</para></listitem>
+</para>
+<caution>
+To avoid loops, you <emphasis>must</emphasis> use this option for servers on TCP ports 53 and 113.
+</caution>
+</listitem>
 </varlistentry>
 <varlistentry>
 <term><arg>-t</arg> <replaceable>n</replaceable></term>

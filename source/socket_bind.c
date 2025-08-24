@@ -2,7 +2,7 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include "mem.h"
 #include "socket.h"
 #include "error.h"
 #include "ip.h"
@@ -13,13 +13,13 @@ static int socket_bind4(int s,const char ip[IP4_LEN],uint16 port)
 {
   struct sockaddr_in sa;
 
-  byte_zero(&sa,sizeof sa);
+  mem_zero(&sa,sizeof sa);
 #if defined(SIN6_LEN)	// sic!
   sa.sin_len = sizeof sa;
 #endif
   sa.sin_family = AF_INET;
   uint16_pack_big((char *) &sa.sin_port,port);
-  byte_copy(&sa.sin_addr,4,ip);
+  mem_copy(&sa.sin_addr,4,ip);
 
   return bind(s,(const struct sockaddr *) &sa,sizeof sa);
 }
@@ -35,14 +35,14 @@ static int socket_bind6(int s,const char ip[IP6_LEN],uint16 port)
 {
   struct sockaddr_in6 sa;
 
-  byte_zero(&sa,sizeof sa);
+  mem_zero(&sa,sizeof sa);
 #if defined(SIN6_LEN)
   sa.sin6_len = sizeof sa;
 #endif
   sa.sin6_family = AF_INET6;
   uint16_pack_big((char *) &sa.sin6_port,port);
-  byte_copy(&sa.sin6_addr,IP6_SANS_SCOPE_LEN,ip);
-  byte_copy(&sa.sin6_scope_id,IP6_SCOPE_ID_LEN,ip+IP6_SANS_SCOPE_LEN);
+  mem_copy(&sa.sin6_addr,IP6_SANS_SCOPE_LEN,ip);
+  mem_copy(&sa.sin6_scope_id,IP6_SCOPE_ID_LEN,ip+IP6_SANS_SCOPE_LEN);
 
   return bind(s,(struct sockaddr *) &sa,sizeof sa);
 }

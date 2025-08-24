@@ -22,6 +22,7 @@
 #include "dns_nd.h"
 #include "dns_constants.h"
 #include "dns_domain.h"
+#include "dns_packet.h"
 
 #define FATAL "tinydns-data: fatal: "
 
@@ -442,40 +443,40 @@ int main(void)
 	}
 	break;
 
-      case 'S': 
-        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem(); 
+      case 'S':
+        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem();
 	ttlparse(&f[6],&ttl,TTL_POSITIVE,"S");
-        ttdparse(&f[7],ttd); 
-        locparse(&f[8],loc); 
-  
-        if (!stralloc_0(&f[1])) nomem(); 
-  
-        if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) { 
-          if (!stralloc_cats(&f[2],".srv.")) nomem(); 
-          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem(); 
-        } 
-        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem(); 
-  
-        if (!stralloc_0(&f[4])) nomem(); 
-        if (!scan_ulong(f[4].s,&u)) u = 0; 
-        uint16_pack_big(srv,u); 
-        if (!stralloc_0(&f[5])) nomem(); 
-        if (!scan_ulong(f[5].s,&u)) u = 0; 
-        uint16_pack_big(srv + 2,u); 
-        if (!stralloc_0(&f[3])) nomem(); 
-        if (!scan_ulong(f[3].s,&u)) nomem(); 
-        uint16_pack_big(srv + 4,u); 
-  
-        rr_start(DNS_T_SRV,ttl,ttd,loc); 
-        rr_add(srv,sizeof srv); 
-        rr_addname(d2); 
-        rr_finish(d1); 
-  
+        ttdparse(&f[7],ttd);
+        locparse(&f[8],loc);
+
+        if (!stralloc_0(&f[1])) nomem();
+
+        if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) {
+          if (!stralloc_cats(&f[2],".srv.")) nomem();
+          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem();
+        }
+        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem();
+
+        if (!stralloc_0(&f[4])) nomem();
+        if (!scan_ulong(f[4].s,&u)) u = 0;
+        uint16_pack_big(srv,u);
+        if (!stralloc_0(&f[5])) nomem();
+        if (!scan_ulong(f[5].s,&u)) u = 0;
+        uint16_pack_big(srv + 2,u);
+        if (!stralloc_0(&f[3])) nomem();
+        if (!scan_ulong(f[3].s,&u)) nomem();
+        uint16_pack_big(srv + 4,u);
+
+        rr_start(DNS_T_SRV,ttl,ttd,loc);
+        rr_add(srv,sizeof srv);
+        rr_addname(d2);
+        rr_finish(d1);
+
 	iplen = ip4_scan(f[1].s,ip4) ;
 	if (iplen != 0 && iplen + 1 == f[1].len) {
-          rr_start(DNS_T_A,ttl,ttd,loc); 
-          rr_add(ip4,sizeof ip4); 
-          rr_finish(d2); 
+          rr_start(DNS_T_A,ttl,ttd,loc);
+          rr_add(ip4,sizeof ip4);
+          rr_finish(d2);
 	} else if (f[1].len > 1) {
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
@@ -485,41 +486,41 @@ int main(void)
 	  } else if (f[1].len > 1)
 	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
 	}
-        break; 
+        break;
 
-      case 'H': 
-        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem(); 
+      case 'H':
+        if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem();
 	ttlparse(&f[5],&ttl,TTL_POSITIVE,"H");
-        ttdparse(&f[6],ttd); 
-        locparse(&f[7],loc); 
-  
-        if (!stralloc_0(&f[1])) nomem(); 
-  
+        ttdparse(&f[6],ttd);
+        locparse(&f[7],loc);
+
+        if (!stralloc_0(&f[1])) nomem();
+
 	if (f[2].len < 1) {
-          if (!stralloc_cats(&f[2],".")) nomem(); 
-	} else if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) { 
-          if (!stralloc_cats(&f[2],".")) nomem(); 
-          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem(); 
-        } 
-        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem(); 
-  
-        if (!stralloc_0(&f[3])) nomem(); 
-        if (!scan_ulong(f[3].s,&u)) u = 0; 
-        uint16_pack_big(svcb,u); 
-  
+          if (!stralloc_cats(&f[2],".")) nomem();
+	} else if (byte_chr(f[2].s,f[2].len,'.') >= f[2].len) {
+          if (!stralloc_cats(&f[2],".")) nomem();
+          if (!stralloc_catb(&f[2],f[0].s,f[0].len)) nomem();
+        }
+        if (!dns_domain_fromdot(&d2,f[2].s,f[2].len)) nomem();
+
+        if (!stralloc_0(&f[3])) nomem();
+        if (!scan_ulong(f[3].s,&u)) u = 0;
+        uint16_pack_big(svcb,u);
+
         if (f[4].len > 1)
           die_semantic4("unparseable parameters in ","H"," line", "");
 
-        rr_start(DNS_T_HTTPS,ttl,ttd,loc); 
-        rr_add(svcb,sizeof svcb); 
-        rr_addname(d2); 
-        rr_finish(d1); 
-  
+        rr_start(DNS_T_HTTPS,ttl,ttd,loc);
+        rr_add(svcb,sizeof svcb);
+        rr_addname(d2);
+        rr_finish(d1);
+
 	iplen = ip4_scan(f[1].s,ip4) ;
 	if (iplen != 0 && iplen + 1 == f[1].len) {
-          rr_start(DNS_T_A,ttl,ttd,loc); 
-          rr_add(ip4,sizeof ip4); 
-          rr_finish(d2); 
+          rr_start(DNS_T_A,ttl,ttd,loc);
+          rr_add(ip4,sizeof ip4);
+          rr_finish(d2);
 	} else if (f[1].len > 1) {
 	  iplen = ip6_scan(f[1].s,ip6,'_') ;
 	  if (iplen != 0 && iplen + 1 == f[1].len) {
@@ -529,7 +530,7 @@ int main(void)
 	  } else if (f[1].len > 1)
 	    die_semantic4("unparseable IP address in ","@"," line: ", f[1].s) ;
 	}
-        break; 
+        break;
 
       case '^': case 'C':
 	if (!dns_domain_fromdot(&d1,f[0].s,f[0].len)) nomem();
@@ -577,23 +578,23 @@ int main(void)
 	if (!stralloc_0(&f[1])) nomem();
 	scan_ulong(f[1].s,&u);
 	uint16_pack_big(type,u);
-	if (byte_equal(type,2,DNS_T_AXFR))
+	if (dns_packet_typematch(type,DNS_T_AXFR))
 	  syntaxerror(": type AXFR prohibited");
-	else if (byte_equal(type,2,DNS_T_IXFR))
+	else if (dns_packet_typematch(type,DNS_T_IXFR))
 	  syntaxerror(": type IXFR prohibited");
-	else if (byte_equal(type,2,DNS_T_ANY))
+	else if (dns_packet_typematch(type,DNS_T_ANY))
 	  syntaxerror(": type ANY prohibited");
-	else if (byte_equal(type,2,DNS_T_0))
+	else if (dns_packet_typematch(type,DNS_T_0))
 	  syntaxerror(": type 0 prohibited");
-	else if (byte_equal(type,2,DNS_T_SOA))
+	else if (dns_packet_typematch(type,DNS_T_SOA))
 	  syntaxerror(": type SOA prohibited");
-	else if (byte_equal(type,2,DNS_T_NS))
+	else if (dns_packet_typematch(type,DNS_T_NS))
 	  syntaxerror(": type NS prohibited");
-	else if (byte_equal(type,2,DNS_T_CNAME))
+	else if (dns_packet_typematch(type,DNS_T_CNAME))
 	  syntaxerror(": type CNAME prohibited");
-	else if (byte_equal(type,2,DNS_T_PTR))
+	else if (dns_packet_typematch(type,DNS_T_PTR))
 	  syntaxerror(": type PTR prohibited");
-	else if (byte_equal(type,2,DNS_T_MX))
+	else if (dns_packet_typematch(type,DNS_T_MX))
 	  syntaxerror(": type MX prohibited");
 
 	txtparse(&f[2]);

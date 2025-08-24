@@ -5,6 +5,7 @@
 #include "fmt.h"
 #include "scan.h"
 #include "byte.h"
+#include "mem.h"
 #include "error.h"
 #include "strerr.h"
 #include "alloc.h"
@@ -83,7 +84,7 @@ void
 optarg_num ( unsigned long * u )
 {
   unsigned int pos ;
-  pos = scan_ulong(optarg,u); 
+  pos = scan_ulong(optarg,u);
   if (0 == pos || optarg[pos])
     strerr_die3x(111,FATAL, optarg, " is not a number");
 }
@@ -152,8 +153,8 @@ main(int argc,char **argv)
       dns_name4_domain(qbuf4,ip4);
       qname = alloc(sizeof qbuf4);
       if (!qname) nomem();
-      byte_copy(qname,sizeof qbuf4,qbuf4);
-      if (!type) byte_copy(qtype,2,DNS_T_PTR);
+      mem_copy(qname,sizeof qbuf4,qbuf4);
+      if (!type) mem_copy(qtype,2,DNS_T_PTR);
     }
   }
   if (!qname && flag6) {
@@ -166,10 +167,10 @@ main(int argc,char **argv)
       dns_name6_domain(qbuf6,ip6);
       qname = alloc(sizeof qbuf6);
       if (!qname) nomem();
-      byte_copy(qname,sizeof qbuf6,qbuf6);
-      if (!type) byte_copy(qtype,2,DNS_T_PTR);
+      mem_copy(qname,sizeof qbuf6,qbuf6);
+      if (!type) mem_copy(qtype,2,DNS_T_PTR);
     }
-  } 
+  }
 
   dns_random_init(seed);
 
@@ -180,7 +181,7 @@ main(int argc,char **argv)
     if (ip.len >= sizeof server_list) ip.len = sizeof server_list;
     for (j = 0;j < sizeof server_list/sizeof *server_list;++j)
       ip_make_unassigned(server_list + j);
-    byte_copy(server_list,ip.len,ip.s);
+    mem_copy(server_list,ip.len,ip.s);
     server_count = ip.len / sizeof *server_list;
     port = 53;
   } else {
@@ -194,10 +195,10 @@ main(int argc,char **argv)
     unsigned int plus,fqdnlen;
 
     if (!type) {
-      if (flag4) 
-	byte_copy(qtype,2,DNS_T_A);
-      else if (flag6) 
-	byte_copy(qtype,2,DNS_T_AAAA);
+      if (flag4)
+	mem_copy(qtype,2,DNS_T_A);
+      else if (flag6)
+	mem_copy(qtype,2,DNS_T_AAAA);
       else
 	usage();
     }
@@ -219,7 +220,7 @@ main(int argc,char **argv)
 	unsigned int j;
 
 	j = byte_chr(fqdn.s + i,fqdnlen - i,'+');
-	byte_copy(fqdn.s + plus,j,fqdn.s + i);
+	mem_copy(fqdn.s + plus,j,fqdn.s + i);
 	fqdn.len = plus + j;
 	if (!dns_domain_fromdot(&qname,fqdn.s,fqdn.len)) oops();
 	r = doit(qname,qtype,server_list,server_count,port,flagrecursive);

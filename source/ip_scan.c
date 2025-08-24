@@ -11,7 +11,7 @@ unsigned int ip4_scan_n(const char *s,unsigned int max,char ip[IP4_LEN])
   unsigned int i;
   unsigned int len;
   unsigned long u;
- 
+
   len = 0;
   i = scan_ulong_n(s,max,&u); if (!i || u > 255U) return 0; ip[0] = u; s += i; len += i; max -= i;
   if (!max || *s != '.') return 0; ++s; ++len; --max;
@@ -34,7 +34,7 @@ static unsigned int ip6_scan_n(const char *s,unsigned int max,char ip[IP6_LEN],c
   unsigned int len;
   unsigned long u;
   char * a;
- 
+
   len = 0;
   a = ip;
   i = scan_xlong_n(s,max,&u); if (!i || u > 0xFFFF) return 0; uint16_pack_big(a,u); s += i; len += i; a += 2; max -= i;
@@ -85,7 +85,7 @@ unsigned int ip_scan(const char * s,struct ip_address * ip,char sep)
 unsigned int ip_scanbracket(const char * s,struct ip_address * ip,char sep)
 {
   unsigned int len;
- 
+
   if (*s != '[') return 0;
   len = ip_scan(s + 1,ip,sep);
   if (!len) return 0;

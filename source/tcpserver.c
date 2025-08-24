@@ -280,7 +280,7 @@ void sigchld()
 {
   int wstat;
   int pid;
- 
+
   while ((pid = wait_nohang(&wstat)) > 0) {
     if (verbosity >= 2) {
       strnum[fmt_ulong(strnum,pid)] = 0;
@@ -296,7 +296,7 @@ void
 optarg_num ( unsigned long * u )
 {
   unsigned int pos ;
-  pos = scan_ulong(optarg,u); 
+  pos = scan_ulong(optarg,u);
   if (0 == pos || optarg[pos])
     strerr_die3x(111,FATAL, optarg, " is not a number");
 }
@@ -311,7 +311,7 @@ main(int argc,char **argv)
   unsigned long u;
   int s;
   int t;
- 
+
   while ((opt = getopt(argc,argv,"dDvqQhHrR1UXx:t:u:g:l:b:B:c:pPoO")) != opteof)
     switch(opt) {
       case 'b': optarg_num(&backlog); break;
@@ -346,7 +346,7 @@ main(int argc,char **argv)
 
   if (!verbosity)
     buffer_2->fd = -1;
- 
+
   hostname = *argv++;
   if (!hostname) usage();
   if (str_equal(hostname,"")) hostname = "0.0.0.0";
@@ -364,12 +364,12 @@ main(int argc,char **argv)
   }
 
   if (!*argv) usage();
- 
+
   sig_block(sig_child);
   sig_catch(sig_child,sigchld);
   sig_catch(sig_term,sigterm);
   sig_ignore(sig_pipe);
- 
+
   if (!stralloc_copys(&tmp,hostname))
     strerr_die2x(111,FATAL,"out of memory");
   if (dns_ip_qualify(&addresses,&fqdn,&tmp) == -1)
@@ -394,7 +394,7 @@ main(int argc,char **argv)
   if (uid) if (prot_uid(uid) == -1)
     strerr_die2sys(111,FATAL,"unable to set uid: ");
 
- 
+
   localportstr[fmt_ulong(localportstr,localport)] = 0;
   if (flag1) {
     buffer_init(&b,buffer_unixwrite,1,bspace,sizeof bspace);
@@ -402,11 +402,11 @@ main(int argc,char **argv)
     buffer_puts(&b,"\n");
     buffer_flush(&b);
   }
- 
+
   if (0 != s) close(0);
   if (1 != s) close(1);
   printstatus();
- 
+
   for (;;) {
     while (numchildren >= limit) sig_pause();
 
@@ -416,7 +416,7 @@ main(int argc,char **argv)
 
     if (t == -1) continue;
     ++numchildren; printstatus();
- 
+
     switch(fork()) {
       case 0:
         close(s);

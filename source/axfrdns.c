@@ -6,6 +6,7 @@
 #include "uint16.h"
 #include "ip.h"
 #include "tai.h"
+#include "publicfile_server.h"
 #include "buffer.h"
 #include "timeoutread.h"
 #include "timeoutwrite.h"
@@ -15,7 +16,7 @@
 #include "stralloc.h"
 #include "strerr.h"
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "case.h"
 #include "scan.h"
 #include "qlog.h"
@@ -25,8 +26,7 @@
 #include "dns_packet.h"
 #include "dns_domain.h"
 #include "dns_random.h"
-
-extern int respond(char *,char *,const struct ip_address *);
+#include "dns_server.h"
 
 #define FATAL "axfrdns: fatal: "
 
@@ -185,7 +185,7 @@ static int build(stralloc *sa,char *q,int flagsoa,char id[2])
 
   dpos = 0;
   copy(type,2);
-  if (flagsoa != byte_equal(type,2,DNS_T_SOA)) return 0;
+  if (flagsoa != dns_packet_typematch(type,DNS_T_SOA)) return 0;
 
   if (!stralloc_copyb(sa,id,2)) nomem();
   if (!stralloc_catb(sa,"\204\000\0\0\0\1\0\0\0\0",10)) nomem();
@@ -193,7 +193,7 @@ static int build(stralloc *sa,char *q,int flagsoa,char id[2])
   if ((misc[0] == '=' + 1) || (misc[0] == '*' + 1)) {
     --misc[0];
     copy(recordloc,2);
-    if (byte_diff(recordloc,2,clientloc)) return 0;
+    if (mem_diff(recordloc,2,clientloc)) return 0;
   }
   if (misc[0] == '*') {
     if (flagsoa) return 0;
@@ -204,9 +204,9 @@ static int build(stralloc *sa,char *q,int flagsoa,char id[2])
 
   copy(ttl,4);
   copy(ttd,8);
-  if (byte_diff(ttd,8,"\0\0\0\0\0\0\0\0")) {
+  if (mem_diff(ttd,8,"\0\0\0\0\0\0\0\0")) {
     tai_unpack(ttd,&cutoff);
-    if (byte_equal(ttl,4,"\0\0\0\0")) {
+    if (mem_equal(ttl,4,"\0\0\0\0")) {
       if (tai_less(&cutoff,&now)) return 0;
       uint32_pack_big(ttl,2);
     }
@@ -219,16 +219,16 @@ static int build(stralloc *sa,char *q,int flagsoa,char id[2])
   if (!stralloc_catb(sa,"\0\0",2)) nomem();
   rdatapos = sa->len;
 
-  if (byte_equal(type,2,DNS_T_SOA)) {
+  if (dns_packet_typematch(type,DNS_T_SOA)) {
     doname(sa);
     doname(sa);
     copy(misc,20);
     if (!stralloc_catb(sa,misc,20)) nomem();
   }
-  else if (byte_equal(type,2,DNS_T_NS) || byte_equal(type,2,DNS_T_PTR) || byte_equal(type,2,DNS_T_CNAME)) {
+  else if (dns_packet_typematch(type,DNS_T_NS) || dns_packet_typematch(type,DNS_T_PTR) || dns_packet_typematch(type,DNS_T_CNAME)) {
     doname(sa);
   }
-  else if (byte_equal(type,2,DNS_T_MX)) {
+  else if (dns_packet_typematch(type,DNS_T_MX)) {
     copy(misc,2);
     if (!stralloc_catb(sa,misc,2)) nomem();
     doname(sa);
@@ -260,11 +260,11 @@ static void doaxfr(char id[2])
   tai_now(&now);
   cdb_init(&c,fdcdb);
 
-  byte_zero(clientloc,2);
+  mem_zero(clientloc,2);
   if (ip_is4(&ip)) {
     key[0] = 0;
     key[1] = '%';
-    byte_copy(key + 2,4,ip.d4);
+    mem_copy(key + 2,4,ip.d4);
     r = cdb_find(&c,key,6);
     if (!r) r = cdb_find(&c,key,5);
     if (!r) r = cdb_find(&c,key,4);
@@ -349,7 +349,7 @@ int main(void)
   dns_random_init(seed);
 
   axfr = env_get("AXFR");
-  
+
   x = ucspi_get_remoteip_str(NULL, NULL, NULL);
   if (!x || !ip_scan(x,&ip,':'))
     ip_make_zero4(&ip);
@@ -391,16 +391,16 @@ int main(void)
     pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) die_truncated();
     pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) die_truncated();
 
-    if (byte_diff(qclass,2,DNS_C_IN)) {
+    if (!dns_packet_internetclass(qclass)) {
       qlog(&ip,port,header + HEADER_ID,65535,zone,qtype," C ");
       fatal1x("bogus query: bad class");
     }
 
-    if (byte_equal(qtype,2,DNS_T_AXFR) || byte_equal(qtype,2,DNS_T_IXFR)) {
+    if (dns_packet_typematch(qtype,DNS_T_AXFR) || dns_packet_typematch(qtype,DNS_T_IXFR)) {
       case_lowerb(zone,zonelen);
       fdcdb = open_read("data.cdb");
       if (fdcdb == -1) die_cdbread();
-      qlog(&ip,port,header + HEADER_ID,65535,zone,qtype,byte_equal(qtype,2,DNS_T_IXFR) ? " I " : " A ");
+      qlog(&ip,port,header + HEADER_ID,65535,zone,qtype,dns_packet_typematch(qtype,DNS_T_IXFR) ? " I " : " A ");
       doaxfr(header + HEADER_ID);
       close(fdcdb);
     }
@@ -411,7 +411,7 @@ int main(void)
       response_id(header + HEADER_ID);
       response[3] &= ~128;	/* set RA=0 */
       if (!(header[2] & 1)) response[2] &= ~1; /* echo client's RD */
-      if (!respond(zone,qtype,&ip)) {
+      if (!respond(zone,qtype,MAX_RESPONSE,&ip)) {
 	qlog(&ip,port,header + HEADER_ID,65535,zone,qtype," - ");
 	die_outside();
       }

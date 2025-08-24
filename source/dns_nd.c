@@ -55,8 +55,8 @@ void dns_name6_domain(char name[DNS_NAME6_DOMAIN],const char ip[IP6_LEN])
 
   namelen = 0;
   for (j = 16; j-- > 0; ) {
-    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j] & 15U); 
-    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j] / 16U); 
+    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j] & 15U);
+    name[namelen++] = '\1'; name[namelen++] = fmt_xdigit(ip[j] / 16U);
   }
   byte_copy(name + namelen,10,"\003ip6\004arpa");
 }

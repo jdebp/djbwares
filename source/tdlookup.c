@@ -3,7 +3,7 @@
 #include "open.h"
 #include "tai.h"
 #include "cdb.h"
-#include "byte.h"
+#include "mem.h"
 #include "case.h"
 #include "dns_domain.h"
 #include "dns_packet.h"
@@ -29,7 +29,7 @@ static int want(const char *owner,const char type[2])
     pos = dns_packet_getname(response,response_len,pos,&d); if (!pos) return 0;
     pos = dns_packet_copy(response,response_len,pos,rrfixed,RRFIXED_SIZE); if (!pos) return 0;
     if (dns_domain_equal(d,owner))
-      if (byte_equal(rrfixed + RRFIXED_TYPE,2,type))
+      if (dns_packet_rrtypematch(rrfixed,type))
         return 0;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
     pos += datalen;
@@ -70,13 +70,13 @@ static int find(const char *d,int flagwild)
     if ((ch == '=' + 1) || (ch == '*' + 1)) {
       --ch;
       dpos = dns_packet_copy(data,dlen,dpos,recordloc,2); if (!dpos) return -1;
-      if (byte_diff(recordloc,2,clientloc)) continue;
+      if (mem_diff(recordloc,2,clientloc)) continue;
     }
     if (flagwild != (ch == '*')) continue;
     dpos = dns_packet_copy(data,dlen,dpos,ttlstr,4); if (!dpos) return -1;
     uint32_unpack_big(ttlstr,&ttl);
     dpos = dns_packet_copy(data,dlen,dpos,ttd,8); if (!dpos) return -1;
-    if (byte_diff(ttd,8,"\0\0\0\0\0\0\0\0")) {
+    if (mem_diff(ttd,8,"\0\0\0\0\0\0\0\0")) {
       tai_unpack(ttd,&cutoff);
       if (ttl == 0) {
 	if (tai_less(&cutoff,&now)) continue;
@@ -146,8 +146,8 @@ RESTART:
     cdb_findstart(&c);
     while ((r = find(control,0))) {
       if (r == -1) return 0;
-      if (byte_equal(type,2,DNS_T_SOA)) flagauthoritative = 1;
-      if (byte_equal(type,2,DNS_T_NS)) flagns = 1;
+      if (dns_packet_typematch(type,DNS_T_SOA)) flagauthoritative = 1;
+      if (dns_packet_typematch(type,DNS_T_NS)) flagns = 1;
     }
     if (flagns) break;
     if (!*control) { /* q is not within our bailiwick */
@@ -179,49 +179,49 @@ RESTART:
     while ((r = find(wild,wild != q))) {
       if (r == -1) return 0;
       flagfound = 1;
-      if (byte_diff(type,2,DNS_T_CNAME) && byte_equal(qtype,2,DNS_T_ANY)) continue;
-      if (flaggavesoa && byte_equal(type,2,DNS_T_SOA)) continue;
-      if (byte_diff(type,2,qtype) && byte_diff(type,2,DNS_T_CNAME)) continue;
-      if (byte_equal(type,2,DNS_T_A) && (dlen - dpos == IP4_LEN)) {
+      if (!dns_packet_typematch(type,DNS_T_CNAME) && dns_packet_typematch(qtype,DNS_T_ANY)) continue;
+      if (flaggavesoa && dns_packet_typematch(type,DNS_T_SOA)) continue;
+      if (!dns_packet_typematch(type,qtype) && !dns_packet_typematch(type,DNS_T_CNAME)) continue;
+      if (dns_packet_typematch(type,DNS_T_A) && (dlen - dpos == IP4_LEN)) {
 	addr4ttl = ttl;
 	i = dns_random(addr4num + 1);
 	if (i < 8) {
 	  if ((i < addr4num) && (addr4num < 8))
-	    byte_copy(addr4[addr4num],IP4_LEN,addr4[i]);
-	  byte_copy(addr4[i],IP4_LEN,data + dpos);
+	    mem_copy(addr4[addr4num],IP4_LEN,addr4[i]);
+	  mem_copy(addr4[i],IP4_LEN,data + dpos);
 	}
 	if (addr4num < 1000000) ++addr4num;
 	continue;
       }
-      if (byte_equal(type,2,DNS_T_AAAA) && (dlen - dpos == IP6_SANS_SCOPE_LEN)) {
+      if (dns_packet_typematch(type,DNS_T_AAAA) && (dlen - dpos == IP6_SANS_SCOPE_LEN)) {
 	addr6ttl = ttl;
 	i = dns_random(addr6num + 1);
 	if (i < 8) {
 	  if ((i < addr6num) && (addr6num < 8))
-	    byte_copy(addr6[addr6num],IP6_SANS_SCOPE_LEN,addr6[i]);
-	  byte_copy(addr6[i],IP6_SANS_SCOPE_LEN,data + dpos);
+	    mem_copy(addr6[addr6num],IP6_SANS_SCOPE_LEN,addr6[i]);
+	  mem_copy(addr6[i],IP6_SANS_SCOPE_LEN,data + dpos);
 	}
 	if (addr6num < 1000000) ++addr6num;
 	continue;
       }
       if (!response_rstart(q,type,ttl)) return 0;
-      if (byte_equal(type,2,DNS_T_NS) || byte_equal(type,2,DNS_T_PTR)) {
+      if (dns_packet_typematch(type,DNS_T_NS) || dns_packet_typematch(type,DNS_T_PTR)) {
 	if (!doname()) return 0;
       }
-      else if (byte_equal(type,2,DNS_T_CNAME)) {
+      else if (dns_packet_typematch(type,DNS_T_CNAME)) {
 	if (!doname()) return 0;
-        if (byte_diff(type,2,qtype)) {
+        if (!dns_packet_typematch(type,qtype)) {
 	  response_rfinish(RESPONSE_ANSWER);
           case_lowerb(d1,dns_domain_length(d1));
 	  if (!dns_domain_copy(pqname,d1)) return 0 ;
 	  goto RESTART ;
 	}
       }
-      else if (byte_equal(type,2,DNS_T_MX)) {
+      else if (dns_packet_typematch(type,DNS_T_MX)) {
 	if (!dobytes(2)) return 0;
 	if (!doname()) return 0;
       }
-      else if (byte_equal(type,2,DNS_T_SOA)) {
+      else if (dns_packet_typematch(type,DNS_T_SOA)) {
 	if (!doname()) return 0;
 	if (!doname()) return 0;
 	if (!dobytes(20)) return 0;
@@ -253,9 +253,9 @@ RESTART:
 
   if (!flagfound)
     response_nxdomain();
-  else if (byte_equal(qtype,2,DNS_T_ANY)) {
+  else if (dns_packet_typematch(qtype,DNS_T_ANY)) {
     if (!response_noany(*pqname)) return 0;
-  } else if (byte_equal(qtype,2,DNS_T_OPT)) {
+  } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
     if (!response_noopt(*pqname)) return 0;
   }
 
@@ -266,7 +266,7 @@ RESTART:
     cdb_findstart(&c);
     while ((r = find(control,0))) {
       if (r == -1) return 0;
-      if (byte_equal(type,2,DNS_T_SOA)) {
+      if (dns_packet_typematch(type,DNS_T_SOA)) {
         if (!response_rstart(control,DNS_T_SOA,ttl)) return 0;
 	if (!doname()) return 0;
 	if (!doname()) return 0;
@@ -281,7 +281,7 @@ RESTART:
       cdb_findstart(&c);
       while ((r = find(control,0))) {
         if (r == -1) return 0;
-        if (byte_equal(type,2,DNS_T_NS)) {
+        if (dns_packet_typematch(type,DNS_T_NS)) {
           if (!response_rstart(control,DNS_T_NS,ttl)) return 0;
 	  if (!doname()) return 0;
           response_rfinish(RESPONSE_AUTHORITY);
@@ -295,11 +295,11 @@ RESTART:
     bpos = dns_packet_skipname(response,arpos,bpos); if (!bpos) return 0;
     bpos = dns_packet_copy(response,arpos,bpos,x,RRFIXED_SIZE); if (!bpos) return 0;
     uint16_unpack_big(x + RRFIXED_DATALEN,&datalen);
-    if (byte_equal(x + RRFIXED_TYPE,2,DNS_T_NS)) {
+    if (dns_packet_rrtypematch(x,DNS_T_NS)) {
       if (!dns_packet_getname(response,arpos,bpos,&d1)) return 0;
-    } else if (byte_equal(x + RRFIXED_TYPE,2,DNS_T_MX) || byte_equal(x + RRFIXED_TYPE,2,DNS_T_HTTPS) || byte_equal(x + RRFIXED_TYPE,2,DNS_T_SVCB)) {
+    } else if (dns_packet_rrtypematch(x,DNS_T_MX) || dns_packet_rrtypematch(x,DNS_T_HTTPS) || dns_packet_rrtypematch(x,DNS_T_SVCB)) {
       if (!dns_packet_getname(response,arpos,bpos + 2,&d1)) return 0;
-    } else if (byte_equal(x + RRFIXED_TYPE,2,DNS_T_SRV)) {
+    } else if (dns_packet_rrtypematch(x,DNS_T_SRV)) {
       if (!dns_packet_getname(response,arpos,bpos + 6,&d1)) return 0;
     } else
       continue;
@@ -308,7 +308,7 @@ RESTART:
       cdb_findstart(&c);
       while ((r = find(d1,0))) {
         if (r == -1) return 0;
-        if (byte_equal(type,2,DNS_T_A)) {
+        if (dns_packet_typematch(type,DNS_T_A)) {
           if (!response_rstart(d1,DNS_T_A,ttl)) return 0;
           if (!dobytes(IP4_LEN)) return 0;
           response_rfinish(RESPONSE_ADDITIONAL);
@@ -319,7 +319,7 @@ RESTART:
       cdb_findstart(&c);
       while ((r = find(d1,0))) {
         if (r == -1) return 0;
-        if (byte_equal(type,2,DNS_T_AAAA)) {
+        if (dns_packet_typematch(type,DNS_T_AAAA)) {
           if (!response_rstart(d1,DNS_T_AAAA,ttl)) return 0;
           if (!dobytes(IP6_SANS_SCOPE_LEN)) return 0;
           response_rfinish(RESPONSE_ADDITIONAL);
@@ -329,10 +329,10 @@ RESTART:
   }
 
   if (flagauthoritative && (response_len > max)) {
-    byte_zero(response + RESPONSE_ADDITIONAL,2);
+    mem_zero(response + RESPONSE_ADDITIONAL,2);
     response_len = arpos;
     if (response_len > max) {
-      byte_zero(response + RESPONSE_AUTHORITY,2);
+      mem_zero(response + RESPONSE_AUTHORITY,2);
       response_len = aupos;
     }
   }
@@ -363,11 +363,11 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
   if (fd == -1) return 0;
   cdb_init(&c,fd);
 
-  byte_zero(clientloc,2);
+  mem_zero(clientloc,2);
   if (ip_is4(ip)) {
     key[0] = 0;
     key[1] = '%';
-    byte_copy(key + 2,4,ip->d4);
+    mem_copy(key + 2,4,ip->d4);
     r = cdb_find(&c,key,6);
     if (!r) r = cdb_find(&c,key,5);
     if (!r) r = cdb_find(&c,key,4);

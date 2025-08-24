@@ -8,6 +8,7 @@
 #include "dns_constants.h"
 #include "dns_server.h"
 #include "dns_domain.h"
+#include "dns_packet.h"
 #include "dd.h"
 #include "strerr.h"
 #include "response.h"
@@ -30,17 +31,17 @@ static int doit(const char *q,const char qtype[2])
   uint32 dlen;
   int i;
 
-  if (byte_equal(qtype,2,DNS_T_ANY)) {
+  if (dns_packet_typematch(qtype,DNS_T_ANY)) {
     if (!response_noany(q)) return 0;
     return 1;
   }
-  if (byte_equal(qtype,2,DNS_T_OPT)) {
+  if (dns_packet_typematch(qtype,DNS_T_OPT)) {
     if (!response_noopt(q)) return 0;
     return 1;
   }
 
-  flaga = byte_equal(qtype,2,DNS_T_A);
-  flagtxt = byte_equal(qtype,2,DNS_T_TXT);
+  flaga = dns_packet_typematch(qtype,DNS_T_A);
+  flagtxt = dns_packet_typematch(qtype,DNS_T_TXT);
   if (!flaga && !flagtxt) goto REFUSE;
 
   if (dd4(q,base,a) != IP4_LEN) goto REFUSE;
@@ -100,6 +101,7 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
   int result;
 
   (void)ipremote; /* Silence a compiler warning. */
+  (void)max; /* Silence a compiler warning. */
   fd = open_read("data.cdb");
   if (fd == -1) return 0;
   cdb_init(&c,fd);

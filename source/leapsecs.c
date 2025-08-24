@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	if (argc > 1)
 		strerr_die1x(100,"leapsecs: usage: leapsecs");
 	(void)argv;	/* Silence a compiler warning. */
-	
+
 	while (fgets(line,sizeof line,stdin)) {
 		if (line[0] == '+') {
 			if (caldate_scan(line + 1,&cd)) {

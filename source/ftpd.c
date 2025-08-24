@@ -5,91 +5,24 @@
 #include <unistd.h>
 #include "timeoutconn.h"
 #include "timeoutaccept.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
 #include "substdio.h"
 #include "fetch.h"
 #include "pathdecode.h"
 #include "file.h"
 #include "sig.h"
 #include "tai.h"
+#include "publicfile_server.h"
 #include "stralloc.h"
 #include "str.h"
 #include "error.h"
 #include "case.h"
 #include "byte.h"
+#include "mem.h"
 #include "env.h"
 #include "fmt.h"
 #include "scan.h"
 #include "ip.h"
 #include "ucspi.h"
-
-static long safewrite(int fd,char *buf,int len)
-{
-  int r;
-  r = timeoutwrite(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char outbuf[1024];
-static substdio out = SUBSTDIO_FDBUF(safewrite,1,outbuf,sizeof outbuf);
-
-static void out_flush(void)
-{
-  substdio_flush(&out);
-}
-
-static void out_put(const char *s,int len)
-{
-  while (len > 0) {
-    substdio_put(&out,s,1);
-    if (*s == (char) 255) substdio_put(&out,s,1);
-    ++s;
-    --len;
-  }
-}
-
-// used by fetch.c
-void out_puts(const char *s)
-{
-  out_put(s,str_len(s));
-}
-
-static long saferead(int fd,char *buf,int len)
-{
-  int r;
-  out_flush();
-  r = timeoutread(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char inbuf[512];
-static substdio in = SUBSTDIO_FDBUF(saferead,0,inbuf,sizeof inbuf);
-
-static void in_get(char *ch)
-{
-  for (;;) {
-    substdio_get(&in,ch,1);
-    if (*ch != (char) 255) return;
-    substdio_get(&in,ch,1);
-    if (*ch == (char) 255) return;
-
-    if ((*ch == (char) 254) || (*ch == (char) 252))
-      substdio_get(&in,ch,1);
-    else if (*ch == (char) 253) {
-      substdio_get(&in,ch,1);
-      substdio_put(&out,"\377\374",2);
-      substdio_put(&out,ch,1);
-    }
-    else if (*ch == (char) 251) {
-      substdio_get(&in,ch,1);
-      substdio_put(&out,"\377\376",2);
-      substdio_put(&out,ch,1);
-    }
-  }
-}
 
 static char strnum[FMT_ULONG];
 static struct ip_address iplocal = IP_ADDRESS_INIT;
@@ -118,9 +51,9 @@ static void startlistening(unsigned char x[6])
 
   stoplistening();
 
-  byte_zero(&sa,sizeof sa);
+  mem_zero(&sa,sizeof sa);
   sa.sin_family = AF_INET;
-  byte_copy(&sa.sin_addr,4,iplocal.d4);  /* FIXME: IPv6 */
+  mem_copy(&sa.sin_addr,4,iplocal.d4);  /* FIXME: IPv6 */
 
   fdlisten = socket(AF_INET,SOCK_STREAM,0);
   if (fdlisten == -1) _exit(22);
@@ -133,8 +66,8 @@ static void startlistening(unsigned char x[6])
   dummy = sizeof sa;
   if (getsockname(fdlisten,(struct sockaddr *) &sa,&dummy) == -1) _exit(22);
 
-  byte_copy(x,4,&sa.sin_addr);
-  byte_copy(x + 4,2,&sa.sin_port);
+  mem_copy(x,4,&sa.sin_addr);
+  mem_copy(x + 4,2,&sa.sin_port);
 }
 
 static void spsv(void)
@@ -189,11 +122,11 @@ static void epsv(const char *arg)
   unsigned char x[6];
 
   if (*arg) {
-    if (case_equals(arg,"all")) { 
+    if (case_equals(arg,"all")) {
       epsv_only = 1;
-    } else if (!case_equals(arg,"1")) { 
+    } else if (!case_equals(arg,"1")) {
       out_puts("504 I do not do that IP protocol.\r\n");
-      return; 
+      return;
     }
   }
 
@@ -237,7 +170,7 @@ static void port(char *arg)
     out_puts("501 Sorry, I don't accept port numbers below 1024.\r\n");
     return;
   }
-  if (byte_diff(x,4,ipremote.d4)) {  /* FIXME: IPv6 */
+  if (mem_diff(x,4,ipremote.d4)) {  /* FIXME: IPv6 */
     out_puts("501 Sorry, I don't allow PORT relaying.\r\n");
     return;
   }
@@ -312,7 +245,7 @@ static void get(char *arg,int how)
       if (getpeername(fddata,(struct sockaddr *) &sa,&dummy) == -1) {
         close(fddata); fddata = -1;
       }
-      else if (byte_diff(&sa.sin_addr,4,ipremote.d4)) {  /* FIXME: IPv6 */
+      else if (mem_diff(&sa.sin_addr,4,ipremote.d4)) {  /* FIXME: IPv6 */
 	errno = error_acces;
 	close(fddata); fddata = -1;
       }
@@ -399,12 +332,12 @@ static void say_dir(const char *code)
       ch = dir.s[i];
       if (ch == '\n') out_put("",1);
       else if (ch == '"') out_put("\"\"",2);
-      else out_put(&ch,1);
+      else out_put_nvt(&ch,1);
     }
   out_puts("\" \r\n");
 }
 
-static void cwd(const char *arg) 
+static void cwd(const char *arg)
 {
   dir_move(arg);
   if (!ok_dir()) return;
@@ -561,8 +494,6 @@ static void request(char *cmd,char *arg)
   out_puts("502 Sorry, I don't understand that command.\r\n");
 }
 
-static stralloc line = stralloc_static_0;
-
 void doit(void)
 {
   char *cmd;
@@ -595,7 +526,7 @@ void doit(void)
   for (;;) {
     if (!stralloc_copys(&line,"")) _exit(21);
     for (;;) {
-      in_get(&ch);
+      in_get_nvt(&ch);
       if (ch == '\n') break;
       if (!ch) ch = '\n';
       if (!stralloc_append(&line,&ch)) _exit(21);

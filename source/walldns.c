@@ -1,8 +1,9 @@
-#include "byte.h"
+#include "mem.h"
 #include "uint32.h"
 #include "dns_constants.h"
 #include "dns_server.h"
 #include "dns_domain.h"
+#include "dns_packet.h"
 #include "dns_nd.h"
 #include "dd.h"
 #include "response.h"
@@ -12,11 +13,6 @@ const char *starting = "starting walldns\n";
 
 void initialize(void)
 {
-}
-
-static int typematch(const char rtype[2],const char qtype[2])
-{
-  return byte_equal(qtype,2,rtype);
 }
 
 static const char ipv4onlyarpa[] = "\010ipv4only\004arpa";
@@ -36,13 +32,13 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
   /* Note that these are subtly different to the fixed built-in responses that proxy DNS servers or DNS client libraries should/must give. */
 
   if (dd4(q,"",ip4) == IP4_LEN) {
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
       response_placeholder_soa("",TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
       response_placeholder_soa("",TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_A,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_A)) {
       if (!response_rstart(q,DNS_T_A,TTL_STATIC_POSITIVE)) return 0;
       if (!response_addbytes(ip4,sizeof ip4)) return 0;
       response_rfinish(RESPONSE_ANSWER);
@@ -54,13 +50,13 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
     if (IP4_LEN != dd4(q,inaddrarpa,ip4)) {
       response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE);
       response_nxdomain();
-    } else if (typematch(DNS_T_ANY,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
       response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
       response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_PTR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_PTR)) {
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
       if (127 == (unsigned char)ip4[3]) {
         if (0 == (unsigned char)ip4[2]
@@ -71,7 +67,7 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
         } else {
           char name[DNS_NAME4_LDOMAIN];
 
-          byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
+          mem_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
           dns_name4_ldomain(name,ip4);
           if (!response_addname(name)) return -1;
         }
@@ -86,9 +82,9 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
         if (!response_addname(q)) return 0; /* original opaque wall */
       }
       response_rfinish(RESPONSE_ANSWER);
-    } else if (typematch(DNS_T_A,qtype)) {  /* original opaque wall */
+    } else if (dns_packet_typematch(qtype,DNS_T_A)) {  /* original opaque wall */
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
-      byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
+      mem_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
       if (!response_addbytes(ip4,sizeof ip4)) return 0;
       response_rfinish(RESPONSE_ANSWER);
     } else
@@ -99,23 +95,23 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
     if (IP6_SANS_SCOPE_LEN * 2 != dd6(q,ip6arpa,ip6)) {
       response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE);
       response_nxdomain();
-    } else if (typematch(DNS_T_ANY,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
       response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
       response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_PTR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_PTR)) {
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
-        if (byte_equal("\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000",IP6_SANS_SCOPE_LEN,ip6)) {
+        if (mem_equal("\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000",IP6_SANS_SCOPE_LEN,ip6)) {
           if (!response_addname(localhost)) return 0;
         } else {
         if (!response_addname(q)) return 0;
         }
       response_rfinish(RESPONSE_ANSWER);
-    } else if (typematch(DNS_T_AAAA,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AAAA)) {
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
-      byte_reverse(ip6, sizeof ip6); /* They are little-endian in the domain name. */
+      mem_reverse(ip6, sizeof ip6); /* They are little-endian in the domain name. */
       if (!response_addbytes(ip6,sizeof ip6)) return 0;
       response_rfinish(RESPONSE_ANSWER);
     } else
@@ -123,17 +119,17 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
     return 1;
   } else
   if (dns_domain_suffix(q,localhost)) {             /* RFC 6761 */
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
       response_placeholder_soa(localhost,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
       response_placeholder_soa(localhost,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_A,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_A)) {
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
         if (!response_addbytes("\177\000\000\001",IP4_LEN)) return 0;
       response_rfinish(RESPONSE_ANSWER);
-    } else if (typematch(DNS_T_AAAA,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AAAA)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
         if (!response_addbytes("\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\001",IP6_SANS_SCOPE_LEN)) return 0;
         response_rfinish(RESPONSE_ANSWER);
@@ -142,13 +138,13 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
     return 1;
   } else
   if (dns_domain_equal(q,ipv4onlyarpa)) {           /* RFC 8880 */
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
       response_placeholder_soa(ipv4onlyarpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
       response_placeholder_soa(ipv4onlyarpa,TTL_STATIC_NEGATIVE);
-    } else if (typematch(DNS_T_A,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_A)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return 0;
         if (!response_addbytes("\300\000\000\252",IP4_LEN)) return 0;
         response_rfinish(RESPONSE_ANSWER);
@@ -186,9 +182,9 @@ int respond(const char *q,const char qtype[2],unsigned int max,const struct ip_a
     &&  !dns_domain_equal(q,"\007default\007service\004arpa")
     ) {
       response_nxdomain();
-    } else if (typematch(DNS_T_ANY,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return 0;
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return 0;
     }
     response_placeholder_soa(servicearpa,TTL_STATIC_NEGATIVE);

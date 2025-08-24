@@ -15,7 +15,7 @@ static int allwrite(int (*op)(),int fd,const char *buf,unsigned int len)
       if (errno == error_intr) continue;
       return -1; /* note that some data may have been written */
     }
-    if (w == 0) 
+    if (w == 0)
 	    ; /* luser's fault */
     buf += w;
     len -= w;
@@ -26,7 +26,7 @@ static int allwrite(int (*op)(),int fd,const char *buf,unsigned int len)
 int buffer_flush(buffer *s)
 {
   int p;
- 
+
   p = s->p;
   if (!p) return 0;
   s->p = 0;
@@ -36,7 +36,7 @@ int buffer_flush(buffer *s)
 int buffer_putalign(buffer *s,const char *buf,unsigned int len)
 {
   unsigned int n;
- 
+
   while (len > (n = s->n - s->p)) {
     byte_copy(s->x + s->p,n,buf); s->p += n; buf += n; len -= n;
     if (buffer_flush(s) == -1) return -1;
@@ -50,7 +50,7 @@ int buffer_putalign(buffer *s,const char *buf,unsigned int len)
 int buffer_put(buffer *s,const char *buf,unsigned int len)
 {
   unsigned int n;
- 
+
   n = s->n;
   if (len > n - s->p) {
     if (buffer_flush(s) == -1) return -1;

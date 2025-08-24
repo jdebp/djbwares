@@ -67,14 +67,14 @@ void doaddressdata(void)
       if (i < address.len) {
         left = byte_rchr(address.s,i,'.');
         if (left == i) left = 0; else ++left;
-  
+
         ++i;
         right = i + byte_chr(address.s + i,address.len - i,'.');
-  
+
         getnum(address.s + left,i - 1 - left,&bot);
         getnum(address.s + i,right - i,&top);
         if (top > 255) top = 255;
-  
+
         while (bot <= top) {
 	  if (!stralloc_copyb(&key,address.s,left)) nomem();
 	  if (!stralloc_catb(&key,strnum,fmt_ulong(strnum,bot))) nomem();
@@ -82,7 +82,7 @@ void doaddressdata(void)
           if (cdb_make_add(&c,key.s,key.len,data.s,data.len) == -1) die_write();
 	  ++bot;
         }
-  
+
         return;
       }
     }

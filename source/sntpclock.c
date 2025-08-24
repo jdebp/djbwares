@@ -5,7 +5,7 @@
 #include "ip.h"
 #include "socket.h"
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "substdio.h"
 #include "readwrite.h"
 #include "select.h"
@@ -153,10 +153,10 @@ int main(int argc,char ** argv)
     uint16 dummy2;
     struct ip_address dummy1 = IP_ADDRESS_INIT;
 
-    byte_zero(query,sizeof query);
+    mem_zero(query,sizeof query);
     query[0] = 27; /* client, NTP version 3 */
     query[2] = 8;
-  
+
     gettimeofday(&tvcookie,(struct timezone *) 0);
     u = tvcookie.tv_sec + NTP_OFFSET;
     query[43] = u; u >>= 8;
@@ -169,7 +169,7 @@ int main(int argc,char ** argv)
     u = getpid();
     query[47] = u; u >>= 8;
     query[46] = u;
-  
+
     taia_now(&ta0);
     if (socket_send(s,query,sizeof query,&ipremote,portremote) == -1)
       strerr_die2sys(111,FATAL,"unable to send request: ");
@@ -191,7 +191,7 @@ int main(int argc,char ** argv)
 	|| (r >= sizeof response)
 	|| (((response[0] & 7) != 2) && ((response[0] & 7) != 4))
 	|| !(response[0] & 56)
-	|| byte_diff(query + 40,8,response + 24)
+	|| mem_diff(query + 40,8,response + 24)
        ) {
       strerr_warn2(WARNING,"unable to read clock: bad response format",0);
       continue;
@@ -211,7 +211,7 @@ int main(int argc,char ** argv)
 
     ntp_taia(response + 40,&taremote,flagleap);
     taia_add(&taremote,&taremote,&deltaoffset);
-  
+
     taia_add(&temp1,&deltamax,&ta1);
     taia_add(&temp2,&deltamin,&ta1);
     if (taia_less(&temp2,&taremote) && !taia_less(&temp1,&taremote)) {

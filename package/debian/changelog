@@ -1,8 +1,10 @@
 djbwares (12) stable; urgency=low
  
-  *
+  * A bug in axfrdns and tinydns-get caused by mixed C function signatures has been fixed.
+  * To eliminate more compiler warnings about type mis-matches, several Bernstein byte library routines have been replaced with new mem library routines or dns_packet library routines.
+  * There is now an identd server.
   
- -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Thu, 21 Aug 2025 17:05:49 +0100
+ -- Jonathan de Boyne Pollard <J.deBoynePollard-newsgroups@NTLWorld.com>  Sun, 24 Aug 2025 10:50:02 +0100
 
 djbwares (11) stable; urgency=low
  

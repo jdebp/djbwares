@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "scan.h"
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "error.h"
 #include "ip.h"
 #include "iopause.h"
@@ -59,7 +59,7 @@ int main(int argc,char **argv)
   if (ip.len > sizeof server_list) ip.len = sizeof server_list;
   for (j = 0; j < sizeof server_list/sizeof *server_list; ++j)
     ip_make_unassigned(server_list + j);
-  byte_copy(server_list,ip.len,ip.s);
+  mem_copy(server_list,ip.len,ip.s);
   server_count = ip.len / sizeof *server_list;
 
   if (!stralloc_copys(&out,"")) oops();

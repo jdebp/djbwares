@@ -6,6 +6,10 @@
 extern unsigned int dns_packet_copy(const char *,unsigned int,unsigned int,char *,unsigned int);
 extern unsigned int dns_packet_getname(const char *,unsigned int,unsigned int,char **);
 extern unsigned int dns_packet_skipname(const char *,unsigned int,unsigned int);
+extern int dns_packet_rrtypematch(const char [10],const char [2]);
+extern int dns_packet_typematch(const char [2],const char [2]);
+extern int dns_packet_rrinternetclass(const char [10]);
+extern int dns_packet_internetclass(const char [2]);
 
 #define HEADER_ID 0
 #define HEADER_QUERY 4

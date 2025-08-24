@@ -1,4 +1,4 @@
-#include "byte.h"
+#include "mem.h"
 #include "case.h"
 #include "buffer.h"
 #include "strerr.h"
@@ -60,13 +60,13 @@ static int doit(unsigned int *max_response)
 
   if (!response_query(q,qtype,qclass)) goto NOQ;
   response_id(header + HEADER_ID);
-  if (byte_diff(qclass,2,DNS_C_IN)) goto WEIRDCLASS;
+  if (!dns_packet_internetclass(qclass)) goto WEIRDCLASS;
   response[2] |= 4;	/* set AA=1 */
   response[3] &= ~128;	/* set RA=0 */
   if (!(header[2] & 1)) response[2] &= ~1; /* echo client's RD */
 
   if (header[2] & 126) goto BADFMT; /* OPCODE must be 0, and TC and AA must be 0 */
-  if (byte_equal(qtype,2,DNS_T_AXFR) || byte_equal(qtype,2,DNS_T_IXFR)) goto NOTIMP;
+  if (dns_packet_typematch(qtype,DNS_T_AXFR) || dns_packet_typematch(qtype,DNS_T_IXFR)) goto NOTIMP;
 
   for (j = 0;j < numglue;++j) {
     char rrfixed[RRFIXED_SIZE];
@@ -75,7 +75,7 @@ static int doit(unsigned int *max_response)
     pos = dns_packet_skipname(buf,len,pos); if (!pos) goto NOQ;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) goto NOQ;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-    if (byte_diff(rrfixed + RRFIXED_TYPE,2,DNS_T_OPT)) goto BADFMT;
+    if (!dns_packet_rrtypematch(rrfixed,DNS_T_OPT)) goto BADFMT;
     uint16_unpack_big(rrfixed + RRFIXED_CLASS,&udpsize);
     if (udpsize > 512 && udpsize <= MAX_RESPONSE) *max_response = udpsize;
     pos += datalen;

@@ -7,7 +7,7 @@ unsigned int ip4_scan(const char *s,char ip[IP4_LEN])
   unsigned int i;
   unsigned int len;
   unsigned long u;
- 
+
   len = 0;
   i = scan_ulong(s,&u); if (!i || u > 255U) return 0; ip[0] = u; s += i; len += i;
   if (*s != '.') return 0; ++s; ++len;

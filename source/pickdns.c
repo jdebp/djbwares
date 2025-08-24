@@ -38,18 +38,18 @@ static int doit(const char *q,const char qtype[2],const struct ip_address *ip)
   qlen = dns_domain_length(q);
   if (qlen > 255) return 0; /* impossible */
 
-  if (byte_equal(qtype,2,DNS_T_ANY)) {
+  if (dns_packet_typematch(qtype,DNS_T_ANY)) {
     if (!response_noany(q)) return 0;
     return 1;
   } else
-  if (byte_equal(qtype,2,DNS_T_OPT)) {
+  if (dns_packet_typematch(qtype,DNS_T_OPT)) {
     if (!response_noopt(q)) return 0;
     return 1;
   }
 
-  flaga = byte_equal(qtype,2,DNS_T_A);
-  flagaaaa = byte_equal(qtype,2,DNS_T_AAAA);
-  flagmx = byte_equal(qtype,2,DNS_T_MX);
+  flaga = dns_packet_typematch(qtype,DNS_T_A);
+  flagaaaa = dns_packet_typematch(qtype,DNS_T_AAAA);
+  flagmx = dns_packet_typematch(qtype,DNS_T_MX);
   if (!flaga && !flagaaaa && !flagmx) goto REFUSE;
 
   if (ip_is4(ip)) {

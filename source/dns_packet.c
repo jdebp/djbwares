@@ -3,8 +3,10 @@ DNS should have used LZ77 instead of its own sophomoric compression algorithm.
 */
 
 #include "error.h"
+#include "mem.h"
 #include "dns_packet.h"
 #include "dns_domain.h"
+#include "dns_constants.h"
 
 unsigned int dns_packet_copy(const char *buf,unsigned int len,unsigned int pos,char *out,unsigned int outlen)
 {
@@ -76,3 +78,24 @@ unsigned int dns_packet_getname(const char *buf,unsigned int len,unsigned int po
   errno = error_proto;
   return 0;
 }
+
+int dns_packet_rrtypematch(const char rrfixed[RRFIXED_SIZE],const char rtype[2])
+{
+  return mem_equal(rrfixed + RRFIXED_TYPE,2,rtype);
+}
+
+extern int dns_packet_rrinternetclass(const char rrfixed[RRFIXED_SIZE])
+{
+  return mem_equal(rrfixed + RRFIXED_CLASS,2,DNS_C_IN);
+}
+
+extern int dns_packet_typematch(const char rtype[2],const char qtype[2])
+{
+  return mem_equal(qtype,2,rtype);
+}
+
+extern int dns_packet_internetclass(const char rclass[2])
+{
+  return mem_equal(rclass,2,DNS_C_IN);
+}
+

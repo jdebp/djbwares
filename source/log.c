@@ -2,8 +2,9 @@
 #include "uint32.h"
 #include "uint16.h"
 #include "error.h"
-#include "byte.h"
+#include "mem.h"
 #include "dns_constants.h"
+#include "dns_packet.h"
 #include "log.h"
 #include "ip.h"
 #include "dnscache.h"
@@ -67,19 +68,19 @@ static void logid(const char id[2])
 
 static void logtype(const char type[2])
 {
-  if (byte_equal(type,2,DNS_T_A)) string("a");
-  else if (byte_equal(type,2,DNS_T_AAAA)) string("aaaa");
-  else if (byte_equal(type,2,DNS_T_TXT)) string("txt");
-  else if (byte_equal(type,2,DNS_T_MX)) string("mx");
-  else if (byte_equal(type,2,DNS_T_SOA)) string("soa");
-  else if (byte_equal(type,2,DNS_T_CNAME)) string("cname");
-  else if (byte_equal(type,2,DNS_T_PTR)) string("ptr");
-  else if (byte_equal(type,2,DNS_T_SIG)) string("sig");
-  else if (byte_equal(type,2,DNS_T_SRV)) string("srv");
-  else if (byte_equal(type,2,DNS_T_LOC)) string("loc");
-  else if (byte_equal(type,2,DNS_T_OPT)) string("opt");
-  else if (byte_equal(type,2,DNS_T_HTTPS)) string("https");
-  else if (byte_equal(type,2,DNS_T_SVCB)) string("svcb");
+  if (dns_packet_typematch(type,DNS_T_A)) string("a");
+  else if (dns_packet_typematch(type,DNS_T_AAAA)) string("aaaa");
+  else if (dns_packet_typematch(type,DNS_T_TXT)) string("txt");
+  else if (dns_packet_typematch(type,DNS_T_MX)) string("mx");
+  else if (dns_packet_typematch(type,DNS_T_SOA)) string("soa");
+  else if (dns_packet_typematch(type,DNS_T_CNAME)) string("cname");
+  else if (dns_packet_typematch(type,DNS_T_PTR)) string("ptr");
+  else if (dns_packet_typematch(type,DNS_T_SIG)) string("sig");
+  else if (dns_packet_typematch(type,DNS_T_SRV)) string("srv");
+  else if (dns_packet_typematch(type,DNS_T_LOC)) string("loc");
+  else if (dns_packet_typematch(type,DNS_T_OPT)) string("opt");
+  else if (dns_packet_typematch(type,DNS_T_HTTPS)) string("https");
+  else if (dns_packet_typematch(type,DNS_T_SVCB)) string("svcb");
   else {
     uint16 u;
 
@@ -307,23 +308,23 @@ void log_rr(const struct ip_address *server,const char *q,const char type[2],con
   string("rr "); ip(server); space(); number(ttl); space();
   logtype(type); space(); name(q); space();
 
-  if (byte_equal(type,2,DNS_T_SRV)) {
+  if (dns_packet_typematch(type,DNS_T_SRV)) {
     u16p(buf,len,4); space();
     u16p(buf,len,0); space();
     u16p(buf,len,2); space();
     namep(buf,len,6);
-  } else if (byte_equal(type,2,DNS_T_A)) {
+  } else if (dns_packet_typematch(type,DNS_T_A)) {
     struct ip_address a;
     char b[IP4_LEN] = {};
     if (len < sizeof b) character('?');
-    byte_copy(b, len < sizeof b ? len : sizeof b, buf);
+    mem_copy(b, len < sizeof b ? len : sizeof b, buf);
     ip_make4(&a,b);
     ip(&a);
-  } else if (byte_equal(type,2,DNS_T_AAAA)) {
+  } else if (dns_packet_typematch(type,DNS_T_AAAA)) {
     struct ip_address a;
     char b[IP6_SANS_SCOPE_LEN] = {};
     if (len < sizeof b) character('?');
-    byte_copy(b, len < sizeof b ? len : sizeof b, buf);
+    mem_copy(b, len < sizeof b ? len : sizeof b, buf);
     ip_make6(&a,b,0);
     ip(&a);
   } else {

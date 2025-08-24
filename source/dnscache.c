@@ -55,7 +55,7 @@ static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qc
   pos = dns_packet_getname(buf,len,pos,q); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qtype,2); if (!pos) return 0;
   pos = dns_packet_copy(buf,len,pos,qclass,2); if (!pos) return 0;
-  if (byte_diff(qclass,2,DNS_C_IN)) return 0;
+  if (!dns_packet_internetclass(qclass)) return 0;
   byte_copy(id,2,header);
 
   *max_response = 512;
@@ -66,7 +66,7 @@ static int packetquery(char *buf,unsigned int len,char **q,char qtype[2],char qc
     pos = dns_packet_skipname(buf,len,pos); if (!pos) return 0;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) return 0;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-    if (byte_diff(rrfixed + RRFIXED_TYPE,2,DNS_T_OPT)) return 0;
+    if (!dns_packet_rrtypematch(rrfixed,DNS_T_OPT)) return 0;
     uint16_unpack_big(rrfixed + RRFIXED_CLASS,&udpsize);
     /* The 512 octet floor is obvious, but RFC 6891 explicitly states it too. */
     if (udpsize > 512 && udpsize <= MAX_RESPONSE) *max_response = udpsize;
@@ -401,7 +401,7 @@ static void doit(int udp53, int tcp53)
 	t_new(tcp53);
   }
 }
-  
+
 #define FATAL "dnscache: fatal: "
 
 static char seed[128];

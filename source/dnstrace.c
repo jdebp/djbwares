@@ -2,7 +2,7 @@
 #include "uint32.h"
 #include "fmt.h"
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "ip.h"
 #include "gen_alloc.h"
 #include "gen_allocdefs.h"
@@ -139,14 +139,14 @@ static void qt_add(const char *q,const char type[2],const char *control,const st
   for (i = 0;i < qt.len;++i)
     if (dns_domain_equal(qt.s[i].owner,q))
       if (dns_domain_equal(qt.s[i].control,control))
-        if (byte_equal(qt.s[i].type,2,type))
+        if (dns_packet_typematch(qt.s[i].type,type))
 	  if (ip_equals(&qt.s[i].ip,ip))
 	    return;
 
-  byte_zero(&x,sizeof x);
+  mem_zero(&x,sizeof x);
   if (!dns_domain_copy(&x.owner,q)) nomem();
   if (!dns_domain_copy(&x.control,control)) nomem();
-  byte_copy(x.type,2,type);
+  mem_copy(x.type,2,type);
   x.ip = *ip;
   if (!qt_alloc_append(&qt,&x)) nomem();
 }
@@ -159,14 +159,14 @@ static void query_add(const char *owner,const char type[2])
 
   for (i = 0;i < query.len;++i)
     if (dns_domain_equal(query.s[i].owner,owner))
-      if (byte_equal(query.s[i].type,2,type))
+      if (dns_packet_typematch(query.s[i].type,type))
 	return;
 
-  byte_zero(&x,sizeof x);
+  mem_zero(&x,sizeof x);
   if (!dns_domain_copy(&x.owner,owner)) nomem();
-  byte_copy(x.type,2,type);
+  mem_copy(x.type,2,type);
   if (!query_alloc_append(&query,&x)) nomem();
-  
+
   for (i = 0;i < ns.len;++i)
     if (dns_domain_suffix(owner,ns.s[i].owner))
       for (j = 0;j < address.len;++j)
@@ -194,7 +194,7 @@ static void ns_add(const char *owner,const char *server)
 
   query_add(server,DNS_T_A);
 
-  byte_zero(&x,sizeof x);
+  mem_zero(&x,sizeof x);
   if (!dns_domain_copy(&x.owner,owner)) nomem();
   if (!dns_domain_copy(&x.ns,server)) nomem();
   if (!ns_alloc_append(&ns,&x)) nomem();
@@ -224,7 +224,7 @@ static void address_add(const char *owner,const struct ip_address *ip)
       if (ip_equals(&address.s[i].ip,ip))
 	return;
 
-  byte_zero(&x,sizeof x);
+  mem_zero(&x,sizeof x);
   if (!dns_domain_copy(&x.owner,owner)) nomem();
   x.ip = *ip;
   if (!address_alloc_append(&address,&x)) nomem();
@@ -243,11 +243,6 @@ static char *t2;
 static char *referral;
 static char *cname;
 
-static int typematch(const char rtype[2],const char qtype[2])
-{
-  return byte_equal(qtype,2,rtype);
-}
-
 void parsepacket(const char *buf,unsigned int len,const char *d,const char dtype[2],const char *control)
 {
   char misc[20];
@@ -256,9 +251,7 @@ void parsepacket(const char *buf,unsigned int len,const char *d,const char dtype
   uint16 numanswers;
   unsigned int posanswers;
   uint16 numauthority;
-  unsigned int posauthority;
   uint16 numglue;
-  unsigned int posglue;
   uint16 datalen;
   unsigned int rcode;
   int flagout;
@@ -290,10 +283,10 @@ void parsepacket(const char *buf,unsigned int len,const char *d,const char dtype
     pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) goto DIE;
     if (dns_domain_equal(t1,d))
-      if (byte_equal(rrfixed + RRFIXED_CLASS,2,DNS_C_IN)) {
-	if (typematch(rrfixed + RRFIXED_TYPE,dtype))
+      if (dns_packet_rrinternetclass(rrfixed)) {
+	if (dns_packet_rrtypematch(rrfixed,dtype))
 	  flagout = 1;
-	else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_CNAME)) {
+	else if (dns_packet_rrtypematch(rrfixed,DNS_T_CNAME)) {
           if (!dns_packet_getname(buf,len,pos,&cname)) goto DIE;
           flagcname = 1;
 	}
@@ -301,21 +294,19 @@ void parsepacket(const char *buf,unsigned int len,const char *d,const char dtype
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
     pos += datalen;
   }
-  posauthority = pos;
   for (j = 0;j < numauthority;++j) {
     char rrfixed[RRFIXED_SIZE];
     pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) goto DIE;
-    if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_SOA))
+    if (dns_packet_rrtypematch(rrfixed,DNS_T_SOA))
       flagsoa = 1;
-    else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_NS)) {
+    else if (dns_packet_rrtypematch(rrfixed,DNS_T_NS)) {
       flagreferral = 1;
       if (!dns_domain_copy(&referral,t1)) goto DIE;
     }
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
     pos += datalen;
   }
-  posglue = pos;
 
   if (!flagcname && !rcode && !flagout && flagreferral && !flagsoa)
     if (dns_domain_equal(referral,control) || !dns_domain_suffix(referral,control)) {
@@ -333,12 +324,12 @@ void parsepacket(const char *buf,unsigned int len,const char *d,const char dtype
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) goto DIE;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
     if (dns_domain_suffix(t1,control))
-      if (byte_equal(rrfixed + RRFIXED_CLASS,2,DNS_C_IN)) {
-        if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_NS)) {
+      if (dns_packet_rrinternetclass(rrfixed)) {
+        if (dns_packet_rrtypematch(rrfixed,DNS_T_NS)) {
 	  if (!dns_packet_getname(buf,len,pos,&t2)) goto DIE;
 	  ns_add(t1,t2);
         }
-        else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_A) && datalen == 4) {
+        else if (dns_packet_rrtypematch(rrfixed,DNS_T_A) && datalen == 4) {
 	  if (!dns_packet_copy(buf,len,pos,misc,4)) goto DIE;
 	  ip_make4(&a,misc);
 	  address_add(t1,&a);
@@ -441,7 +432,7 @@ int main(int argc,char **argv)
     if (!dns_domain_copy(&q,qt.s[i].owner)) nomem();
     control = qt.s[i].control;
     if (!dns_domain_suffix(q,control)) continue;
-    byte_copy(type,2,qt.s[i].type);
+    mem_copy(type,2,qt.s[i].type);
     ip[0] = qt.s[i].ip;
 
     if (!stralloc_copys(&querystr,"")) nomem();

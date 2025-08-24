@@ -2,7 +2,7 @@
 #include <sys/param.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "byte.h"
+#include "mem.h"
 #include "socket.h"
 #include "ip.h"
 #include "ip4.h"
@@ -13,10 +13,10 @@ static int socket_send4(int s,const char *buf,int len,const char ip[IP4_LEN],uin
 {
   struct sockaddr_in sa;
 
-  byte_zero(&sa,sizeof sa);
+  mem_zero(&sa,sizeof sa);
   sa.sin_family = AF_INET;
   uint16_pack_big((char *) &sa.sin_port,port);
-  byte_copy(&sa.sin_addr,4,ip);
+  mem_copy(&sa.sin_addr,4,ip);
 
   return sendto(s,buf,len,0,(struct sockaddr *) &sa,sizeof sa);
 }
@@ -25,11 +25,11 @@ static int socket_send6(int s,const char *buf,int len,const char ip[IP6_LEN],uin
 {
   struct sockaddr_in6 sa;
 
-  byte_zero(&sa,sizeof sa);
+  mem_zero(&sa,sizeof sa);
   sa.sin6_family = AF_INET6;
   uint16_pack_big((char *) &sa.sin6_port,port);
-  byte_copy(&sa.sin6_addr,IP6_SANS_SCOPE_LEN,ip);
-  byte_copy(&sa.sin6_scope_id,IP6_SCOPE_ID_LEN,ip+IP6_SANS_SCOPE_LEN);
+  mem_copy(&sa.sin6_addr,IP6_SANS_SCOPE_LEN,ip);
+  mem_copy(&sa.sin6_scope_id,IP6_SCOPE_ID_LEN,ip+IP6_SANS_SCOPE_LEN);
 
   return sendto(s,buf,len,0,(struct sockaddr *) &sa,sizeof sa);
 }

@@ -5,6 +5,7 @@
 #include "dns_resolve.h"
 #include "dns_constants.h"
 #include "dns_domain.h"
+#include "dns_packet.h"
 #include "dns_nd.h"
 #include "dd.h"
 #include "response.h"
@@ -48,11 +49,6 @@ int dns_resolve_nospecials(const char *q,const char qtype[2])
   return dns_resolve_servers_nospecials(q,qtype,server_list,server_count,port,1);
 }
 
-static int typematch(const char rtype[2],const char qtype[2])
-{
-  return byte_equal(qtype,2,rtype);
-}
-
 static const char localhost[] = "\011localhost";
 static const char inaddrarpa[] = "\007in-addr\004arpa";
 static const char ipv4onlyarpa[] = "\010ipv4only\004arpa";
@@ -76,19 +72,19 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
   } else
   if (dns_domain_suffix(q,localhost)) {     /* RFC 6761 */
     if (!response_query(q,qtype,DNS_C_IN)) return -1;
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return -1;
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return -1;
-    } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
       if (!response_noaxfr(q)) return -1;
     } else if (IP4_LEN == dd4(q,localhost,ip4) && 127 == (unsigned char)ip4[3]) {
-      if (typematch(DNS_T_A,qtype)) {
+      if (dns_packet_typematch(qtype,DNS_T_A)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
         if (!response_addbytes(ip4,sizeof ip4)) return -1;
         response_rfinish(RESPONSE_ANSWER);
-      } else if (typematch(DNS_T_AAAA,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_AAAA)) {
         char ip6[IP6_SANS_SCOPE_LEN];
 
         byte_zero(ip6, sizeof ip6);
@@ -100,11 +96,11 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
         response_rfinish(RESPONSE_ANSWER);
       }
     } else {
-      if (typematch(DNS_T_A,qtype)) {
+      if (dns_packet_typematch(qtype,DNS_T_A)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addbytes("\177\000\000\001",IP4_LEN)) return -1;
         response_rfinish(RESPONSE_ANSWER);
-      } else if (typematch(DNS_T_AAAA,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_AAAA)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addbytes("\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\001",IP6_SANS_SCOPE_LEN)) return -1;
         response_rfinish(RESPONSE_ANSWER);
@@ -114,13 +110,13 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
   }
   if (dns_domain_equal(q,ipv4onlyarpa)) {   /* RFC 8880 */
     if (!response_query(q,qtype,DNS_C_IN)) return -1;
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return -1;
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return -1;
-    } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
       if (!response_noaxfr(q)) return -1;
-    } else if (typematch(DNS_T_A,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_A)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addbytes("\300\000\000\252",IP4_LEN)) return -1;
         response_rfinish(RESPONSE_ANSWER);
@@ -142,13 +138,13 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
     &&  (170 == (unsigned char)ip4[0] || 171 == (unsigned char)ip4[0])
     ) {  /* RFC 8880 */
       if (!response_query(q,qtype,DNS_C_IN)) return -1;
-      if (typematch(DNS_T_ANY,qtype)) {
+      if (dns_packet_typematch(qtype,DNS_T_ANY)) {
         if (!response_noany(q)) return -1;
-      } else if (typematch(DNS_T_OPT,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
         if (!response_noopt(q)) return -1;
-      } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
         if (!response_noaxfr(q)) return -1;
-      } else if (typematch(DNS_T_PTR,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_PTR)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addname(ipv4onlyarpa)) return -1;
         response_rfinish(RESPONSE_ANSWER);
@@ -157,13 +153,13 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
     } else
     if (127 == (unsigned char)ip4[3]) {     /* long-standing /etc/hosts mapping, should have been in RFC 6761 */
       if (!response_query(q,qtype,DNS_C_IN)) return -1;
-      if (typematch(DNS_T_ANY,qtype)) {
+      if (dns_packet_typematch(qtype,DNS_T_ANY)) {
         if (!response_noany(q)) return -1;
-      } else if (typematch(DNS_T_OPT,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
         if (!response_noopt(q)) return -1;
-      } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
         if (!response_noaxfr(q)) return -1;
-      } else if (typematch(DNS_T_PTR,qtype)) {
+      } else if (dns_packet_typematch(qtype,DNS_T_PTR)) {
         if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
         if (0 == (unsigned char)ip4[2]
         &&  0 == (unsigned char)ip4[1]
@@ -184,13 +180,13 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
   } else
   if (dns_domain_equal(q,"\0011\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\0010\003ip6\004arpa")) {
     if (!response_query(q,qtype,DNS_C_IN)) return -1;
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_noany(q)) return -1;
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_noopt(q)) return -1;
-    } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
       if (!response_noaxfr(q)) return -1;
-    } else if (typematch(DNS_T_PTR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_PTR)) {
       if (!response_rstart(q,qtype,TTL_STATIC_POSITIVE)) return -1;
       if (!response_addname(localhost)) return -1;
       response_rfinish(RESPONSE_ANSWER);
@@ -198,15 +194,15 @@ static int handle_specials(const char *q,const char qtype[2],unsigned int server
     return dns_transmit_set(&dns_resolve_tx,response,response_len);
   } else
   {
-    if (typematch(DNS_T_ANY,qtype)) {
+    if (dns_packet_typematch(qtype,DNS_T_ANY)) {
       if (!response_query(q,qtype,DNS_C_IN)) return -1;
       if (!response_noany(q)) return -1;
       return dns_transmit_set(&dns_resolve_tx,response,response_len);
-    } else if (typematch(DNS_T_OPT,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_OPT)) {
       if (!response_query(q,qtype,DNS_C_IN)) return -1;
       if (!response_noopt(q)) return -1;
       return dns_transmit_set(&dns_resolve_tx,response,response_len);
-    } else if (typematch(DNS_T_AXFR,qtype)||typematch(DNS_T_IXFR,qtype)) {
+    } else if (dns_packet_typematch(qtype,DNS_T_AXFR)||dns_packet_typematch(qtype,DNS_T_IXFR)) {
       if (!response_query(q,qtype,DNS_C_IN)) return -1;
       if (!response_noaxfr(q)) return -1;
       return dns_transmit_set(&dns_resolve_tx,response,response_len);
@@ -221,7 +217,7 @@ int dns_resolve_servers(const char *q,const char qtype[2],const struct ip_addres
   int r;
 
   if ((r = handle_specials(q,qtype,server_count)) != 0) return r;
-  return dns_resolve_servers_nospecials(q,qtype,server_list,server_count,port,1);
+  return dns_resolve_servers_nospecials(q,qtype,server_list,server_count,port,flagrecursive);
 }
 
 int dns_resolve(const char *q,const char qtype[2])

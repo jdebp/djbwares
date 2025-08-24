@@ -6,58 +6,18 @@
 #include "sig.h"
 #include "exit.h"
 #include "fmt.h"
-#include "case.h"
-#include "str.h"
 #include "tai.h"
+#include "case.h"
+#include "publicfile_server.h"
 #include "caltime.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
 #include "buffer.h"
 #include "error.h"
-#include "getln.h"
 #include "byte.h"
 #include "ucspi.h"
 #include "subfd.h"
 #include "env.h"
 #include <unistd.h>
-#include <sys/socket.h>
-
-int safewrite(int fd,const char *buf,int len)
-{
-  int r;
-  r = timeoutwrite(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char outbuf[BUFFER_OUTSIZE];
-static buffer out = BUFFER_INIT(safewrite,1,outbuf,sizeof outbuf);
-
-void out_put(const char *s,int len)
-{
-  buffer_put(&out,s,len);
-}
-
-void out_puts(const char *s)
-{
-  buffer_puts(&out,s);
-}
-
-void out_flush(void)
-{
-  buffer_flush(&out);
-}
-
-int readline2(buffer * b, stralloc * s)
-{
-  int match;
-
-  if (getln(b,s,&match,'\n') == -1) _exit(21);
-  if (!match) return 0;
-  if (s->len && (s->s[s->len - 1] == '\n')) --s->len;
-  if (s->len && (s->s[s->len - 1] == '\r')) --s->len;
-  return 1;
-}
+#include <sys/socket.h>	// for shutdown()
 
 static char strnum[FMT_ULONG];
 
@@ -86,7 +46,7 @@ static void log(unsigned code,const char *msg)
   substdio_flush(subfderr);
 }
 
-void barf(unsigned code, const char * selector, const char *message)
+static void barf(unsigned code, const char * selector, const char *message)
 {
   if (flaglogunsupported)
     log(code,message);
@@ -110,7 +70,7 @@ void barf(unsigned code, const char * selector, const char *message)
   _exit(0);
 }
 
-int gopherdate(stralloc *sa,const struct tai *t)
+static int gopherdate(stralloc *sa,const struct tai *t)
 {
   struct caltime ct;
 
@@ -132,7 +92,7 @@ static stralloc nowstr = stralloc_static_0;
 static stralloc mtimestr = stralloc_static_0;
 static stralloc contenttype = stralloc_static_0;
 
-void headers(stralloc * s, const struct tai * mtime, unsigned long length, const char * name)
+static void headers(stralloc * s, const struct tai * mtime, unsigned long length, const char * name)
 {
   struct tai now;
 
@@ -162,7 +122,7 @@ static stralloc port_field = stralloc_static_0;
 static const char * localhost = 0;
 static const char * localport = 0;
 
-void get(void)
+static void get(void)
 {
   unsigned long length;
   struct tai mtime;
@@ -279,31 +239,13 @@ void get(void)
       out_puts("\r\n");
     }
     out_put(attr.s,attr.len);
-  } else 
+  } else
     barf(1, fn.s, "Internal error");
 
   out_flush();
   if (protocol < 1)
     _exit(0);
   close(fd);
-}
-
-int saferead(int fd,char *buf,int len)
-{
-  int r;
-  out_flush();
-  r = timeoutread(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char inbuf[BUFFER_INSIZE];
-static buffer in = BUFFER_INIT(saferead,0,inbuf,sizeof inbuf);
-static stralloc line = stralloc_static_0;
-
-void readline(void)
-{
-  if (!readline2(&in,&line)) _exit(0);
 }
 
 void doit(void)
@@ -322,7 +264,7 @@ void doit(void)
     int flagdir;
     unsigned int i;
 
-    readline();
+    if (!readline()) break;
 
     if (!stralloc_copys(&path,"")) _exit(21);
     if (!stralloc_copys(&plus,"")) _exit(21);

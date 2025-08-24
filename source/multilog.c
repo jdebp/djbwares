@@ -571,7 +571,7 @@ void doit(char **script)
     for (j = 0;j < cnum;++j)
       if (c[j].flagselected)
         buffer_put(&c[j].ss,line,linelen);
-        
+
     if (linelen == 1000)
       for (;;) {
         if (buffer_GETC(&ssin,&ch) <= 0) {

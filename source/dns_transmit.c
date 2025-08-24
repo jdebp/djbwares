@@ -58,8 +58,8 @@ static int irrelevant(const struct dns_transmit *d,const char *buf,unsigned int 
   alloc_free(dn);
 
   pos = dns_packet_copy(buf,len,pos,out,4); if (!pos) return 1;
-  if (byte_diff(out,2,d->qtype)) return 1;
-  if (byte_diff(out + 2,2,DNS_C_IN)) return 1;
+  if (!dns_packet_typematch(out,d->qtype)) return 1;
+  if (!dns_packet_internetclass(out + 2)) return 1;
 
   return 0;
 }
@@ -125,7 +125,7 @@ static int thisudp(struct dns_transmit *d)
       if (!ip_is_unassigned(ip)) {
 	d->query[2] = dns_random(256);
 	d->query[3] = dns_random(256);
-  
+
         d->s1 = 1 + socket_udp(ip);
         if (!d->s1) { dns_transmit_free(d); return -1; }
 	if (randombind(d,ip) == 0)
@@ -138,7 +138,7 @@ static int thisudp(struct dns_transmit *d)
               d->tcpstate = 0;
               return 0;
             }
-  
+
         socketfree(d);
       }
     }
@@ -180,7 +180,7 @@ static int thistcp(struct dns_transmit *d)
       d->s1 = 1 + socket_tcp(ip);
       if (!d->s1) { dns_transmit_free(d); return -1; }
       if (randombind(d,ip) == -1) { dns_transmit_free(d); return -1; }
-  
+
       taia_now(&now);
       taia_uint(&d->deadline,10);
       taia_add(&d->deadline,&d->deadline,&now);
@@ -192,7 +192,7 @@ static int thistcp(struct dns_transmit *d)
         d->tcpstate = 1;
         return 0;
       }
-  
+
       socketfree(d);
     }
   }

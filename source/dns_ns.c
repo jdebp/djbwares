@@ -27,8 +27,8 @@ static int dns_ns_packet(stralloc *out,const char *buf,unsigned int len)
     pos = dns_packet_skipname(buf,len,pos); if (!pos) return -1;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) return -1;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-    if (byte_equal(rrfixed + RRFIXED_TYPE,2,DNS_T_NS))
-      if (byte_equal(rrfixed + RRFIXED_CLASS,2,DNS_C_IN)) {
+    if (dns_packet_rrtypematch(rrfixed,DNS_T_NS))
+      if (dns_packet_rrinternetclass(rrfixed)) {
 	if (!dns_packet_getname(buf,len,pos,&q)) return -1;
 	if (!dns_domain_todot_cat(out,q)) return -1;
 	if (!stralloc_0(out)) return -1;

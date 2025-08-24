@@ -9,45 +9,17 @@
 #include "case.h"
 #include "str.h"
 #include "tai.h"
+#include "publicfile_server.h"
 #include "httpdate.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
 #include "buffer.h"
 #include "error.h"
-#include "getln.h"
 #include "byte.h"
 #include "ucspi.h"
 #include "subfd.h"
 #include "env.h"
 #include "conf.h"
 #include <unistd.h>
-#include <sys/socket.h>
-
-int safewrite(int fd,const char *buf,int len)
-{
-  int r;
-  r = timeoutwrite(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char outbuf[BUFFER_OUTSIZE];
-static buffer out = BUFFER_INIT(safewrite,1,outbuf,sizeof outbuf);
-
-void out_put(const char *s,int len)
-{
-  buffer_put(&out,s,len);
-}
-
-void out_puts(const char *s)
-{
-  buffer_puts(&out,s);
-}
-
-void out_flush(void)
-{
-  buffer_flush(&out);
-}
+#include <sys/socket.h>	// for shutdown()
 
 static void log(const char *code,const char *msg)
 {
@@ -83,7 +55,7 @@ static struct tai mtime;
 static struct tai mtimeage;
 static stralloc mtimestr = stralloc_static_0;
 
-void header(const char *code,const char *message)
+static void header(const char *code,const char *message)
 {
   if (protocolnum == 1)
     out_puts("HTTP/1.0 ");
@@ -97,7 +69,7 @@ void header(const char *code,const char *message)
   out_puts("\r\n");
 }
 
-void barf(const char *code,const char *message)
+static void barf(const char *code,const char *message)
 {
   if (flaglogunsupported)
     log(code,message);
@@ -127,7 +99,7 @@ void barf(const char *code,const char *message)
 static stralloc fn = stralloc_static_0;
 static stralloc contenttype = stralloc_static_0;
 
-void get(void)
+static void get(void)
 {
   unsigned long length;
   int fd;
@@ -211,31 +183,8 @@ void get(void)
 }
 
 static stralloc field = stralloc_static_0;
-static stralloc line = stralloc_static_0;
 
-int saferead(int fd,char *buf,int len)
-{
-  int r;
-  out_flush();
-  r = timeoutread(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char inbuf[BUFFER_INSIZE];
-static buffer in = BUFFER_INIT(saferead,0,inbuf,sizeof inbuf);
-
-void readline(void)
-{
-  int match;
-
-  if (getln(&in,&line,&match,'\n') == -1) _exit(21);
-  if (!match) _exit(0);
-  if (line.len && (line.s[line.len - 1] == '\n')) --line.len;
-  if (line.len && (line.s[line.len - 1] == '\r')) --line.len;
-}
-
-void doit()
+void doit(void)
 {
   unsigned int i, maxlen;
   int spaces;
@@ -254,7 +203,7 @@ void doit()
   sig_ignore(sig_pipe);
 
   for (;;) {
-    readline();
+    if (!readline()) break;
 
     if (!line.len) continue;
 

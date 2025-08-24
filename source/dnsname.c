@@ -23,7 +23,7 @@ int main(int argc,char **argv)
     struct ip_address ip = IP_ADDRESS_INIT;
 
     l = ip_scan(*argv,&ip,':');
-    if (0 >= l || (*argv)[l]) 
+    if (0 >= l || (*argv)[l])
       strerr_die3x(111,FATAL,"unable to parse IP address ",*argv);
     if (dns_name(&out,&ip) == -1)
        strerr_die4sys(111,FATAL,"unable to find host name for ",*argv,": ");

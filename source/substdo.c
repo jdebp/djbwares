@@ -17,7 +17,7 @@ register int len;
       if (errno == error_intr) continue;
       return -1; /* note that some data may have been written */
     }
-    if (w == 0) 
+    if (w == 0)
 	    ; /* luser's fault */
     buf += w;
     len -= w;
@@ -28,7 +28,7 @@ register int len;
 int substdio_flush(register substdio *s)
 {
   register int p;
- 
+
   p = s->p;
   if (!p) return 0;
   s->p = 0;
@@ -38,7 +38,7 @@ int substdio_flush(register substdio *s)
 int substdio_bput(register substdio *s,register const char *buf,register int len)
 {
   register int n;
- 
+
   while (len > (n = s->n - s->p)) {
     byte_copy(s->x + s->p,n,buf); s->p += n; buf += n; len -= n;
     if (substdio_flush(s) == -1) return -1;
@@ -52,7 +52,7 @@ int substdio_bput(register substdio *s,register const char *buf,register int len
 int substdio_put(register substdio *s,register const char *buf,register int len)
 {
   register int n;
- 
+
   n = s->n;
   if (len > n - s->p) {
     if (substdio_flush(s) == -1) return -1;

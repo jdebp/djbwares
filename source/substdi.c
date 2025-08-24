@@ -17,7 +17,7 @@ static int getthis(register substdio *s,register char *buf,register int len)
 {
   register int r;
   register int q;
- 
+
   r = s->p;
   q = r - len;
   if (q > 0) { r = len; s->p = q; } else s->p = 0;
@@ -45,7 +45,7 @@ int substdio_feed(register substdio *s)
 int substdio_bget(register substdio *s,register char *buf,register int len)
 {
   register int r;
- 
+
   if (s->p > 0) return getthis(s,buf,len);
   r = s->n; if (r <= len) return oneread(s->op,s->fd,buf,r);
   r = substdio_feed(s); if (r <= 0) return r;
@@ -55,7 +55,7 @@ int substdio_bget(register substdio *s,register char *buf,register int len)
 int substdio_get(register substdio *s,register char *buf,register int len)
 {
   register int r;
- 
+
   if (s->p > 0) return getthis(s,buf,len);
   if (s->n <= len) return oneread(s->op,s->fd,buf,len);
   r = substdio_feed(s); if (r <= 0) return r;

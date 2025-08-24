@@ -1,7 +1,7 @@
 #include "uint16.h"
 #include "uint32.h"
 #include "error.h"
-#include "byte.h"
+#include "mem.h"
 #include "dns_constants.h"
 #include "dns_packet.h"
 #include "dns_domain.h"
@@ -15,19 +15,19 @@ static char *d;
 
 static unsigned int printpacket_qtype(stralloc *out,const char type[2])
 {
-  if (byte_equal(type,2,DNS_T_A)) X("a");
-  else if (byte_equal(type,2,DNS_T_AAAA)) X("aaaa");
-  else if (byte_equal(type,2,DNS_T_TXT)) X("txt");
-  else if (byte_equal(type,2,DNS_T_MX)) X("mx");
-  else if (byte_equal(type,2,DNS_T_SOA)) X("soa");
-  else if (byte_equal(type,2,DNS_T_CNAME)) X("cname");
-  else if (byte_equal(type,2,DNS_T_PTR)) X("ptr");
-  else if (byte_equal(type,2,DNS_T_SIG)) X("sig");
-  else if (byte_equal(type,2,DNS_T_SRV)) X("srv");
-  else if (byte_equal(type,2,DNS_T_LOC)) X("loc");
-  else if (byte_equal(type,2,DNS_T_OPT)) X("opt");
-  else if (byte_equal(type,2,DNS_T_HTTPS)) X("https");
-  else if (byte_equal(type,2,DNS_T_SVCB)) X("svcb");
+  if (dns_packet_typematch(type,DNS_T_A)) X("a");
+  else if (dns_packet_typematch(type,DNS_T_AAAA)) X("aaaa");
+  else if (dns_packet_typematch(type,DNS_T_TXT)) X("txt");
+  else if (dns_packet_typematch(type,DNS_T_MX)) X("mx");
+  else if (dns_packet_typematch(type,DNS_T_SOA)) X("soa");
+  else if (dns_packet_typematch(type,DNS_T_CNAME)) X("cname");
+  else if (dns_packet_typematch(type,DNS_T_PTR)) X("ptr");
+  else if (dns_packet_typematch(type,DNS_T_SIG)) X("sig");
+  else if (dns_packet_typematch(type,DNS_T_SRV)) X("srv");
+  else if (dns_packet_typematch(type,DNS_T_LOC)) X("loc");
+  else if (dns_packet_typematch(type,DNS_T_OPT)) X("opt");
+  else if (dns_packet_typematch(type,DNS_T_HTTPS)) X("https");
+  else if (dns_packet_typematch(type,DNS_T_SVCB)) X("svcb");
   else {
     uint16 u;
 
@@ -88,7 +88,7 @@ unsigned int printpacket_cat(stralloc *out,char *buf,unsigned int len)
     pos = dns_packet_getname(buf,len,pos,&d); if (!pos) return 0;
     pos = dns_packet_copy(buf,len,pos,data,4); if (!pos) return 0;
 
-    if (byte_diff(data + 2,2,DNS_C_IN)) {
+    if (!dns_packet_internetclass(data + 2)) {
       X("weird class");
     }
     else {

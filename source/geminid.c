@@ -7,46 +7,15 @@
 #include "exit.h"
 #include "fmt.h"
 #include "case.h"
-#include "str.h"
 #include "tai.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "buffer.h"
+#include "publicfile_server.h"
 #include "error.h"
-#include "getln.h"
 #include "byte.h"
 #include "ucspi.h"
 #include "subfd.h"
 #include "env.h"
 #include "conf.h"
 #include <unistd.h>
-#include <sys/socket.h>
-
-int safewrite(int fd,const char *buf,int len)
-{
-  int r;
-  r = timeoutwrite(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char outbuf[BUFFER_OUTSIZE];
-static buffer out = BUFFER_INIT(safewrite,1,outbuf,sizeof outbuf);
-
-void out_put(const char *s,int len)
-{
-  buffer_put(&out,s,len);
-}
-
-void out_puts(const char *s)
-{
-  buffer_puts(&out,s);
-}
-
-void out_flush(void)
-{
-  buffer_flush(&out);
-}
 
 static void log(const char *code,const char *msg)
 {
@@ -68,14 +37,14 @@ static int flaglogunsupported = 0;
 
 static char filebuf[1024];
 
-void header(const char *code,const char *message)
+static void header(const char *code,const char *message)
 {
   out_puts(code);
   out_puts(message);
   out_puts("\r\n");
 }
 
-void barf(const char *code,const char *message)
+static void barf(const char *code,const char *message)
 {
   if (flaglogunsupported)
     log(code, message);
@@ -87,7 +56,7 @@ void barf(const char *code,const char *message)
 static stralloc fn = stralloc_static_0;
 static stralloc contenttype = stralloc_static_0;
 
-void get(void)
+static void get(void)
 {
   unsigned long length;
   int fd;
@@ -133,31 +102,7 @@ void get(void)
   close(fd);
 }
 
-static stralloc line = stralloc_static_0;
-
-int saferead(int fd,char *buf,int len)
-{
-  int r;
-  out_flush();
-  r = timeoutread(60,fd,buf,len);
-  if (r <= 0) _exit(0);
-  return r;
-}
-
-static char inbuf[BUFFER_INSIZE];
-static buffer in = BUFFER_INIT(saferead,0,inbuf,sizeof inbuf);
-
-void readline(void)
-{
-  int match;
-
-  if (getln(&in,&line,&match,'\n') == -1) _exit(21);
-  if (!match) _exit(0);
-  if (line.len && (line.s[line.len - 1] == '\n')) --line.len;
-  if (line.len && (line.s[line.len - 1] == '\r')) --line.len;
-}
-
-void doit()
+void doit(void)
 {
   unsigned int i, maxlen;
 

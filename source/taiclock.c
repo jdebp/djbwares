@@ -5,7 +5,7 @@
 #include "ip.h"
 #include "socket.h"
 #include "str.h"
-#include "byte.h"
+#include "mem.h"
 #include "substdio.h"
 #include "readwrite.h"
 #include "select.h"
@@ -82,7 +82,7 @@ int main(int argc,char ** argv)
     uint16 dummy2;
     struct ip_address dummy1 = IP_ADDRESS_INIT;
 
-    byte_zero(query,sizeof query);
+    mem_zero(query,sizeof query);
     query[0] = 'c';
     query[1] = 't';
     query[2] = 'a';
@@ -114,8 +114,8 @@ int main(int argc,char ** argv)
     taia_now(&ta1);
     if (   (r != sizeof response)
 	|| (response[0] != 's')
-	|| byte_diff(query + 1,3,response + 1)
-	|| byte_diff(query + 20,12,response + 20)
+	|| mem_diff(query + 1,3,response + 1)
+	|| mem_diff(query + 20,12,response + 20)
        ) {
       strerr_warn2(WARNING,"unable to read clock: bad response format",0);
       continue;

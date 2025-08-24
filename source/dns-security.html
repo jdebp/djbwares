@@ -32,6 +32,7 @@ djbdns has several defensive measures in place against this.
 <li><p>
 Its primary defence is that <a href="commands/tinydns.xml"><code>tinydns</code></a> from its original Bernstein version onwards has defaulted to simply not responding to queries about domain names that its database does not record it as authoritative for.
 Nothing is reflected back to the primary target.
+</p><p>
 <strong> Note: </strong>
 Although it might seem that making <a href="commands/tinydns.xml"><code>tinydns</code></a> respond as BIND did, for every domain name, is a good idea &mdash; and asking how to do this was a particularly common question in the early years of djbdns &mdash; this is wrong-headed and should not be done.
 tinydns does and always did the right thing out of the box.

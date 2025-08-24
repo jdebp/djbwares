@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- **************************************************************************
+.... For copyright and licensing terms, see the file named COPYING.
+.... **************************************************************************
+.-->
+<?xml-stylesheet href="docbook-xml.css" type="text/css"?>
+
+<refentry id="identd">
+
+<refmeta xmlns:xi="http://www.w3.org/2001/XInclude">
+<refentrytitle>identd</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="manual">user commands</refmiscinfo>
+<refmiscinfo class="source">djbwares</refmiscinfo>
+<xi:include href="version.xml" />
+</refmeta>
+
+<refnamediv>
+<refname>identd</refname>
+<refpurpose>opaque UCSPI-TCP IDENT server</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<cmdsynopsis>
+<command>identd</command>
+<arg choice='req'><replaceable>root</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsection>
+<title>Description</title>
+
+<para>
+<command>identd</command> provides opaque IDENT service.
+Its raison d'&#xEA;tre is to handle other machines that might be running <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> without the <arg choice='plain'>-R</arg> option, or some such, without just refusing IDENT service outright.
+</para>
+<note>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> with the (default) <arg choice='plain'>-r</arg> option does not recognize the IDENT protocol's error response, or handle the "Other" operating system code.
+<command>identd</command> thus always provides positive responses, that however do not even convey real information about the operating system let alone its sockets and user accounts.
+</note>
+
+<para>
+The Bernstein convention is for <arg choice='plain'><replaceable>root</replaceable></arg> to be <filename>/public/file</filename>, but it can use other conventional locations such as <filename>/home/publicfile/public</filename> or <filename>/var/www</filename>.
+</para>
+
+<para>
+<command>identd</command> accepts a request on standard input, and responds in a fixed manner on standard output.
+<command>identd</command> also prints local log information on standard error.
+</para>
+
+<para>
+If <command>identd</command> runs out of memory, encounters an I/O error, or does not receive an input line within 60 seconds, it exits silently.
+</para>
+
+<para>
+Normally <command>identd</command> is run under a UCSPI-TCP server program (<command>tcp-socket-accept</command>, <command>s6-tcpserver</command>, or <command>tcpserver</command> spawning a server program per connection) to handle IDENT connections from hosts around the Internet.
+It can also be run under a UCSPI-SSL server program, although no-one uses IDENT/SSL.
+</para>
+<caution>
+<citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> <emphasis>must</emphasis> be run with the <arg choice='plain'>-R</arg> option if it is used.
+</caution>
+
+</refsection>
+<refsection>
+<title>Security</title>
+
+<para>
+<command>identd</command> chroots to <arg choice='plain'><replaceable>root</replaceable></arg> when it starts. 
+It then sets its group id and user id to the numbers given in environment variables <envar>GID</envar> and <envar>UID</envar>, as set by <command>envuidgid</command> (or equivalent).
+</para>
+<note>
+<command>identd</command> reads the <filename>/etc/leapsecs.dat</filename> file before the chroot, and does not require it to be copied under <arg choice='plain'><replaceable>root</replaceable></arg>.
+</note>
+
+<para>
+The <arg choice='plain'><replaceable>root</replaceable></arg> argument, changed root, and dropped privileges exist because of security code common to all publicfile services.
+<command>identd</command> provides a purely opaque service that provides clients with no real information.
+It accesses no files, nor obtains information about any sockets, nor looks up anything in any login or account database.
+</para>
+
+<para>
+<command>identd</command> does not even validate the syntax of the requests, beyond that they are lines or characters ending in CRLF.
+Its fixed response identifies all requests, extant connections or not, as belonging to <code>root</code> on Xenix.
+Attackers can fingerprint that a system is running this <command>identd</command>, as opposed to one that actually publishes real information, but not the system that it is running on or anything about that system.
+</para>
+<note>
+If accommodating wrongly-configured <citerefentry><refentrytitle>tcpserver</refentrytitle><manvolnum>1</manvolnum></citerefentry> on hosts on the Internet is not a concern, just do not run any IDENT service at all.
+</note>
+
+</refsection>
+
+<refsection>
+<title>History</title>
+<para>
+<command>identd</command> was added to djbwares in 2025.
+</para>
+</refsection>
+
+<refsection>
+<title>Author</title>
+<para>
+Derived from original code by <personname><firstname>Daniel</firstname> <othername>J.</othername> <surname>Bernstein</surname></personname>.
+Documentation by <personname><firstname>Jonathan</firstname> <surname>de Boyne Pollard</surname></personname>.
+</para>
+</refsection>
+
+</refentry>

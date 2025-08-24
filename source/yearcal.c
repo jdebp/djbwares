@@ -28,6 +28,7 @@ int main(int argc,char **argv)
   int weekday;
   struct caldate cd;
 
+  (void)argc; /* Silence a compiler warning. */
   while (*++argv) {
     year = atoi(*argv);
 

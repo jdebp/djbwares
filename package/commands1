@@ -41,6 +41,7 @@ gopherd
 host
 http@
 httpd
+identd
 leapsecs
 mconnect
 mconnect-io

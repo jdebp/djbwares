@@ -134,7 +134,7 @@ void rblsmtpd(void)
   for (i = 0;i < message.len;++i)
     if ((message.s[i] < 32) || (message.s[i] > 126))
       message.s[i] = '?';
-  
+
   buffer_puts(buffer_2,"rblsmtpd: ");
   buffer_puts(buffer_2,ip_env);
   buffer_puts(buffer_2," pid ");

@@ -74,16 +74,6 @@ static void save_finish(const char type[2],const char *d,uint32 ttl)
 }
 
 
-static int typematch(const char rtype[2],const char qtype[2])
-{
-  return byte_equal(qtype,2,rtype);
-}
-
-static int internetclass(const char rclass[2])
-{
-  return byte_equal(rclass,2,DNS_C_IN);
-}
-
 static uint32 ttlget(const char buf[4])
 {
   uint32 ttl;
@@ -213,21 +203,21 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
   if (dd4(d,"",ip4) == IP4_LEN) {
     log_synthetic(d,dtype,z->level,TTL_STATIC_POSITIVE);
     if (!rqa(z)) return -1;
-    if (typematch(DNS_T_ANY,dtype)) {
+    if (dns_packet_typematch(dtype,DNS_T_ANY)) {
       if (!response_noany(d)) return -1;
       if (!response_placeholder_soa("",TTL_STATIC_NEGATIVE)) return -1;
-    } else if (typematch(DNS_T_OPT,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
       if (!response_noopt(d)) return -1;
       if (!response_placeholder_soa("",TTL_STATIC_NEGATIVE)) return -1;
-    } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
       if (!response_noaxfr(d)) return -1;
       if (!response_placeholder_soa("",TTL_STATIC_NEGATIVE)) return -1;
-    } else if (typematch(DNS_T_A,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_A)) {
       if (!response_rstart(d,DNS_T_A,TTL_STATIC_POSITIVE)) return -1;
       if (!response_addbytes(ip4,sizeof ip4)) return -1;
       response_rfinish(RESPONSE_ANSWER);
       if (!response_badip4(d)) return -1;
-    } else if (typematch(DNS_T_AAAA,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_AAAA)) {
       byte_zero(ip6, sizeof ip6);
       byte_copy(ip6 + sizeof ip6 - sizeof ip4,sizeof ip4,ip4);
       ip6[10] = ip6[11] = 0xFF;
@@ -245,16 +235,16 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
       if (127 == (unsigned char)ip4[3]) {
         log_synthetic(d,dtype,z->level,TTL_STATIC_NEGATIVE);
         if (!rqa(z)) return -1;
-        if (typematch(DNS_T_ANY,dtype)) {
+        if (dns_packet_typematch(dtype,DNS_T_ANY)) {
           if (!response_noany(d)) return -1;
           if (!response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_OPT,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
           if (!response_noopt(d)) return -1;
           if (!response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
           if (!response_noaxfr(d)) return -1;
           if (!response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_PTR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_PTR)) {
           if (!response_rstart(d,DNS_T_PTR,TTL_STATIC_POSITIVE)) return -1;
           if (0 == (unsigned char)ip4[2]
           &&  0 == (unsigned char)ip4[1]
@@ -277,11 +267,11 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
       if (169 == (unsigned char)ip4[3] && 0xFE == (unsigned char)ip4[2]) {    /* RFC 6762 */
         log_synthetic(d,dtype,z->level,TTL_STATIC_NEGATIVE);
         if (!rqa(z)) return -1;
-        if (typematch(DNS_T_ANY,dtype)) {
+        if (dns_packet_typematch(dtype,DNS_T_ANY)) {
           if (!response_noany(d)) return -1;
-        } else if (typematch(DNS_T_OPT,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
           if (!response_noopt(d)) return -1;
-        } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
           if (!response_noaxfr(d)) return -1;
         }
         if (!response_placeholder_soa(inaddrarpa,TTL_STATIC_NEGATIVE)) return -1;
@@ -294,16 +284,16 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
       if (byte_equal("\001\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000",IP6_SANS_SCOPE_LEN,ip6)) {
         log_synthetic(d,dtype,z->level,TTL_STATIC_POSITIVE);
         if (!rqa(z)) return -1;
-        if (typematch(DNS_T_ANY,dtype)) {
+        if (dns_packet_typematch(dtype,DNS_T_ANY)) {
           if (!response_noany(d)) return -1;
           if (!response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_OPT,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
           if (!response_noopt(d)) return -1;
           if (!response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
           if (!response_noaxfr(d)) return -1;
           if (!response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE)) return -1;
-        } else if (typematch(DNS_T_PTR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_PTR)) {
           if (!response_rstart(d,DNS_T_PTR,TTL_STATIC_POSITIVE)) return -1;
           if (!response_addname(localhost)) return -1;
           response_rfinish(RESPONSE_ANSWER);
@@ -315,11 +305,11 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
       if (0xFE == (unsigned char)ip6[15] && (0x80 <= (unsigned char)ip6[14] && (unsigned char)ip6[14] < 0xA0)) {    /* RFC 6762 */
         log_synthetic(d,dtype,z->level,TTL_STATIC_NEGATIVE);
         if (!rqa(z)) return -1;
-        if (typematch(DNS_T_ANY,dtype)) {
+        if (dns_packet_typematch(dtype,DNS_T_ANY)) {
           if (!response_noany(d)) return -1;
-        } else if (typematch(DNS_T_OPT,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
           if (!response_noopt(d)) return -1;
-        } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+        } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
           if (!response_noaxfr(d)) return -1;
         }
         if (!response_placeholder_soa(ip6arpa,TTL_STATIC_NEGATIVE)) return -1;
@@ -330,22 +320,22 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
   if (dns_domain_suffix(d,localhost)) {
     log_synthetic(d,dtype,z->level,TTL_STATIC_POSITIVE);
     if (!rqa(z)) return -1;
-    if (typematch(DNS_T_ANY,dtype)) {
+    if (dns_packet_typematch(dtype,DNS_T_ANY)) {
       if (!response_noany(d)) return -1;
       if (!response_placeholder_soa(localhost,TTL_STATIC_NEGATIVE)) return -1;
-    } else if (typematch(DNS_T_OPT,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
       if (!response_noopt(d)) return -1;
       if (!response_placeholder_soa(localhost,TTL_STATIC_NEGATIVE)) return -1;
-    } else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
       if (!response_noaxfr(d)) return -1;
       if (!response_placeholder_soa(localhost,TTL_STATIC_NEGATIVE)) return -1;
     } else if (IP4_LEN == dd4(d,localhost,ip4) && 127 == (unsigned char)ip4[3]) {
-      if (typematch(DNS_T_A,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_A)) {
         if (!response_rstart(d,DNS_T_A,TTL_STATIC_POSITIVE)) return -1;
         byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
         if (!response_addbytes(ip4, sizeof ip4)) return -1;
         response_rfinish(RESPONSE_ANSWER);
-      } else if (typematch(DNS_T_AAAA,dtype)) {
+      } else if (dns_packet_typematch(dtype,DNS_T_AAAA)) {
         byte_zero(ip6, sizeof ip6);
         byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
         byte_copy(ip6 + sizeof ip6 - sizeof ip4,sizeof ip4,ip4);
@@ -355,11 +345,11 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
         response_rfinish(RESPONSE_ANSWER);
       }
     } else {
-      if (typematch(DNS_T_A,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_A)) {
         if (!response_rstart(d,DNS_T_A,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addbytes("\177\0\0\1",IP4_LEN)) return -1;
         response_rfinish(RESPONSE_ANSWER);
-      } else if (typematch(DNS_T_AAAA,dtype)) {
+      } else if (dns_packet_typematch(dtype,DNS_T_AAAA)) {
         if (!response_rstart(d,DNS_T_AAAA,TTL_STATIC_POSITIVE)) return -1;
         if (!response_addbytes("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1",IP6_SANS_SCOPE_LEN)) return -1;
         response_rfinish(RESPONSE_ANSWER);
@@ -386,9 +376,9 @@ static int handle_specials(struct query *z,const char *d,const char dtype[2])
     &&  !dns_domain_equal(d,"\007default\007service\004arpa")
     ) {
       response_nxdomain();
-    } else if (typematch(DNS_T_ANY,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_ANY)) {
       if (!response_noany(d)) return -1;
-    } else if (typematch(DNS_T_OPT,dtype)) {
+    } else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
       if (!response_noopt(d)) return -1;
     }
     if (!response_placeholder_soa(servicearpa,TTL_STATIC_NEGATIVE)) return -1;
@@ -405,7 +395,7 @@ static int handle_specials_as_glue(struct query *z,const char *d,const char dtyp
 
   if (dd4(d,"",ip4) == IP4_LEN) {
     log_synthetic(d,dtype,z->level,TTL_STATIC_POSITIVE);
-    if (typematch(DNS_T_A,dtype) || typematch(DNS_T_AAAA,dtype)) {
+    if (dns_packet_typematch(dtype,DNS_T_A) || dns_packet_typematch(dtype,DNS_T_AAAA)) {
       byte_zero(ip6, sizeof ip6);
       byte_copy(ip6 + sizeof ip6 - sizeof ip4,sizeof ip4,ip4);
       ip6[10] = ip6[11] = 0xFF;
@@ -451,7 +441,7 @@ static int handle_specials_as_glue(struct query *z,const char *d,const char dtyp
   if (dns_domain_suffix(d,localhost)) {
     log_synthetic(d,dtype,z->level,TTL_STATIC_POSITIVE);
     if (IP4_LEN == dd4(d,localhost,ip4) && 127 == (unsigned char)ip4[3]) {
-      if (typematch(DNS_T_A,dtype) || typematch(DNS_T_AAAA,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_A) || dns_packet_typematch(dtype,DNS_T_AAAA)) {
         byte_reverse(ip4, sizeof ip4); /* They are little-endian in the domain name. */
         byte_zero(ip6, sizeof ip6);
         byte_copy(ip6 + sizeof ip6 - sizeof ip4,sizeof ip4,ip4);
@@ -466,7 +456,7 @@ static int handle_specials_as_glue(struct query *z,const char *d,const char dtyp
         }
       }
     } else {
-      if (typematch(DNS_T_A,dtype) || typematch(DNS_T_AAAA,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_A) || dns_packet_typematch(dtype,DNS_T_AAAA)) {
         if (z->server_count[z->level - 1] < QUERY_MAXNS_ADDR) {
           ip_make_loopback4(&z->server_addresses[z->level - 1][z->server_count[z->level - 1]]);
           ++z->server_count[z->level - 1];
@@ -557,14 +547,14 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
     ttl = ttlget(rrfixed + RRFIXED_TTL);
 
     byte_copy(type,2,rrfixed + RRFIXED_TYPE);
-    if (!internetclass(rrfixed + RRFIXED_CLASS)) continue;
+    if (!dns_packet_rrinternetclass(rrfixed)) continue;
 
     while (end < recordsc) {
       pos = dns_packet_getname(buf,len,recordsv[end],&t2); if (!pos) goto DIE;
       pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
       if (!dns_domain_equal(t1,t2)) break;
-      if (!typematch(rrfixed + RRFIXED_TYPE,type)) break;
-      if (!internetclass(rrfixed + RRFIXED_CLASS)) break;
+      if (!dns_packet_rrtypematch(rrfixed,type)) break;
+      if (!dns_packet_rrinternetclass(rrfixed)) break;
       ++end;
     }
 
@@ -573,16 +563,16 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
     /* Do not cache anything that would cross a local prune-and-graft point. */
     if (!roots_same(t1,control)) continue;
 
-    if (typematch(type,DNS_T_ANY))
+    if (dns_packet_typematch(type,DNS_T_ANY))
       ;
-    else if (typematch(type,DNS_T_OPT))
+    else if (dns_packet_typematch(type,DNS_T_OPT))
       /* This is essntially a wire protocol extension, not a record in the distributed database.
       ** It is improper to cache it.
       */
       ;
-    else if (typematch(type,DNS_T_AXFR)||typematch(type,DNS_T_IXFR))
+    else if (dns_packet_typematch(type,DNS_T_AXFR)||dns_packet_typematch(type,DNS_T_IXFR))
       ;
-    else if (typematch(type,DNS_T_SOA)) {
+    else if (dns_packet_typematch(type,DNS_T_SOA)) {
       int done_one = 0;
       save_start();
       while (begin < end) {
@@ -593,7 +583,7 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
         pos = dns_packet_copy(buf,len,pos,b,sizeof b); if (!pos) goto DIE;
 	/* It is unfortunately necessary to avoid caching the SOA RRSETs that
 	** people send to us in the authority section, as they have usually
-	** been modified to convey TTLs for empty RRSETs and no-such-name 
+	** been modified to convey TTLs for empty RRSETs and no-such-name
 	** answers.
 	*/
         if (recordsv[begin] < posauthority) {
@@ -608,13 +598,13 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
       if (done_one)
 	save_finish(DNS_T_SOA,t1,ttl);
     }
-    else if (typematch(type,DNS_T_CNAME)) {
+    else if (dns_packet_typematch(type,DNS_T_CNAME)) {
       pos = dns_packet_skipname(buf,len,recordsv[end - 1]); if (!pos) goto DIE;
       pos = dns_packet_getname(buf,len,pos + RRFIXED_SIZE,&t2); if (!pos) goto DIE;
       log_rrcname(whichserver,t1,t2,ttl);
       cachegeneric(DNS_T_CNAME,t1,t2,dns_domain_length(t2),ttl);
     }
-    else if (typematch(type,DNS_T_PTR)) {
+    else if (dns_packet_typematch(type,DNS_T_PTR)) {
       save_start();
       while (begin < end) {
         pos = dns_packet_skipname(buf,len,recordsv[begin]); if (!pos) goto DIE;
@@ -625,7 +615,7 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
       }
       save_finish(DNS_T_PTR,t1,ttl);
     }
-    else if (typematch(type,DNS_T_NS)) {
+    else if (dns_packet_typematch(type,DNS_T_NS)) {
       int done_one = 0;
       save_start();
       while (begin < end) {
@@ -648,7 +638,7 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
       if (done_one)
         save_finish(DNS_T_NS,t1,ttl);
     }
-    else if (typematch(type,DNS_T_MX)) {
+    else if (dns_packet_typematch(type,DNS_T_MX)) {
       save_start();
       while (begin < end) {
 	char b[2];
@@ -662,7 +652,7 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
       }
       save_finish(DNS_T_MX,t1,ttl);
     }
-    else if (typematch(type,DNS_T_A)) {
+    else if (dns_packet_typematch(type,DNS_T_A)) {
       save_start();
       while (begin < end) {
         pos = dns_packet_skipname(buf,len,recordsv[begin]); if (!pos) goto DIE;
@@ -677,7 +667,7 @@ static int save_records(const char *buf,const unsigned int len,const unsigned in
       }
       save_finish(DNS_T_A,t1,ttl);
     }
-    else if (typematch(type,DNS_T_AAAA)) {
+    else if (dns_packet_typematch(type,DNS_T_AAAA)) {
       save_start();
       while (begin < end) {
         pos = dns_packet_skipname(buf,len,recordsv[begin]); if (!pos) goto DIE;
@@ -798,12 +788,12 @@ static int doit(struct query *z,int state)
       }
 
       /* Chase down client-side aliases. */
-      if (!typematch(DNS_T_CNAME,dtype)) {
+      if (!dns_packet_typematch(dtype,DNS_T_CNAME)) {
         byte_copy(key,2,DNS_T_CNAME);
         while (dlen <= 255) {
           cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
           /* A previous explicit query might have caused an empty RRSet to have been cached.
-          ** Take care to ignore such a thing. 
+          ** Take care to ignore such a thing.
           */
           if (cached && cachedlen) {
             log_cachedcname(d,cached,ttl);
@@ -820,7 +810,7 @@ static int doit(struct query *z,int state)
       }
 
       /* Attempt to fulfil the lower level from the cache. */
-      if (typematch(DNS_T_A,dtype) || typematch(DNS_T_AAAA,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_A) || dns_packet_typematch(dtype,DNS_T_AAAA)) {
         /* Always pass IPv4 and IPv6 address information together down to the lower level.
         ** This works around a design problem where we can only do one type of glue query.
         */
@@ -853,7 +843,7 @@ static int doit(struct query *z,int state)
           ++any_rrset;
         }
       }
-      else if (typematch(DNS_T_ANY,dtype) || typematch(DNS_T_OPT,dtype) || typematch(DNS_T_AXFR,dtype) || typematch(DNS_T_IXFR,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_ANY) || dns_packet_typematch(dtype,DNS_T_OPT) || dns_packet_typematch(dtype,DNS_T_AXFR) || dns_packet_typematch(dtype,DNS_T_IXFR)) {
         /* These are either synthesized or forbidden.
         ** So always return to the lower level without checking the cache.
         */
@@ -907,12 +897,12 @@ static int doit(struct query *z,int state)
       }
 
       /* Chase down client-side aliases. */
-      if (!typematch(DNS_T_CNAME,dtype)) {
+      if (!dns_packet_typematch(dtype,DNS_T_CNAME)) {
         byte_copy(key,2,DNS_T_CNAME);
         while (dlen <= 255) {
           cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
           /* A previous explicit query might have caused an empty RRSet to have been cached.
-          ** Take care to ignore such a thing. 
+          ** Take care to ignore such a thing.
           */
           if (cached && cachedlen) {
             log_cachedcname(d,cached,ttl);
@@ -933,21 +923,21 @@ static int doit(struct query *z,int state)
       ** Synthesized responses to ANY or OPT must not override NXDOMAIN or CNAME.
       */
       byte_copy(key,2,dtype);
-      if (typematch(DNS_T_ANY,dtype)) {
+      if (dns_packet_typematch(dtype,DNS_T_ANY)) {
         log_synthetic(d,dtype,z->level,TTL_POSITIVE);
         if (!rqa(z)) goto DIE;
         if (!response_noany(d)) goto DIE;
         cleanup(z);
         return 1;
       }
-      else if (typematch(DNS_T_OPT,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_OPT)) {
         log_synthetic(d,dtype,z->level,TTL_POSITIVE);
         if (!rqa(z)) goto DIE;
         if (!response_noopt(d)) goto DIE;
         cleanup(z);
         return 1;
       }
-      else if (typematch(DNS_T_AXFR,dtype)||typematch(DNS_T_IXFR,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_AXFR)||dns_packet_typematch(dtype,DNS_T_IXFR)) {
         /* Should have been rejected at the query start level and never get here. */
         log_synthetic(d,dtype,z->level,TTL_POSITIVE);
         if (!rqa(z)) goto DIE;
@@ -955,10 +945,10 @@ static int doit(struct query *z,int state)
         cleanup(z);
         return 1;
       }
-      else if (typematch(DNS_T_CNAME,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_CNAME)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         /* A previous explicit query might have caused an empty RRSet to have been cached.
-        ** Take care to ignore such a thing. 
+        ** Take care to ignore such a thing.
         */
         if (cached && cachedlen) {
           log_cachedanswer(d,DNS_T_CNAME,ttl);
@@ -968,7 +958,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_SOA,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_SOA)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           char b[20];
@@ -990,7 +980,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_NS,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_NS)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           log_cachedanswer(d,DNS_T_NS,ttl);
@@ -1005,7 +995,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_PTR,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_PTR)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           log_cachedanswer(d,DNS_T_PTR,ttl);
@@ -1020,7 +1010,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_MX,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_MX)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           char b[2];
@@ -1039,7 +1029,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_A,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_A)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           log_cachedanswer(d,DNS_T_A,ttl);
@@ -1055,7 +1045,7 @@ static int doit(struct query *z,int state)
           return 1;
         }
       }
-      else if (typematch(DNS_T_AAAA,dtype)) {
+      else if (dns_packet_typematch(dtype,DNS_T_AAAA)) {
         cached = cache_get(key,dlen + 2,&cachedlen,&ttl);
         if (cached) {
           log_cachedanswer(d,DNS_T_AAAA,ttl);
@@ -1247,7 +1237,7 @@ static int doit(struct query *z,int state)
   flagsoa = 0;
   soattl = 0;
   if (!dns_domain_copy(&owner_name,d)) goto DIE;
-  /* This code assumes that the CNAME chain is presented in the correct 
+  /* This code assumes that the CNAME chain is presented in the correct
   ** order.  The example algorithm in RFC 1034 will actually result in this
   ** being the case, but the words do not require it to be so.
   */
@@ -1257,16 +1247,16 @@ static int doit(struct query *z,int state)
     pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
     pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
 
-    if (internetclass(rrfixed + RRFIXED_CLASS)) { /* should always be true */
+    if (dns_packet_rrinternetclass(rrfixed)) { /* should always be true */
       if (dns_domain_equal(t1,owner_name)) {
-        if (typematch(rrfixed + RRFIXED_TYPE,dtype))
+        if (dns_packet_rrtypematch(rrfixed,dtype))
           flagempty = 0;
-        else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_CNAME)) {
+        else if (dns_packet_rrtypematch(rrfixed,DNS_T_CNAME)) {
           if (!dns_packet_getname(buf,len,pos,&owner_name)) goto DIE;
         }
       }
     }
-  
+
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
     pos += datalen;
   }
@@ -1279,13 +1269,13 @@ static int doit(struct query *z,int state)
     uint16 datalen;
     pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
     pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
-    if (internetclass(rrfixed + RRFIXED_CLASS)) { /* should always be true */
-      if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_SOA)) {
+    if (dns_packet_rrinternetclass(rrfixed)) { /* should always be true */
+      if (dns_packet_rrtypematch(rrfixed,DNS_T_SOA)) {
         flagsoa = 1;
         soattl = ttlget(rrfixed + RRFIXED_TTL);
         if (soattl > TTL_SOA_MAX) soattl = TTL_SOA_MAX;
       }
-      else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_NS)) {
+      else if (dns_packet_rrtypematch(rrfixed,DNS_T_NS)) {
         flagreferral = 1;
         if (!dns_domain_copy(&referral,t1)) goto DIE;
       }
@@ -1297,8 +1287,8 @@ static int doit(struct query *z,int state)
 
   if (0 > save_records(buf,len,posanswers,posauthority,numanswers+numauthority+numglue,control,whichserver)) goto DIE;
 
-  if (!typematch(DNS_T_CNAME,dtype)) {
-    /* This code assumes that the CNAME chain is presented in the correct 
+  if (!dns_packet_typematch(dtype,DNS_T_CNAME)) {
+    /* This code assumes that the CNAME chain is presented in the correct
     ** order.  The example algorithm in RFC 1034 will actually result in this
     ** being the case, but the words do not require it to be so.
     */
@@ -1309,8 +1299,8 @@ static int doit(struct query *z,int state)
 
       pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
       pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
-      if (internetclass(rrfixed + RRFIXED_CLASS)) { /* should always be true */
-        if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_CNAME))
+      if (dns_packet_rrinternetclass(rrfixed)) { /* should always be true */
+        if (dns_packet_rrtypematch(rrfixed,DNS_T_CNAME))
           if (dns_domain_equal(t1,d)) {
 	    if (z->level == 0) {
               uint32 ttl = ttlget(rrfixed + RRFIXED_TTL);
@@ -1360,7 +1350,7 @@ static int doit(struct query *z,int state)
   /* Cache an empty set positive answer. */
   if (!rcode && flagempty && flagsoa)
     /* Don't save empty RRSets for those types that we use as special markers. */
-    if (!typematch(DNS_T_ANY,dtype) && !typematch(DNS_T_OPT,dtype) && !typematch(DNS_T_AXFR,dtype) && !typematch(DNS_T_IXFR,dtype)) {
+    if (!dns_packet_typematch(dtype,DNS_T_ANY) && !dns_packet_typematch(dtype,DNS_T_OPT) && !dns_packet_typematch(dtype,DNS_T_AXFR) && !dns_packet_typematch(dtype,DNS_T_IXFR)) {
       save_start();
       save_finish(dtype,d,soattl);
       log_nodata(whichserver,d,dtype,soattl);
@@ -1380,9 +1370,9 @@ static int doit(struct query *z,int state)
         pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
         pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
         uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-        if (internetclass(rrfixed + RRFIXED_CLASS)) { /* should always be true */
+        if (dns_packet_rrinternetclass(rrfixed)) { /* should always be true */
           if (dns_domain_equal(t1,d)) {
-	    if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_A)) {
+	    if (dns_packet_rrtypematch(rrfixed,DNS_T_A)) {
               if (datalen == IP4_LEN)
 		if (z->server_count[z->level - 1] < QUERY_MAXNS_ADDR) {
 		  char b[IP4_LEN];
@@ -1390,7 +1380,7 @@ static int doit(struct query *z,int state)
 		  ip_make4(&z->server_addresses[z->level - 1][z->server_count[z->level - 1]],b);
 		  ++z->server_count[z->level - 1];
 		}
-	    } else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_AAAA)) {
+	    } else if (dns_packet_rrtypematch(rrfixed,DNS_T_AAAA)) {
               if (IP6_SANS_SCOPE_LEN == datalen)
 		if (z->server_count[z->level - 1] < QUERY_MAXNS_ADDR) {
 		  char b[IP6_SANS_SCOPE_LEN];
@@ -1416,24 +1406,24 @@ static int doit(struct query *z,int state)
       pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
       pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
       uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-      if (internetclass(rrfixed + RRFIXED_CLASS)) /* should always be true */
+      if (dns_packet_rrinternetclass(rrfixed)) /* should always be true */
         if (dns_domain_equal(t1,d))
-          if (typematch(rrfixed + RRFIXED_TYPE,dtype)) {
+          if (dns_packet_rrtypematch(rrfixed,dtype)) {
             uint32 ttl = ttlget(rrfixed + RRFIXED_TTL);
             if (!response_rstart(t1,rrfixed + RRFIXED_TYPE,ttl)) goto DIE;
-  
-            if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_NS) || typematch(rrfixed + RRFIXED_TYPE,DNS_T_CNAME) || typematch(rrfixed + RRFIXED_TYPE,DNS_T_PTR)) {
+
+            if (dns_packet_rrtypematch(rrfixed,DNS_T_NS) || dns_packet_rrtypematch(rrfixed,DNS_T_CNAME) || dns_packet_rrtypematch(rrfixed,DNS_T_PTR)) {
               if (!dns_packet_getname(buf,len,pos,&t2)) goto DIE;
               if (!response_addname(t2)) goto DIE;
             }
-            else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_MX)) {
+            else if (dns_packet_rrtypematch(rrfixed,DNS_T_MX)) {
 	      char b[2];
               pos2 = dns_packet_copy(buf,len,pos,b,sizeof b); if (!pos2) goto DIE;
               if (!response_addbytes(b,sizeof b)) goto DIE;
               if (!dns_packet_getname(buf,len,pos2,&t2)) goto DIE;
               if (!response_addname(t2)) goto DIE;
             }
-            else if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_SOA)) {
+            else if (dns_packet_rrtypematch(rrfixed,DNS_T_SOA)) {
 	      char b[20];
               pos2 = dns_packet_getname(buf,len,pos,&t2); if (!pos2) goto DIE;
               if (!response_addname(t2)) goto DIE;
@@ -1446,7 +1436,7 @@ static int doit(struct query *z,int state)
               if (pos + datalen > len) goto DIE;
               if (!response_addbytes(buf + pos,datalen)) goto DIE;
             }
-  
+
             response_rfinish(RESPONSE_ANSWER);
           }
       pos += datalen;
@@ -1483,8 +1473,8 @@ static int doit(struct query *z,int state)
     pos = dns_packet_getname(buf,len,pos,&t1); if (!pos) goto DIE;
     pos = dns_packet_copy(buf,len,pos,rrfixed,sizeof rrfixed); if (!pos) goto DIE;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-    if (typematch(rrfixed + RRFIXED_TYPE,DNS_T_NS)) /* should always be true */
-      if (internetclass(rrfixed + RRFIXED_CLASS)) /* should always be true */
+    if (dns_packet_rrtypematch(rrfixed,DNS_T_NS)) /* should always be true */
+      if (dns_packet_rrinternetclass(rrfixed)) /* should always be true */
         if (dns_domain_equal(referral,t1)) /* should always be true */
           if (k < QUERY_MAXNS)
             if (!dns_packet_getname(buf,len,pos,&z->ns[z->level][k++])) goto DIE;
@@ -1510,7 +1500,7 @@ static int doit(struct query *z,int state)
 
 int query_start(struct query *z,char *dn,char type[2],char class[2],const struct ip_address * localip)
 {
-  if (typematch(type,DNS_T_AXFR)||typematch(type,DNS_T_IXFR)) { errno = error_perm; return -1; }
+  if (dns_packet_typematch(type,DNS_T_AXFR)||dns_packet_typematch(type,DNS_T_IXFR)) { errno = error_perm; return -1; }
 
   cleanup(z);
   z->level = 0;

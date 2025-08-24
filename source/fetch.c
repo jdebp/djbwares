@@ -5,6 +5,7 @@
 #include <time.h>
 #include "substdio.h"
 #include "timeoutwrite.h"
+#include "publicfile_server.h"
 #include "error.h"
 #include "exit.h"
 #include "direntry.h"
@@ -23,8 +24,6 @@ static int trouble;
 static time_t now;
 static struct stat st;
 static char strnum[FMT_ULONG];
-
-extern void out_puts(const char *s);
 
 static int datawrite(int fd,char *buf,int len)
 {

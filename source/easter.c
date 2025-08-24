@@ -15,6 +15,7 @@ int main(int argc, char** argv)
   int weekday;
   int yearday;
 
+  (void)argc; /* Silence a compiler warning. */
   while (*++argv) {
     cd.year = atoi(*argv);
     if (cd.year > 0) {

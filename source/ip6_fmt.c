@@ -9,7 +9,7 @@ unsigned int ip6_fmt(char *s,const char ip[IP6_LEN],char sep)
   unsigned int i;
   uint16 u;
   const char * a;
- 
+
   len = 0;
   a = ip;
   uint16_unpack_big(a,&u); i = fmt_xlong(s,u); len += i; a += 2; if (s) s += i;

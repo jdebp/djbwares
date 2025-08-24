@@ -73,7 +73,7 @@ void
 optarg_num ( unsigned long * u )
 {
   unsigned int pos ;
-  pos = scan_ulong(optarg,u); 
+  pos = scan_ulong(optarg,u);
   if (0 == pos || optarg[pos])
     strerr_die3x(111,FATAL, optarg, " is not a number");
 }
@@ -93,7 +93,7 @@ main(int argc,char **argv)
   close(6);
   close(7);
   sig_ignore(sig_pipe);
- 
+
   while ((opt = getopt(argc,argv,"dDvqQhHrRi:p:t:T:l:")) != opteof)
     switch(opt) {
       case 'd': flagdelay = 1; break;
@@ -113,10 +113,10 @@ main(int argc,char **argv)
 		  ++j;
 		  k = scan_ulong(optarg + j,&ctimeout[1]);
 		  if (0 == k || optarg[j + k]) strerr_die3x(111,FATAL, optarg + j, " is not a number");
-		} else 
+		} else
 		  if (0 == j || optarg[j]) strerr_die3x(111,FATAL, optarg, " is not a number");
 		break;
-      case 'i': j = ip_scan(optarg,&iplocal,':'); 
+      case 'i': j = ip_scan(optarg,&iplocal,':');
 		if (0 == j || optarg[j]) strerr_die3x(111,FATAL, optarg, " is not an IP address");
 		break;
       case 'p': optarg_num(&u); portlocal = u; break;
@@ -250,7 +250,7 @@ main(int argc,char **argv)
   if (fd_copy(7,6) == -1)
     strerr_die2sys(111,FATAL,"unable to set up descriptor 7: ");
   sig_uncatch(sig_pipe);
- 
+
   pathexec(argv);
   strerr_die4sys(111,FATAL,"unable to run ",*argv,": ");
 }

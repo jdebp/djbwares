@@ -1,6 +1,6 @@
 #include "stralloc.h"
 #include "uint16.h"
-#include "byte.h"
+#include "mem.h"
 #include "dns_sortip.h"
 #include "dns_transmit.h"
 #include "dns_resolve.h"
@@ -27,8 +27,8 @@ static int dns_ip_packet(stralloc *out,const char *buf,unsigned int len)
     pos = dns_packet_skipname(buf,len,pos); if (!pos) return -1;
     pos = dns_packet_copy(buf,len,pos,rrfixed,RRFIXED_SIZE); if (!pos) return -1;
     uint16_unpack_big(rrfixed + RRFIXED_DATALEN,&datalen);
-    if (byte_equal(rrfixed + RRFIXED_CLASS,2,DNS_C_IN)) {
-      if (byte_equal(rrfixed + RRFIXED_TYPE,2,DNS_T_A)) {
+    if (dns_packet_rrinternetclass(rrfixed)) {
+      if (dns_packet_rrtypematch(rrfixed,DNS_T_A)) {
 	char a[IP4_LEN];
         if (sizeof a == datalen) {
 	  struct ip_address ip;
@@ -37,7 +37,7 @@ static int dns_ip_packet(stralloc *out,const char *buf,unsigned int len)
 	  if (!stralloc_catb(out,&ip,sizeof ip)) return -1;
         }
       } else
-      if (byte_equal(rrfixed + RRFIXED_TYPE,2,DNS_T_AAAA)) {
+      if (dns_packet_rrtypematch(rrfixed,DNS_T_AAAA)) {
 	char a[IP6_SANS_SCOPE_LEN];
         if (sizeof a == datalen) {
 	  struct ip_address ip;
@@ -57,11 +57,13 @@ static char *q = 0;
 
 int dns_ip4(stralloc *out,const stralloc *fqdn)
 {
-  struct ip_address a = IP_ADDRESS_INIT;
+  char ip4[IP4_LEN];
   unsigned int l;
 
   if (!stralloc_copys(out,"")) return -1;
-  if ((l = ip4_scan_n(fqdn->s,fqdn->len,&a)) && l == fqdn->len) {
+  if ((l = ip4_scan_n(fqdn->s,fqdn->len,ip4)) && l == fqdn->len) {
+    struct ip_address a = IP_ADDRESS_INIT;
+    ip_make4(&a,ip4);
     if (!stralloc_catb(out,&a,sizeof a)) return -1;
     return 0;
   }
